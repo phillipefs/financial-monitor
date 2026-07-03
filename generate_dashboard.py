@@ -7,10 +7,11 @@ from __future__ import annotations
 
 import os
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from html import escape
 from pathlib import Path
 from typing import Dict
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 import urllib3
 import pandas as pd
@@ -28,6 +29,7 @@ from onchain import (
 )
 
 OUTPUT_FILE = Path(__file__).parent / "dashboard.html"
+SAO_PAULO_TZ = "America/Sao_Paulo"
 
 # Display order for coverage groups.
 GROUP_ORDER = ["Indices", "Cripto", "EUA", "Brasil", "Moeda"]
@@ -39,6 +41,15 @@ GROUP_TITLES = {
     "Moeda": "Currency",
 }
 SIGNAL_ORDER = ["UltraBuy", "Buy", "Neutral", "Sell"]
+
+
+def sao_paulo_now() -> datetime:
+    """Return the current timestamp in Brasilia/Sao Paulo time."""
+    try:
+        tz = ZoneInfo(SAO_PAULO_TZ)
+    except ZoneInfoNotFoundError:
+        tz = timezone(timedelta(hours=-3), name="BRT")
+    return datetime.now(tz)
 
 RESEARCH_V2_CSS = """
 /* ===== RESEARCH THEME OVERRIDES ===== */
@@ -1042,7 +1053,7 @@ def _build_sector_rows(df_sector: pd.DataFrame, market_key: str) -> str:
 
 
 def generate_html(df: pd.DataFrame, onchain: Dict) -> str:
-    now = datetime.now().strftime("%d/%m/%Y %H:%M")
+    now = sao_paulo_now().strftime("%d/%m/%Y %H:%M BRT")
     counts = df["Signal"].value_counts().to_dict()
     total = len(df)
     ub = counts.get("UltraBuy", 0)
