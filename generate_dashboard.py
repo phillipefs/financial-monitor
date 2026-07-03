@@ -516,7 +516,7 @@ body.research-v2{
 }
 
 .research-v2 .t-assets{
-  min-width:720px;
+  min-width:840px;
   font-size:.84rem;
 }
 
@@ -546,9 +546,10 @@ body.research-v2{
 }
 .research-v2 .col-name{color:var(--rm-muted)}
 .research-v2 .th-r,
-.research-v2 .t-assets th:nth-child(6),
+.research-v2 .t-assets th:nth-child(7),
 .research-v2 .col-price,
 .research-v2 .col-rsi,
+.research-v2 .col-dd,
 .research-v2 .col-sig{
   text-align:center;
 }
@@ -556,16 +557,19 @@ body.research-v2{
 .research-v2 .t-assets th:nth-child(4),
 .research-v2 .t-assets th:nth-child(5),
 .research-v2 .t-assets th:nth-child(6),
+.research-v2 .t-assets th:nth-child(7),
 .research-v2 .col-price,
 .research-v2 .col-rsi,
+.research-v2 .col-dd,
 .research-v2 .col-sig{
-  width:14%;
+  width:12%;
 }
 .research-v2 .col-price{
   color:var(--rm-text);
   font-variant-numeric:tabular-nums;
 }
 .research-v2 .col-rsi .rsi-pill,
+.research-v2 .col-dd .dd-pill,
 .research-v2 .col-sig .signal-badge{
   margin-inline:auto;
 }
@@ -600,6 +604,46 @@ body.research-v2{
   color:var(--rm-red);
   background:rgba(240,111,104,.12);
   border-color:rgba(240,111,104,.34);
+}
+
+.research-v2 .dd-pill{
+  display:inline-block;
+  min-width:58px;
+  padding:3px 10px;
+  border-radius:5px;
+  border:1px solid var(--rm-line);
+  background:#080b0f;
+  color:var(--rm-muted);
+  font-family:var(--mono);
+  font-size:.76rem;
+  font-weight:800;
+  font-variant-numeric:tabular-nums;
+  text-align:center;
+  white-space:nowrap;
+}
+
+.research-v2 .dd-flat{
+  color:var(--rm-cyan);
+  background:rgba(67,215,232,.1);
+  border-color:rgba(67,215,232,.28);
+}
+
+.research-v2 .dd-mild{
+  color:var(--rm-yellow);
+  background:rgba(241,188,75,.12);
+  border-color:rgba(241,188,75,.3);
+}
+
+.research-v2 .dd-deep{
+  color:var(--rm-red);
+  background:rgba(240,111,104,.12);
+  border-color:rgba(240,111,104,.34);
+}
+
+.research-v2 .dd-stress{
+  color:#ff8aa0;
+  background:rgba(244,63,94,.14);
+  border-color:rgba(244,63,94,.38);
 }
 
 .research-v2 .sig-ultrabuy,
@@ -1096,6 +1140,32 @@ def _format_price(val: float) -> str:
     return f"{val:,.4f}"
 
 
+def _format_percent(val: float) -> str:
+    value = float(val)
+    if abs(value) < 0.05:
+        value = 0.0
+    return f"{value:.1f}%"
+
+
+def _format_peak_date(value: object) -> str:
+    try:
+        if pd.isna(value):
+            return ""
+        return pd.Timestamp(value).strftime("%d/%m/%Y")
+    except Exception:
+        return ""
+
+
+def _drawdown_class(value: float) -> str:
+    if value >= -10:
+        return "dd-flat"
+    if value >= -25:
+        return "dd-mild"
+    if value >= -50:
+        return "dd-deep"
+    return "dd-stress"
+
+
 def _mvrv_gauge_svg(mvrv: float, coin: str) -> str:
     """SVG semicircular gauge for MVRV."""
     if coin == "BTC":
@@ -1188,6 +1258,12 @@ def _build_sector_rows(df_sector: pd.DataFrame, market_key: str) -> str:
             sig_lbl = _signal_label(r["Signal"])
             rsi_w = int(r["Weekly_RSI"])
             rsi_m = int(r["Monthly_RSI"])
+            drawdown = float(r.get("Drawdown_Pct", 0.0))
+            dd_cls = _drawdown_class(drawdown)
+            peak_date = _format_peak_date(r.get("Peak_Date"))
+            peak_meta = f"Top close: {_format_price(float(r.get('Peak_Close', r['Weekly_Close'])))}"
+            if peak_date:
+                peak_meta += f" | Date: {peak_date}"
             rows_html += f'''
             <tr class="asset-row" data-signal="{r['Signal']}" data-market="{escape(market_key)}" data-ticker="{escape(str(r['Ticker']).lower())}" data-name="{escape(str(r['Name']).lower())}">
               <td class="col-tk"><span class="tk-badge">{escape(str(r['Ticker']))}</span></td>
@@ -1195,6 +1271,7 @@ def _build_sector_rows(df_sector: pd.DataFrame, market_key: str) -> str:
               <td class="col-price">{_format_price(r['Weekly_Close'])}</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="{rsi_w}">{rsi_w}</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="{rsi_m}">{rsi_m}</span></td>
+              <td class="col-dd"><span class="dd-pill {dd_cls}" title="{escape(peak_meta, quote=True)}">{_format_percent(drawdown)}</span></td>
               <td class="col-sig"><span class="signal-badge {sig_cls}">{sig_lbl}</span></td>
             </tr>'''
     return rows_html
@@ -1248,6 +1325,7 @@ def generate_html(df: pd.DataFrame, onchain: Dict) -> str:
                 <th class="th-sort th-r" data-col="2">Price</th>
                 <th class="th-sort th-r" data-col="3">RSI W</th>
                 <th class="th-sort th-r" data-col="4">RSI M</th>
+                <th class="th-sort th-r" data-col="5">DD %</th>
                 <th>Signal</th>
               </tr>
             </thead>
@@ -1380,10 +1458,16 @@ body{{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:
 .col-name{{color:var(--muted);font-size:.82rem}}
 .col-price{{text-align:right;font-family:var(--mono);font-weight:600}}
 .col-rsi{{text-align:right}}
+.col-dd{{text-align:right}}
 .col-sig{{text-align:center}}
 
 /* RSI PILLS */
 .rsi-pill{{display:inline-block;font-family:var(--mono);font-size:.78rem;font-weight:700;padding:3px 10px;border-radius:var(--radius-xs);min-width:36px;text-align:center}}
+.dd-pill{{display:inline-block;font-family:var(--mono);font-size:.76rem;font-weight:800;padding:3px 10px;border-radius:var(--radius-xs);min-width:58px;text-align:center;white-space:nowrap}}
+.dd-flat{{color:var(--teal);background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.3)}}
+.dd-mild{{color:var(--yellow);background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.3)}}
+.dd-deep{{color:var(--red);background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.3)}}
+.dd-stress{{color:#ff8aa0;background:rgba(244,63,94,.14);border:1px solid rgba(244,63,94,.38)}}
 
 /* SIGNAL BADGES */
 .signal-badge{{display:inline-block;font-size:.64rem;font-weight:800;padding:4px 11px;border-radius:14px;letter-spacing:.4px;white-space:nowrap}}

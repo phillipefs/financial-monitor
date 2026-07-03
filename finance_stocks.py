@@ -37,11 +37,22 @@ def round_half_up(n) -> int:
 def calculate_rsi(ticker_symbol: str, interval: str, window: int, period: str) -> pd.Series:
     df = yf.Ticker(ticker_symbol).history(interval=interval, period=period)
     df.dropna(inplace=True)
+    if df.empty:
+        raise ValueError("no price data returned")
 
     rsi = RSIIndicator(close=df["Close"], window=window).rsi()
     df["RSI"] = rsi
 
-    return df[["Close", "RSI"]].iloc[-1]
+    peak_date = df["Close"].idxmax()
+    peak_close = float(df.loc[peak_date, "Close"])
+    current_close = float(df["Close"].iloc[-1])
+    drawdown_pct = ((current_close / peak_close) - 1.0) * 100.0 if peak_close else 0.0
+
+    df["Peak_Close"] = peak_close
+    df["Peak_Date"] = peak_date
+    df["Drawdown_Pct"] = drawdown_pct
+
+    return df[["Close", "RSI", "Peak_Close", "Peak_Date", "Drawdown_Pct"]].iloc[-1]
 
 
 def get_signal(
@@ -373,6 +384,9 @@ def fetch_asset_rsi(asset: Dict[str, object], remove_crypto_suffix: bool = False
         "Weekly_Close": float(round(weekly["Close"], 2)),
         "Weekly_RSI": round_half_up(weekly["RSI"]),
         "Monthly_RSI": round_half_up(monthly["RSI"]),
+        "Drawdown_Pct": float(round(weekly["Drawdown_Pct"], 2)),
+        "Peak_Close": float(round(weekly["Peak_Close"], 2)),
+        "Peak_Date": weekly["Peak_Date"],
         "Signal": signal,
         "Setor": asset.get("setor", ""),
     }
