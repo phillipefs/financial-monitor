@@ -1,7 +1,7 @@
 """
-generate_dashboard.py — Gera dashboard.html V2 (Financial Terminal)
-Uso: py generate_dashboard.py
-Saída: dashboard.html (abrir no browser)
+generate_dashboard.py — Generates dashboard.html (Financial Monitor Research)
+Usage: py generate_dashboard.py
+Output: dashboard.html (open in browser)
 """
 from __future__ import annotations
 
@@ -15,11 +15,11 @@ from typing import Dict
 import urllib3
 import pandas as pd
 
-# Desabilita warnings de SSL (proxy corporativo)
+# Disable SSL warnings for corporate proxies.
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 os.environ.setdefault("CURL_CA_BUNDLE", "")
 
-# Importa lógica existente
+# Reuse the existing data collection logic.
 from finance_stocks import collect_rsi_data
 from onchain import (
     classify_mvrv_btc,
@@ -29,35 +29,801 @@ from onchain import (
 
 OUTPUT_FILE = Path(__file__).parent / "dashboard.html"
 
-# Ordem dos setores
+# Display order for coverage groups.
 GROUP_ORDER = ["Indices", "Cripto", "EUA", "Brasil", "Moeda"]
 GROUP_TITLES = {
-    "Indices": "Índices Globais",
-    "Cripto": "Criptomoedas",
-    "EUA": "Mercado Americano",
-    "Brasil": "Mercado Brasileiro",
-    "Moeda": "Câmbio",
-}
-GROUP_ICONS = {
-    "Indices": "📌",
-    "Cripto": "🪙",
-    "EUA": "🇺🇸",
-    "Brasil": "🇧🇷",
-    "Moeda": "💱",
+    "Indices": "Global Indices",
+    "Cripto": "Crypto Assets",
+    "EUA": "U.S. Market",
+    "Brasil": "Brazilian Market",
+    "Moeda": "Currency",
 }
 SIGNAL_ORDER = ["UltraBuy", "Buy", "Neutral", "Sell"]
+
+RESEARCH_V2_CSS = """
+/* ===== RESEARCH THEME OVERRIDES ===== */
+:root{
+  --rm-bg:#07090b;
+  --rm-bg-soft:#0d1116;
+  --rm-surface:#111820;
+  --rm-surface-2:#151e28;
+  --rm-surface-3:#1a2531;
+  --rm-line:#263241;
+  --rm-line-soft:rgba(145,163,182,.16);
+  --rm-text:#eef3f7;
+  --rm-muted:#9cabb9;
+  --rm-dim:#647181;
+  --rm-cyan:#43d7e8;
+  --rm-green:#35d08f;
+  --rm-yellow:#f1bc4b;
+  --rm-red:#f06f68;
+  --rm-blue:#6fa8ff;
+  --rm-shadow:0 24px 70px rgba(0,0,0,.35);
+  --radius:8px;
+  --radius-sm:6px;
+  --radius-xs:4px;
+}
+
+body.research-v2,
+.research-v2 *{
+  letter-spacing:0;
+}
+
+body.research-v2{
+  background:
+    linear-gradient(180deg,rgba(67,215,232,.06),transparent 260px),
+    linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px),
+    linear-gradient(180deg,rgba(255,255,255,.02) 1px,transparent 1px),
+    var(--rm-bg);
+  background-size:auto,48px 48px,48px 48px,auto;
+  color:var(--rm-text);
+  font-family:"Segoe UI",Inter,system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
+}
+
+.research-v2 .topbar{
+  min-height:72px;
+  padding:14px clamp(16px,3vw,34px);
+  background:rgba(7,9,11,.88);
+  border-bottom:1px solid var(--rm-line);
+  box-shadow:0 18px 50px rgba(0,0,0,.28);
+  backdrop-filter:blur(18px);
+}
+
+.research-v2 .topbar-brand{
+  min-width:260px;
+  gap:12px;
+}
+
+.research-v2 .brand-dot{
+  width:34px;
+  height:34px;
+  border-radius:8px;
+  background:
+    linear-gradient(135deg,rgba(67,215,232,.95),rgba(53,208,143,.78)),
+    var(--rm-cyan);
+  box-shadow:0 0 0 1px rgba(255,255,255,.14) inset,0 12px 28px rgba(67,215,232,.18);
+  animation:none;
+  position:relative;
+}
+
+.research-v2 .brand-dot::after{
+  content:"FM";
+  position:absolute;
+  inset:0;
+  display:grid;
+  place-items:center;
+  color:#051013;
+  font-size:.68rem;
+  font-weight:900;
+  font-family:var(--mono);
+}
+
+.research-v2 .brand-name{
+  display:block;
+  color:var(--rm-text);
+  font-size:1rem;
+  font-weight:800;
+}
+
+.research-v2 .search-wrap{
+  flex:1 1 340px;
+  max-width:520px;
+}
+
+.research-v2 .search-input{
+  height:42px;
+  border-radius:8px;
+  border-color:var(--rm-line);
+  background:rgba(17,24,32,.92);
+  color:var(--rm-text);
+  font-size:.9rem;
+  box-shadow:0 0 0 1px rgba(255,255,255,.02) inset;
+}
+
+.research-v2 .search-input::placeholder{color:var(--rm-dim)}
+.research-v2 .search-input:focus{
+  border-color:rgba(67,215,232,.7);
+  box-shadow:0 0 0 3px rgba(67,215,232,.12);
+}
+
+.research-v2 .search-icon{
+  color:var(--rm-cyan);
+  font-size:1rem;
+}
+
+.research-v2 .topbar-meta{
+  gap:8px;
+  padding:8px 12px;
+  margin-left:auto;
+  border:1px solid var(--rm-line);
+  border-radius:8px;
+  background:rgba(17,24,32,.7);
+  color:var(--rm-muted);
+}
+
+.research-v2 .topbar-meta time{
+  color:var(--rm-text);
+  font-size:.82rem;
+}
+
+.research-v2 .executive-board{
+  max-width:1440px;
+  margin:0 auto;
+  padding:34px clamp(16px,3vw,34px) 22px;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(300px,360px);
+  gap:22px;
+  align-items:stretch;
+}
+
+.research-v2 .brief-copy{
+  min-height:190px;
+  padding:28px 30px;
+  border:1px solid var(--rm-line);
+  border-radius:8px;
+  background:
+    linear-gradient(135deg,rgba(67,215,232,.13),transparent 36%),
+    linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.012)),
+    var(--rm-surface);
+  box-shadow:var(--rm-shadow);
+}
+
+.research-v2 .eyebrow{
+  color:var(--rm-cyan);
+  font-size:.78rem;
+  font-weight:800;
+  text-transform:uppercase;
+  margin-bottom:16px;
+}
+
+.research-v2 .brief-copy h1{
+  max-width:none;
+  margin:0 0 16px;
+  color:var(--rm-text);
+  font-size:clamp(1.2rem,1.5vw,1.55rem);
+  line-height:1.08;
+  font-weight:850;
+  white-space:nowrap;
+}
+
+.research-v2 .brief-copy p{
+  max-width:760px;
+  color:var(--rm-muted);
+  font-size:1.02rem;
+}
+
+.research-v2 .market-read{
+  height:100%;
+  padding:20px 22px;
+  border:1px solid var(--rm-line);
+  border-radius:8px;
+  background:rgba(17,24,32,.86);
+  box-shadow:var(--rm-shadow);
+}
+
+.research-v2 .market-read h2{
+  margin:0 0 18px;
+  color:var(--rm-cyan);
+  font-size:.78rem;
+  font-weight:800;
+  text-transform:uppercase;
+}
+
+.research-v2 .mix-row{
+  display:grid;
+  grid-template-columns:82px 38px 1fr;
+  align-items:center;
+  gap:10px;
+  min-height:34px;
+  color:var(--rm-muted);
+  font-size:.82rem;
+}
+
+.research-v2 .mix-row strong{
+  color:var(--rm-text);
+  font-family:var(--mono);
+  text-align:right;
+}
+
+.research-v2 .mix-bar{
+  height:8px;
+  overflow:hidden;
+  border-radius:999px;
+  background:rgba(255,255,255,.07);
+}
+
+.research-v2 .mix-bar span{
+  display:block;
+  width:var(--w);
+  height:100%;
+  border-radius:inherit;
+  background:var(--c);
+}
+
+.research-v2 .kpi-strip{
+  max-width:1440px;
+  margin:0 auto;
+  padding:0 clamp(16px,3vw,34px) 28px;
+  gap:12px;
+  background:transparent;
+  overflow:visible;
+}
+
+.research-v2 .kpi-cell{
+  min-width:150px;
+  padding:18px;
+  text-align:left;
+  border:1px solid var(--rm-line);
+  border-radius:8px;
+  background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.015)),var(--rm-surface);
+  transition:border-color .18s ease,transform .18s ease,background .18s ease;
+}
+
+.research-v2 .kpi-cell:hover{
+  border-color:rgba(67,215,232,.44);
+  background:var(--rm-surface-2);
+  transform:translateY(-2px);
+}
+
+.research-v2 .kpi-num{
+  font-size:1.9rem;
+  font-weight:850;
+}
+
+.research-v2 .kpi-label{
+  margin-top:8px;
+  color:var(--rm-muted);
+  font-size:.76rem;
+  text-transform:none;
+  font-weight:700;
+}
+
+.research-v2 .main{
+  max-width:1440px;
+  padding:0 clamp(16px,3vw,34px) 42px;
+}
+
+.research-v2 .section-title{
+  margin:12px 0 16px;
+  color:var(--rm-text);
+  font-size:1.08rem;
+  font-weight:850;
+}
+
+.research-v2 .section-title::before{
+  width:22px;
+  height:2px;
+  background:var(--rm-cyan);
+}
+
+.research-v2 .oc-grid{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:16px;
+  margin-bottom:34px;
+}
+
+.research-v2 .oc-card{
+  padding:22px;
+  border-color:var(--rm-line);
+  border-radius:8px;
+  background:
+    linear-gradient(120deg,rgba(67,215,232,.09),transparent 44%),
+    var(--rm-surface);
+  box-shadow:0 20px 45px rgba(0,0,0,.24);
+}
+
+.research-v2 .oc-card:hover{
+  border-color:rgba(67,215,232,.48);
+  box-shadow:0 24px 70px rgba(0,0,0,.36);
+}
+
+.research-v2 .oc-card-head{margin-bottom:18px}
+.research-v2 .oc-icon{
+  width:42px;
+  height:42px;
+  display:grid;
+  place-items:center;
+  border:1px solid var(--rm-line);
+  border-radius:8px;
+  background:rgba(7,9,11,.36);
+  font-size:1.28rem;
+}
+
+.research-v2 .oc-title{font-size:1.24rem}
+.research-v2 .badge-zone,
+.research-v2 .signal-badge,
+.research-v2 .oc-risk-pill,
+.research-v2 .ps-item{border-radius:999px}
+
+.research-v2 .oc-body{gap:24px}
+.research-v2 .oc-gauge{flex-basis:150px}
+.research-v2 .gauge-svg{filter:drop-shadow(0 16px 24px rgba(0,0,0,.26))}
+.research-v2 .oc-row{padding:7px 0;border-color:var(--rm-line-soft)}
+.research-v2 .oc-k{color:var(--rm-muted);font-size:.74rem;text-transform:none}
+.research-v2 .oc-v{color:var(--rm-text)}
+.research-v2 .oc-highlight{color:var(--rm-yellow)}
+.research-v2 .pos{color:var(--rm-green)}
+.research-v2 .neg{color:var(--rm-red)}
+
+.research-v2 .filter-strip{
+  position:sticky;
+  top:72px;
+  z-index:40;
+  padding:12px;
+  margin-bottom:14px;
+  border:1px solid var(--rm-line);
+  border-radius:8px;
+  background:rgba(13,17,22,.92);
+  backdrop-filter:blur(16px);
+  align-items:flex-start;
+  gap:14px;
+}
+
+.research-v2 .filter-group{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.research-v2 .filter-group label{
+  color:var(--rm-muted);
+  text-transform:none;
+  font-size:.78rem;
+  font-weight:800;
+}
+
+.research-v2 .fbtn{
+  min-height:34px;
+  border-radius:6px;
+  border-color:var(--rm-line);
+  background:rgba(255,255,255,.03);
+  color:var(--rm-muted);
+  font-size:.72rem;
+  font-weight:800;
+  text-transform:none;
+}
+
+.research-v2 .fbtn:hover{
+  color:var(--rm-text);
+  border-color:rgba(67,215,232,.4);
+}
+
+.research-v2 .fbtn.active{
+  box-shadow:0 0 0 2px rgba(255,255,255,.06) inset,0 0 0 1px currentColor;
+}
+
+.research-v2 .fbtn .fc{
+  color:inherit;
+  opacity:.78;
+}
+
+.research-v2 .fbtn[data-filter="UltraBuy"],
+.research-v2 .fbtn[data-filter="Buy"]{
+  color:var(--rm-green);
+  background:rgba(53,208,143,.11);
+  border-color:rgba(53,208,143,.38);
+}
+
+.research-v2 .fbtn[data-filter="Neutral"]{
+  color:var(--rm-blue);
+  background:rgba(111,168,255,.1);
+  border-color:rgba(111,168,255,.28);
+}
+
+.research-v2 .fbtn[data-filter="Sell"]{
+  color:var(--rm-red);
+  background:rgba(240,111,104,.12);
+  border-color:rgba(240,111,104,.34);
+}
+
+.research-v2 .fbtn[data-filter="all"],
+.research-v2 .fbtn[data-market]{
+  color:var(--rm-cyan);
+  background:rgba(67,215,232,.09);
+  border-color:rgba(67,215,232,.3);
+}
+
+.research-v2 .sector-nav{
+  gap:8px;
+  margin-bottom:14px;
+  padding:0;
+  border:0;
+}
+
+.research-v2 .sector-tab{
+  min-height:38px;
+  padding:8px 12px;
+  border:1px solid var(--rm-line);
+  border-radius:6px;
+  background:rgba(17,24,32,.72);
+  color:var(--rm-muted);
+}
+
+.research-v2 .sector-tab:hover{
+  color:var(--rm-text);
+  background:var(--rm-surface-2);
+}
+
+.research-v2 .sector-tab.active{
+  color:var(--rm-text);
+  border-color:rgba(67,215,232,.52);
+  background:rgba(67,215,232,.11);
+}
+
+.research-v2 .tab-count{
+  border-radius:999px;
+  border-color:var(--rm-line);
+  background:rgba(7,9,11,.36);
+  color:var(--rm-text);
+}
+
+.research-v2 .panel-summary{gap:8px;margin-bottom:12px}
+.research-v2 .ps-item{
+  border-color:var(--rm-line);
+  background:rgba(17,24,32,.74);
+}
+.research-v2 .ps-green{color:var(--rm-green)}
+.research-v2 .ps-blue{color:var(--rm-blue)}
+.research-v2 .ps-red{color:var(--rm-red)}
+
+.research-v2 .table-wrap{
+  border-color:var(--rm-line);
+  border-radius:8px;
+  overflow:auto;
+  background:var(--rm-surface);
+  box-shadow:0 18px 44px rgba(0,0,0,.22);
+}
+
+.research-v2 .t-assets{
+  min-width:720px;
+  font-size:.84rem;
+}
+
+.research-v2 .t-assets thead{background:#0b0f14}
+.research-v2 .t-assets th{
+  position:sticky;
+  top:0;
+  z-index:2;
+  padding:12px 14px;
+  border-color:var(--rm-line);
+  background:#0b0f14;
+  color:var(--rm-muted);
+  font-size:.72rem;
+  text-transform:none;
+}
+
+.research-v2 .th-sort::after{content:"↕";color:var(--rm-dim)}
+.research-v2 .th-sort.asc::after{content:"↑";color:var(--rm-cyan)}
+.research-v2 .th-sort.desc::after{content:"↓";color:var(--rm-cyan)}
+.research-v2 .t-assets td{padding:11px 14px;border-color:var(--rm-line-soft)}
+.research-v2 .t-assets tbody tr:hover td{background:rgba(67,215,232,.055)}
+.research-v2 .tk-badge{
+  border-color:var(--rm-line);
+  border-radius:5px;
+  background:#080b0f;
+  color:var(--rm-text);
+}
+.research-v2 .col-name{color:var(--rm-muted)}
+.research-v2 .th-r,
+.research-v2 .t-assets th:nth-child(6),
+.research-v2 .col-price,
+.research-v2 .col-rsi,
+.research-v2 .col-sig{
+  text-align:center;
+}
+.research-v2 .t-assets th:nth-child(3),
+.research-v2 .t-assets th:nth-child(4),
+.research-v2 .t-assets th:nth-child(5),
+.research-v2 .t-assets th:nth-child(6),
+.research-v2 .col-price,
+.research-v2 .col-rsi,
+.research-v2 .col-sig{
+  width:14%;
+}
+.research-v2 .col-price{
+  color:var(--rm-text);
+  font-variant-numeric:tabular-nums;
+}
+.research-v2 .col-rsi .rsi-pill,
+.research-v2 .col-sig .signal-badge{
+  margin-inline:auto;
+}
+
+.research-v2 .rsi-pill{
+  border-radius:5px;
+  color:var(--rm-muted);
+  background:#080b0f;
+  border:1px solid var(--rm-line);
+}
+
+.research-v2 .rsi-pill[data-zone="deep"],
+.research-v2 .rsi-pill[data-zone="value"]{
+  color:var(--rm-green);
+  background:rgba(53,208,143,.12);
+  border-color:rgba(53,208,143,.34);
+}
+
+.research-v2 .rsi-pill[data-zone="watch"]{
+  color:var(--rm-cyan);
+  background:rgba(67,215,232,.1);
+  border-color:rgba(67,215,232,.28);
+}
+
+.research-v2 .rsi-pill[data-zone="warm"]{
+  color:var(--rm-yellow);
+  background:rgba(241,188,75,.12);
+  border-color:rgba(241,188,75,.3);
+}
+
+.research-v2 .rsi-pill[data-zone="hot"]{
+  color:var(--rm-red);
+  background:rgba(240,111,104,.12);
+  border-color:rgba(240,111,104,.34);
+}
+
+.research-v2 .sig-ultrabuy,
+.research-v2 .sig-buy{
+  color:var(--rm-green);
+  background:rgba(53,208,143,.11);
+  border-color:rgba(53,208,143,.38);
+}
+
+.research-v2 .sig-neutral{
+  color:var(--rm-blue);
+  background:rgba(111,168,255,.1);
+  border-color:rgba(111,168,255,.28);
+}
+
+.research-v2 .sig-sell{
+  color:var(--rm-red);
+  background:rgba(240,111,104,.12);
+  border-color:rgba(240,111,104,.34);
+}
+
+.research-v2 .empty-state{
+  display:none;
+  padding:26px;
+  border-top:1px solid var(--rm-line);
+  color:var(--rm-muted);
+  background:rgba(7,9,11,.2);
+  font-size:.88rem;
+}
+
+.research-v2 .empty-state.is-visible{display:block}
+.research-v2 .footer{
+  max-width:1440px;
+  margin:20px auto 0;
+  padding:24px clamp(16px,3vw,34px) 36px;
+  border-color:var(--rm-line);
+  color:var(--rm-dim);
+  text-align:left;
+}
+.research-v2 .footer a{color:var(--rm-cyan)}
+
+@media(max-width:1100px){
+  .research-v2 .brief-copy h1{
+    white-space:normal;
+    font-size:clamp(1.45rem,3vw,2.15rem);
+  }
+}
+
+@media(max-width:980px){
+  .research-v2 .executive-board{grid-template-columns:1fr}
+  .research-v2 .oc-grid{grid-template-columns:1fr}
+  .research-v2 .topbar-brand{min-width:auto}
+}
+
+@media(max-width:720px){
+  .research-v2 .topbar{min-height:auto}
+  .research-v2 .search-wrap{
+    flex-basis:100%;
+    max-width:none;
+    order:3;
+  }
+  .research-v2 .topbar-meta{
+    width:100%;
+    justify-content:space-between;
+  }
+  .research-v2 .brief-copy{
+    min-height:auto;
+    padding:22px;
+  }
+  .research-v2 .kpi-strip{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .research-v2 .kpi-cell{min-width:0}
+  .research-v2 .filter-strip{position:static}
+}
+
+@media(max-width:480px){
+  .research-v2 .executive-board,
+  .research-v2 .main,
+  .research-v2 .kpi-strip{
+    padding-left:12px;
+    padding-right:12px;
+  }
+  .research-v2 .kpi-strip{grid-template-columns:1fr}
+  .research-v2 .oc-body{flex-direction:column}
+  .research-v2 .oc-gauge{
+    width:150px;
+    flex-basis:auto;
+  }
+}
+"""
+
+RESEARCH_V2_SCRIPT = r"""
+(function(){
+  "use strict";
+
+  const panels = document.querySelectorAll('.sector-panel');
+  const rows = document.querySelectorAll('.asset-row');
+  const signalBtns = document.querySelectorAll('.fbtn[data-filter]');
+  const marketBtns = document.querySelectorAll('.fbtn[data-market]');
+  const searchInput = document.getElementById('globalSearch');
+
+  const state = {
+    signal: 'all',
+    market: 'all',
+    query: ''
+  };
+
+  panels.forEach(panel => {
+    if(!panel.querySelector('.empty-state')) {
+      const empty = document.createElement('div');
+      empty.className = 'empty-state';
+      empty.textContent = 'No assets match the current filters.';
+      panel.appendChild(empty);
+    }
+  });
+
+  function normalize(value) {
+    return (value || '').toLowerCase().trim();
+  }
+
+  function rowMatches(row) {
+    const signalMatch = state.signal === 'all' || row.dataset.signal === state.signal;
+    const marketMatch = state.market === 'all' || row.dataset.market === state.market;
+    const textMatch = !state.query ||
+      normalize(row.dataset.ticker).includes(state.query) ||
+      normalize(row.dataset.name).includes(state.query);
+    return signalMatch && marketMatch && textMatch;
+  }
+
+  function syncPanels() {
+    panels.forEach(panel => {
+      const panelName = panel.id.replace('panel-', '');
+      panel.classList.toggle('active', state.market === 'all' || panelName === state.market);
+
+      let visibleRows = 0;
+      panel.querySelectorAll('.asset-row').forEach(row => {
+        const isVisible = rowMatches(row);
+        row.hidden = !isVisible;
+        if(isVisible) visibleRows += 1;
+      });
+
+      const empty = panel.querySelector('.empty-state');
+      if(empty) empty.classList.toggle('is-visible', visibleRows === 0);
+    });
+  }
+
+  function applyViewState() {
+    syncPanels();
+  }
+
+  signalBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      signalBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.signal = btn.dataset.filter;
+      applyViewState();
+    });
+  });
+
+  marketBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      marketBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.market = btn.dataset.market;
+      applyViewState();
+    });
+  });
+
+  if(searchInput) {
+    searchInput.addEventListener('input', () => {
+      state.query = normalize(searchInput.value);
+      applyViewState();
+    });
+  }
+
+  document.querySelectorAll('.th-sort').forEach(th => {
+    th.addEventListener('click', () => {
+      const table = th.closest('table');
+      const tbody = table.querySelector('tbody');
+      const col = parseInt(th.dataset.col);
+      const tableRows = Array.from(tbody.querySelectorAll('tr'));
+      const isAsc = th.classList.contains('asc');
+
+      th.closest('thead').querySelectorAll('.th-sort').forEach(h => {
+        h.classList.remove('asc','desc');
+      });
+
+      th.classList.add(isAsc ? 'desc' : 'asc');
+      const dir = isAsc ? -1 : 1;
+
+      tableRows.sort((a, b) => {
+        let va = a.children[col]?.textContent.trim() || '';
+        let vb = b.children[col]?.textContent.trim() || '';
+        const na = parseFloat(va.replace(/[^0-9.\-]/g, ''));
+        const nb = parseFloat(vb.replace(/[^0-9.\-]/g, ''));
+        if(!isNaN(na) && !isNaN(nb)) return (na - nb) * dir;
+        return va.localeCompare(vb, 'pt-BR') * dir;
+      });
+
+      tableRows.forEach(r => tbody.appendChild(r));
+    });
+  });
+
+  document.querySelectorAll('.rsi-pill').forEach(pill => {
+    const v = parseInt(pill.dataset.rsi);
+    if(v <= 30) pill.dataset.zone = 'deep';
+    else if(v <= 40) pill.dataset.zone = 'value';
+    else if(v <= 50) pill.dataset.zone = 'watch';
+    else if(v >= 70) pill.dataset.zone = 'hot';
+    else if(v >= 60) pill.dataset.zone = 'warm';
+    else pill.dataset.zone = 'neutral';
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if(e.key === '/' && searchInput && document.activeElement !== searchInput) {
+      e.preventDefault();
+      searchInput.focus();
+    }
+    if(e.key === 'Escape' && searchInput) {
+      searchInput.value = '';
+      state.query = '';
+      applyViewState();
+      searchInput.blur();
+    }
+  });
+
+  rows.forEach(row => row.hidden = false);
+  applyViewState();
+})();
+"""
 
 
 # ==============================================================
 # DATA FETCHING
 # ==============================================================
 def fetch_rsi_data() -> pd.DataFrame:
-    """Busca RSI semanal/mensal para todos os ativos e retorna DataFrame."""
+    """Fetch weekly/monthly RSI for all assets and return a DataFrame."""
     return collect_rsi_data(remove_crypto_suffix=True)
 
 
 def fetch_onchain_data() -> Dict:
-    """Busca MVRV on-chain para BTC e ETH."""
+    """Fetch on-chain MVRV for BTC and ETH."""
     data = {}
     for coin, classifier in [("BTC", classify_mvrv_btc), ("ETH", classify_mvrv_eth)]:
         try:
@@ -159,7 +925,7 @@ def _build_onchain_card(coin: str, data: Dict) -> str:
         return f'''
         <div class="oc-card oc-unavailable">
           <div class="oc-card-head"><span class="oc-icon">{"₿" if coin == "BTC" else "Ξ"}</span><span class="oc-title">{coin}</span></div>
-          <p class="oc-na">Dados indisponíveis — execute fora da rede corporativa</p>
+          <p class="oc-na">Data unavailable — retry outside the corporate network</p>
         </div>'''
 
     zone_cls = _zone_class(data["zone"])
@@ -184,14 +950,14 @@ def _build_onchain_card(coin: str, data: Dict) -> str:
         </div>
       </div>
       <div class="oc-footer">
-        <span class="oc-action-label">Ação:</span>
+        <span class="oc-action-label">Action:</span>
         <span class="oc-action-val">{escape(data["action"])}</span>
         <span class="oc-risk-pill">Risk: {escape(data["risk"])}</span>
       </div>
     </div>'''
 
 
-def _build_sector_rows(df_sector: pd.DataFrame) -> str:
+def _build_sector_rows(df_sector: pd.DataFrame, market_key: str) -> str:
     rows_html = ""
     for sig in SIGNAL_ORDER:
         sub = df_sector[df_sector["Signal"] == sig].copy()
@@ -210,7 +976,7 @@ def _build_sector_rows(df_sector: pd.DataFrame) -> str:
             rsi_w = int(r["Weekly_RSI"])
             rsi_m = int(r["Monthly_RSI"])
             rows_html += f'''
-            <tr class="asset-row" data-signal="{r['Signal']}" data-ticker="{escape(str(r['Ticker']).lower())}" data-name="{escape(str(r['Name']).lower())}">
+            <tr class="asset-row" data-signal="{r['Signal']}" data-market="{escape(market_key)}" data-ticker="{escape(str(r['Ticker']).lower())}" data-name="{escape(str(r['Name']).lower())}">
               <td class="col-tk"><span class="tk-badge">{escape(str(r['Ticker']))}</span></td>
               <td class="col-name">{escape(str(r['Name']))}</td>
               <td class="col-price">{_format_price(r['Weekly_Close'])}</td>
@@ -229,13 +995,17 @@ def generate_html(df: pd.DataFrame, onchain: Dict) -> str:
     b = counts.get("Buy", 0)
     n = counts.get("Neutral", 0)
     s = counts.get("Sell", 0)
+    ub_pct = (ub / total * 100) if total else 0
+    b_pct = (b / total * 100) if total else 0
+    n_pct = (n / total * 100) if total else 0
+    s_pct = (s / total * 100) if total else 0
 
     # Build on-chain section
     btc_card = _build_onchain_card("BTC", onchain.get("BTC")) if onchain else ""
     eth_card = _build_onchain_card("ETH", onchain.get("ETH")) if onchain else ""
 
-    # Build sector nav tabs + table content
-    sector_tabs = ""
+    # Build market filter buttons + table content
+    market_buttons = f'''<button class="fbtn active" data-market="all">All <span class="fc">{total}</span></button>'''
     sector_panels = ""
     first = True
     for grupo in GROUP_ORDER:
@@ -243,38 +1013,29 @@ def generate_html(df: pd.DataFrame, onchain: Dict) -> str:
         if sub.empty:
             continue
         title = GROUP_TITLES.get(grupo, grupo)
-        icon = GROUP_ICONS.get(grupo, "")
-        active_cls = "active" if first else ""
         cnt = len(sub)
 
-        # Tab counts by signal
         s_counts = sub["Signal"].value_counts().to_dict()
-        tab_info = ""
-        if s_counts.get("UltraBuy", 0) + s_counts.get("Buy", 0) > 0:
-            tab_info += f'<span class="tab-dot dot-green"></span>'
-        if s_counts.get("Sell", 0) > 0:
-            tab_info += f'<span class="tab-dot dot-red"></span>'
+        market_buttons += f'''<button class="fbtn" data-market="{grupo.lower()}">{title} <span class="fc">{cnt}</span></button>'''
 
-        sector_tabs += f'''<button class="sector-tab {active_cls}" data-panel="{grupo.lower()}">{icon} {title} <span class="tab-count">{cnt}</span>{tab_info}</button>'''
-
-        rows = _build_sector_rows(sub)
+        rows = _build_sector_rows(sub, grupo.lower())
         sector_panels += f'''
       <div class="sector-panel {"active" if first else ""}" id="panel-{grupo.lower()}">
         <div class="panel-summary">
-          <span class="ps-item ps-green">{s_counts.get("UltraBuy", 0) + s_counts.get("Buy", 0)} oportunidades</span>
-          <span class="ps-item ps-blue">{s_counts.get("Neutral", 0)} neutros</span>
-          <span class="ps-item ps-red">{s_counts.get("Sell", 0)} sobrecomprados</span>
+          <span class="ps-item ps-green">{s_counts.get("UltraBuy", 0) + s_counts.get("Buy", 0)} opportunities</span>
+          <span class="ps-item ps-blue">{s_counts.get("Neutral", 0)} neutral</span>
+          <span class="ps-item ps-red">{s_counts.get("Sell", 0)} overbought</span>
         </div>
         <div class="table-wrap">
           <table class="t-assets">
             <thead>
               <tr>
                 <th class="th-sort" data-col="0">Ticker</th>
-                <th class="th-sort" data-col="1">Nome</th>
-                <th class="th-sort th-r" data-col="2">Preço</th>
+                <th class="th-sort" data-col="1">Name</th>
+                <th class="th-sort th-r" data-col="2">Price</th>
                 <th class="th-sort th-r" data-col="3">RSI W</th>
                 <th class="th-sort th-r" data-col="4">RSI M</th>
-                <th>Sinal</th>
+                <th>Signal</th>
               </tr>
             </thead>
             <tbody>{rows}
@@ -290,7 +1051,7 @@ def generate_html(df: pd.DataFrame, onchain: Dict) -> str:
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Financial Monitor — Pro Dashboard</title>
+<title>Financial Monitor Research — Dashboard</title>
 <style>
 /* ===== DESIGN TOKENS ===== */
 :root{{
@@ -313,7 +1074,6 @@ body{{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:
 .brand-dot{{width:10px;height:10px;border-radius:50%;background:var(--teal);animation:blink 2s infinite}}
 @keyframes blink{{0%,100%{{opacity:1}}50%{{opacity:.4}}}}
 .brand-name{{font-size:1.05rem;font-weight:800;letter-spacing:-.3px}}
-.brand-tag{{font-size:.65rem;background:var(--card2);border:1px solid var(--line);padding:2px 8px;border-radius:12px;color:var(--teal);font-weight:700;letter-spacing:.5px;text-transform:uppercase}}
 .topbar-meta{{margin-left:auto;display:flex;align-items:center;gap:14px;font-size:.78rem;color:var(--muted)}}
 .topbar-meta time{{color:var(--teal);font-weight:700;font-family:var(--mono)}}
 
@@ -452,60 +1212,79 @@ body{{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:
   .kpi-cell{{min-width:48%;flex:1 1 48%}}
   .col-name{{display:none}}
 }}
+{RESEARCH_V2_CSS}
 </style>
 </head>
-<body>
+<body class="research-v2">
 
 <!-- TOPBAR -->
-<div class="topbar">
+<header class="topbar">
   <div class="topbar-brand">
-    <span class="brand-dot"></span>
-    <span class="brand-name">Financial Monitor</span>
-    <span class="brand-tag">Pro v2</span>
+    <span class="brand-dot" aria-hidden="true"></span>
+    <span class="brand-name">Financial Monitor Research</span>
   </div>
-  <div class="search-wrap">
-    <span class="search-icon">&#128269;</span>
-    <input type="text" class="search-input" id="globalSearch" placeholder="Buscar ativo... (ticker ou nome)" autocomplete="off"/>
+  <div class="search-wrap" role="search">
+    <span class="search-icon">&#8981;</span>
+    <input type="text" class="search-input" id="globalSearch" placeholder="Search ticker, asset, or name" autocomplete="off"/>
   </div>
   <div class="topbar-meta">
-    <span>Atualizado</span>
+    <span>Research snapshot</span>
     <time>{now}</time>
   </div>
-</div>
+</header>
+
+<!-- EXECUTIVE BRIEF -->
+<section class="executive-board" aria-label="Executive summary">
+  <div class="brief-copy">
+    <div class="eyebrow">Multi-asset research desk</div>
+    <h1>Institutional dashboard for momentum, on-chain value, and risk zones.</h1>
+    <p>Consolidated view of crypto, global indices, global equities, Brazilian equities, and currency markets focused on weekly RSI, monthly RSI, and MVRV.</p>
+  </div>
+  <aside class="market-read" aria-label="Signal distribution">
+    <h2>Signal Allocation</h2>
+    <div class="mix-row"><span>Ultra Buy</span><strong>{ub}</strong><div class="mix-bar"><span style="--w:{ub_pct:.1f}%;--c:var(--rm-green)"></span></div></div>
+    <div class="mix-row"><span>Buy</span><strong>{b}</strong><div class="mix-bar"><span style="--w:{b_pct:.1f}%;--c:var(--rm-green)"></span></div></div>
+    <div class="mix-row"><span>Neutral</span><strong>{n}</strong><div class="mix-bar"><span style="--w:{n_pct:.1f}%;--c:var(--rm-blue)"></span></div></div>
+    <div class="mix-row"><span>Sell</span><strong>{s}</strong><div class="mix-bar"><span style="--w:{s_pct:.1f}%;--c:var(--rm-red)"></span></div></div>
+  </aside>
+</section>
 
 <!-- KPI STRIP -->
-<div class="kpi-strip">
-  <div class="kpi-cell"><div class="kpi-num" style="color:var(--teal)">{total}</div><div class="kpi-label">Ativos</div></div>
-  <div class="kpi-cell"><div class="kpi-num" style="color:var(--green)">{ub}</div><div class="kpi-label">Ultra Buy</div></div>
-  <div class="kpi-cell"><div class="kpi-num" style="color:var(--green)">{b}</div><div class="kpi-label">Buy</div></div>
-  <div class="kpi-cell"><div class="kpi-num" style="color:var(--blue)">{n}</div><div class="kpi-label">Neutral</div></div>
-  <div class="kpi-cell"><div class="kpi-num" style="color:var(--red)">{s}</div><div class="kpi-label">Sell</div></div>
+<div class="kpi-strip" aria-label="Key indicators">
+  <div class="kpi-cell"><div class="kpi-num" style="color:var(--rm-cyan)">{total}</div><div class="kpi-label">Assets in coverage</div></div>
+  <div class="kpi-cell"><div class="kpi-num" style="color:var(--rm-green)">{ub}</div><div class="kpi-label">Extreme asymmetry</div></div>
+  <div class="kpi-cell"><div class="kpi-num" style="color:var(--rm-green)">{b}</div><div class="kpi-label">Buy zone</div></div>
+  <div class="kpi-cell"><div class="kpi-num" style="color:var(--rm-blue)">{n}</div><div class="kpi-label">Neutral</div></div>
+  <div class="kpi-cell"><div class="kpi-num" style="color:var(--rm-red)">{s}</div><div class="kpi-label">Overbought</div></div>
 </div>
 
 <div class="main">
 
   <!-- ON-CHAIN -->
-  <h2 class="section-title">On-Chain Analytics</h2>
+  <h2 class="section-title">On-Chain Valuation Desk</h2>
   <div class="oc-grid">
     {btc_card}
     {eth_card}
   </div>
 
   <!-- RSI MONITOR -->
-  <h2 class="section-title">RSI Monitor</h2>
+  <h2 class="section-title">RSI Opportunity Matrix</h2>
 
   <!-- Filter -->
   <div class="filter-strip">
-    <label>Sinal:</label>
-    <button class="fbtn active" data-filter="all">Todos <span class="fc">{total}</span></button>
-    <button class="fbtn" data-filter="UltraBuy">Ultra Buy <span class="fc">{ub}</span></button>
-    <button class="fbtn" data-filter="Buy">Buy <span class="fc">{b}</span></button>
-    <button class="fbtn" data-filter="Neutral">Neutral <span class="fc">{n}</span></button>
-    <button class="fbtn" data-filter="Sell">Sell <span class="fc">{s}</span></button>
+    <div class="filter-group">
+      <label>Filter Signal</label>
+      <button class="fbtn active" data-filter="all">All <span class="fc">{total}</span></button>
+      <button class="fbtn" data-filter="UltraBuy">Ultra Buy <span class="fc">{ub}</span></button>
+      <button class="fbtn" data-filter="Buy">Buy <span class="fc">{b}</span></button>
+      <button class="fbtn" data-filter="Neutral">Neutral <span class="fc">{n}</span></button>
+      <button class="fbtn" data-filter="Sell">Sell <span class="fc">{s}</span></button>
+    </div>
+    <div class="filter-group">
+      <label>Filter Market</label>
+      {market_buttons}
+    </div>
   </div>
-
-  <!-- Sector Tabs -->
-  <div class="sector-nav">{sector_tabs}</div>
 
   <!-- Panels -->
   {sector_panels}
@@ -513,119 +1292,11 @@ body{{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:
 </div>
 
 <div class="footer">
-  Financial Monitor Pro v2.0 · Gerado em <a>{now}</a> · Dados: Yahoo Finance + CoinMetrics · Self-hosted
+  Financial Monitor Research · Updated <a>{now}</a> · Data: Yahoo Finance + CoinMetrics · Static research dashboard
 </div>
 
 <script>
-(function(){{
-  "use strict";
-
-  // === SECTOR TABS ===
-  const tabs = document.querySelectorAll('.sector-tab');
-  const panels = document.querySelectorAll('.sector-panel');
-  tabs.forEach(tab => {{
-    tab.addEventListener('click', () => {{
-      tabs.forEach(t => t.classList.remove('active'));
-      panels.forEach(p => p.classList.remove('active'));
-      tab.classList.add('active');
-      const panel = document.getElementById('panel-' + tab.dataset.panel);
-      if(panel) panel.classList.add('active');
-    }});
-  }});
-
-  // === SIGNAL FILTER ===
-  const fbtns = document.querySelectorAll('.fbtn[data-filter]');
-  fbtns.forEach(btn => {{
-    btn.addEventListener('click', () => {{
-      fbtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      const f = btn.dataset.filter;
-      document.querySelectorAll('.asset-row').forEach(row => {{
-        row.style.display = (f === 'all' || row.dataset.signal === f) ? '' : 'none';
-      }});
-    }});
-  }});
-
-  // === GLOBAL SEARCH ===
-  const searchInput = document.getElementById('globalSearch');
-  searchInput.addEventListener('input', () => {{
-    const q = searchInput.value.toLowerCase().trim();
-    document.querySelectorAll('.asset-row').forEach(row => {{
-      if(!q) {{ row.style.display = ''; return; }}
-      const match = row.dataset.ticker.includes(q) || row.dataset.name.includes(q);
-      row.style.display = match ? '' : 'none';
-    }});
-    // Show all panels during search
-    if(q) {{
-      panels.forEach(p => p.classList.add('active'));
-      tabs.forEach(t => t.classList.add('active'));
-    }} else {{
-      // Restore tab state
-      panels.forEach(p => p.classList.remove('active'));
-      tabs.forEach(t => t.classList.remove('active'));
-      const firstTab = tabs[0];
-      if(firstTab) {{
-        firstTab.classList.add('active');
-        const fp = document.getElementById('panel-' + firstTab.dataset.panel);
-        if(fp) fp.classList.add('active');
-      }}
-    }}
-  }});
-
-  // === TABLE SORT ===
-  document.querySelectorAll('.th-sort').forEach(th => {{
-    th.addEventListener('click', () => {{
-      const table = th.closest('table');
-      const tbody = table.querySelector('tbody');
-      const col = parseInt(th.dataset.col);
-      const rows = Array.from(tbody.querySelectorAll('tr'));
-      const isAsc = th.classList.contains('asc');
-
-      // Reset all sort indicators in this table
-      th.closest('thead').querySelectorAll('.th-sort').forEach(h => {{
-        h.classList.remove('asc','desc');
-      }});
-
-      th.classList.add(isAsc ? 'desc' : 'asc');
-      const dir = isAsc ? -1 : 1;
-
-      rows.sort((a, b) => {{
-        let va = a.children[col]?.textContent.trim() || '';
-        let vb = b.children[col]?.textContent.trim() || '';
-        const na = parseFloat(va.replace(/[^0-9.\\-]/g, ''));
-        const nb = parseFloat(vb.replace(/[^0-9.\\-]/g, ''));
-        if(!isNaN(na) && !isNaN(nb)) return (na - nb) * dir;
-        return va.localeCompare(vb) * dir;
-      }});
-
-      rows.forEach(r => tbody.appendChild(r));
-    }});
-  }});
-
-  // === RSI PILL COLORING ===
-  document.querySelectorAll('.rsi-pill').forEach(pill => {{
-    const v = parseInt(pill.dataset.rsi);
-    if(v <= 30) {{ pill.style.background = 'rgba(52,211,153,.15)'; pill.style.color = '#34d399'; pill.style.border = '1px solid rgba(52,211,153,.3)'; }}
-    else if(v <= 40) {{ pill.style.background = 'rgba(34,211,238,.1)'; pill.style.color = '#22d3ee'; pill.style.border = '1px solid rgba(34,211,238,.25)'; }}
-    else if(v >= 70) {{ pill.style.background = 'rgba(248,113,113,.12)'; pill.style.color = '#f87171'; pill.style.border = '1px solid rgba(248,113,113,.3)'; }}
-    else if(v >= 60) {{ pill.style.background = 'rgba(251,191,36,.1)'; pill.style.color = '#fbbf24'; pill.style.border = '1px solid rgba(251,191,36,.25)'; }}
-    else {{ pill.style.background = 'var(--bg)'; pill.style.color = 'var(--muted)'; pill.style.border = '1px solid var(--line)'; }}
-  }});
-
-  // === KEYBOARD SHORTCUT (/ to focus search) ===
-  document.addEventListener('keydown', (e) => {{
-    if(e.key === '/' && document.activeElement !== searchInput) {{
-      e.preventDefault();
-      searchInput.focus();
-    }}
-    if(e.key === 'Escape') {{
-      searchInput.value = '';
-      searchInput.dispatchEvent(new Event('input'));
-      searchInput.blur();
-    }}
-  }});
-
-}})();
+{RESEARCH_V2_SCRIPT}
 </script>
 </body>
 </html>'''
@@ -636,26 +1307,26 @@ body{{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:
 # ==============================================================
 def main():
     print("=" * 60)
-    print("  FINANCIAL MONITOR PRO — Dashboard V2 Generator")
+    print("  FINANCIAL MONITOR RESEARCH — Dashboard Generator")
     print("=" * 60)
 
-    print("\n[1/3] Buscando dados On-Chain (BTC + ETH)...")
+    print("\n[1/3] Fetching on-chain data (BTC + ETH)...")
     onchain = fetch_onchain_data()
 
-    print("[2/3] Buscando RSI para todos os ativos...")
+    print("[2/3] Fetching RSI for all assets...")
     df = fetch_rsi_data()
 
     if df.empty:
-        print("  [ERRO] Nenhum dado retornado. Verifique conexão ou yfinance.")
+        print("  [ERROR] No data returned. Check the connection or yfinance.")
         sys.exit(1)
 
-    print(f"  [OK] {len(df)} ativos processados")
+    print(f"  [OK] {len(df)} assets processed")
 
-    print("[3/3] Gerando dashboard HTML...")
+    print("[3/3] Generating dashboard HTML...")
     html = generate_html(df, onchain)
     OUTPUT_FILE.write_text(html, encoding="utf-8")
-    print(f"  [OK] Salvo em: {OUTPUT_FILE}")
-    print(f"\n  Abra no browser: file:///{OUTPUT_FILE.as_posix()}")
+    print(f"  [OK] Saved to: {OUTPUT_FILE}")
+    print(f"\n  Open in browser: file:///{OUTPUT_FILE.as_posix()}")
     print("=" * 60)
 
 
