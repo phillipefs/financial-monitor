@@ -4,6 +4,9 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Financial Monitor Research — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet"/>
 <style>
 /* ===== DESIGN TOKENS ===== */
 :root{
@@ -1141,6 +1144,160 @@ body.research-v2.profile-field-v2::after{
   }
 }
 
+
+/* ===== V3 ENHANCEMENTS ===== */
+
+/* Typography */
+body.research-v2{font-family:Inter,"Segoe UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif}
+.research-v2 .brief-copy h1,.research-v2 .brand-name,.research-v2 .section-title{letter-spacing:-.02em}
+.research-v2 .col-price,.research-v2 .col-dd,.research-v2 .highlight-chip{font-variant-numeric:tabular-nums}
+
+/* Radius unification */
+.research-v2 .brief-copy,.research-v2 .market-read,.research-v2 .kpi-cell,.research-v2 .oc-card,
+.research-v2 .highlight-card,.research-v2 .table-wrap,.research-v2 .filter-strip{border-radius:12px}
+
+/* KPI deltas */
+.research-v2 .kpi-delta{display:flex;align-items:baseline;gap:6px;margin-top:8px;font-family:var(--mono);font-size:.68rem;font-weight:700}
+.research-v2 .kpi-delta .d-good{color:var(--rm-green)}
+.research-v2 .kpi-delta .d-bad{color:var(--rm-red)}
+.research-v2 .kpi-delta .d-flat{color:var(--rm-muted)}
+.research-v2 .kpi-delta .d-ctx{color:var(--rm-dim);font-family:var(--font);font-weight:600}
+
+/* Signal Allocation — reuse the signal-badge look, KPI-style count */
+.research-v2 .market-read .mix-row{grid-template-columns:auto 1fr auto;gap:14px;min-height:40px}
+.research-v2 .market-read .mix-row .signal-badge{min-width:84px;text-align:center;justify-self:start}
+.research-v2 .market-read .mix-row .mix-bar{height:8px}
+.research-v2 .market-read .mix-row strong{font-size:1.05rem;font-weight:850;color:var(--rm-text)}
+
+/* RSI position meters */
+.research-v2 .rsi-meter{display:inline-flex;flex-direction:column;align-items:center;gap:6px;min-width:64px}
+.research-v2 .rsi-meter .rsi-pill{background:transparent;border:0;padding:0;min-width:0;font-size:.8rem}
+.research-v2 .rsi-track{position:relative;width:64px;height:4px;border-radius:999px;background:rgba(148,163,184,.16)}
+.research-v2 .rsi-track::before{content:"";position:absolute;inset:0;border-radius:inherit;opacity:.4;
+  background:linear-gradient(90deg,rgba(53,208,143,.55) 0 30%,transparent 30% 70%,rgba(240,111,104,.55) 70% 100%)}
+.research-v2 .rsi-tick{position:absolute;top:-2px;bottom:-2px;width:1px;background:rgba(148,163,184,.38)}
+.research-v2 .rsi-dot{position:absolute;top:50%;width:9px;height:9px;border-radius:50%;transform:translate(-50%,-50%);
+  background:var(--rm-muted);box-shadow:0 0 0 2px var(--rm-surface)}
+.research-v2 .rsi-meter[data-zone="deep"] .rsi-dot,.research-v2 .rsi-meter[data-zone="value"] .rsi-dot{background:var(--rm-green)}
+.research-v2 .rsi-meter[data-zone="watch"] .rsi-dot{background:var(--rm-cyan)}
+.research-v2 .rsi-meter[data-zone="warm"] .rsi-dot{background:var(--rm-yellow)}
+.research-v2 .rsi-meter[data-zone="hot"] .rsi-dot{background:var(--rm-red)}
+
+/* Gauges */
+.research-v2 .gauge-svg{overflow:visible}
+.research-v2 .gauge-svg .g-tick{stroke:var(--rm-surface)}
+.research-v2 .gauge-svg .g-lab{fill:var(--rm-dim);font-weight:700;font-family:var(--mono)}
+.research-v2 .gauge-svg .g-val{font-family:var(--mono)}
+.research-v2 .g-arc{stroke-dasharray:var(--arc) 100}
+@media (prefers-reduced-motion:no-preference){
+  @keyframes gaugeGrow{from{stroke-dasharray:0 100}}
+  .research-v2 .g-arc{animation:gaugeGrow 1.1s cubic-bezier(.25,.75,.3,1)}
+}
+
+/* Expandable rows */
+.research-v2 .asset-row{cursor:pointer}
+.research-v2 .asset-row .col-tk{white-space:nowrap}
+.research-v2 .asset-row .col-tk::before{content:"\203a";display:inline-block;margin-right:8px;color:var(--rm-dim);
+  font-weight:800;transition:transform .2s ease,color .2s ease}
+.research-v2 .asset-row.expanded .col-tk::before{transform:rotate(90deg);color:var(--rm-cyan)}
+.research-v2 .asset-detail td{padding:0;border-bottom:1px solid var(--rm-line-soft);background:rgba(67,215,232,.035)}
+.research-v2 .detail-inner{display:flex;flex-wrap:wrap;align-items:center;gap:22px;padding:14px 18px 14px 44px}
+.research-v2 .detail-item{display:flex;flex-direction:column;gap:3px}
+.research-v2 .detail-item .k{font-size:.6rem;font-weight:800;color:var(--rm-dim);text-transform:uppercase;letter-spacing:.5px}
+.research-v2 .detail-item .v{font-family:var(--mono);font-size:.82rem;font-weight:700;color:var(--rm-text)}
+.research-v2 .detail-links{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap}
+.research-v2 .detail-link{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;
+  border:1px solid rgba(67,215,232,.35);background:rgba(67,215,232,.08);color:var(--rm-cyan);
+  font-size:.72rem;font-weight:800;text-decoration:none;transition:.2s;white-space:nowrap}
+.research-v2 .detail-link:hover{background:rgba(67,215,232,.16)}
+
+/* Entrance motion */
+@media (prefers-reduced-motion:no-preference){
+  @keyframes v3Up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  .research-v2 .brief-copy,.research-v2 .market-read,.research-v2 .kpi-cell,
+  .research-v2 .oc-card,.research-v2 .highlight-card{animation:v3Up .6s cubic-bezier(.22,.7,.3,1) both}
+  .research-v2 .market-read{animation-delay:.08s}
+  .research-v2 .kpi-cell:nth-child(2){animation-delay:.05s}
+  .research-v2 .kpi-cell:nth-child(3){animation-delay:.1s}
+  .research-v2 .kpi-cell:nth-child(4){animation-delay:.15s}
+  .research-v2 .kpi-cell:nth-child(5){animation-delay:.2s}
+  .research-v2 .oc-card:nth-child(2){animation-delay:.08s}
+  .research-v2 .oc-card:nth-child(3){animation-delay:.16s}
+  .research-v2 .highlight-card:nth-child(2){animation-delay:.1s}
+}
+
+/* Focus visibility */
+.research-v2 .fbtn:focus-visible,.research-v2 .sector-tab:focus-visible,.research-v2 .asset-row:focus-visible,
+.research-v2 .theme-btn:focus-visible,.research-v2 .detail-link:focus-visible,.research-v2 .search-input:focus-visible{
+  outline:2px solid var(--rm-cyan);outline-offset:2px}
+
+/* Theme toggle button */
+.research-v2 .theme-btn{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;
+  border:1px solid var(--rm-line);background:transparent;color:var(--rm-muted);cursor:pointer;font-size:.9rem;transition:.2s}
+.research-v2 .theme-btn:hover{color:var(--rm-cyan);border-color:rgba(67,215,232,.5)}
+
+/* ===== LIGHT THEME ===== */
+body.research-v2.theme-light{
+  --rm-bg:#eef2f6;--rm-bg-soft:#e9eef4;--rm-surface:#ffffff;--rm-surface-2:#f4f7fa;--rm-surface-3:#e9eef4;
+  --rm-line:#d9e1e9;--rm-line-soft:rgba(22,32,42,.12);
+  --rm-text:#16202a;--rm-muted:#48586a;--rm-dim:#7b8a99;
+  --rm-cyan:#0e7490;--rm-green:#087f5b;--rm-yellow:#b45309;--rm-red:#c92a2a;--rm-blue:#1d4ed8;
+  --rm-shadow:0 18px 44px rgba(15,30,45,.1);
+  --teal:#0e7490;--green:#087f5b;--red:#c92a2a;--yellow:#b45309;--blue:#1d4ed8;--orange:#c2410c;
+  --txt:#16202a;--muted:#48586a;--dim:#7b8a99;--line:#d9e1e9;--glow-teal:rgba(14,116,144,.14);
+  color:var(--rm-text);
+}
+body.research-v2.profile-field-v2.theme-light{
+  background:linear-gradient(160deg,#f7fafc 0%,#eef2f6 45%,#e7edf3 100%);
+  background-attachment:fixed;animation:none;
+}
+body.research-v2.profile-field-v2.theme-light::before,
+body.research-v2.profile-field-v2.theme-light::after{display:none}
+.research-v2.theme-light .topbar{background:rgba(255,255,255,.88);border-bottom-color:var(--rm-line);box-shadow:0 10px 30px rgba(15,30,45,.06)}
+.research-v2.theme-light .brief-copy,
+.research-v2.theme-light .market-read,
+.research-v2.theme-light .highlight-card,
+.research-v2.theme-light .kpi-cell,
+.research-v2.theme-light .oc-card,
+.research-v2.theme-light .filter-strip,
+.research-v2.theme-light .table-wrap,
+.research-v2.theme-light .global-empty-state{
+  border-color:var(--rm-line);background:#fff;box-shadow:0 14px 34px rgba(15,30,45,.08);backdrop-filter:none;
+}
+.research-v2.theme-light .brief-copy{background:linear-gradient(135deg,rgba(14,116,144,.06),transparent 40%),#fff}
+.research-v2.theme-light .oc-card{background:linear-gradient(120deg,rgba(14,116,144,.04),transparent 44%),#fff}
+.research-v2.theme-light .oc-card:hover{border-color:rgba(14,116,144,.4);box-shadow:0 18px 44px rgba(15,30,45,.12)}
+.research-v2.theme-light .kpi-cell:hover{background:#f4f7fa;border-color:rgba(14,116,144,.4)}
+.research-v2.theme-light .search-input,
+.research-v2.theme-light .topbar-meta,
+.research-v2.theme-light .sector-tab,
+.research-v2.theme-light .ps-item,
+.research-v2.theme-light .empty-state{background:#fff;border-color:var(--rm-line)}
+.research-v2.theme-light .oc-icon{background:#f4f7fa;border-color:var(--rm-line)}
+.research-v2.theme-light .t-assets thead,
+.research-v2.theme-light .t-assets th{background:#f4f7fa;border-color:var(--rm-line)}
+.research-v2.theme-light .t-assets td{background:transparent}
+.research-v2.theme-light .t-assets tbody tr:hover td{background:rgba(14,116,144,.05)}
+.research-v2.theme-light .tk-badge,
+.research-v2.theme-light .dd-pill{background:#f2f5f8}
+.research-v2.theme-light .rsi-meter .rsi-pill{background:transparent}
+.research-v2.theme-light .fbtn{background:#fff}
+.research-v2.theme-light .fbtn[data-filter="UltraBuy"],.research-v2.theme-light .fbtn[data-filter="Buy"]{background:rgba(8,127,91,.08)}
+.research-v2.theme-light .fbtn[data-filter="Neutral"]{background:rgba(29,78,216,.07)}
+.research-v2.theme-light .fbtn[data-filter="Sell"]{background:rgba(201,42,42,.07)}
+.research-v2.theme-light .fbtn[data-filter="all"],.research-v2.theme-light .fbtn[data-market]{background:rgba(14,116,144,.07)}
+.research-v2.theme-light .highlight-chip{background:#f2f5f8;border-color:var(--rm-line);color:var(--rm-muted)}
+.research-v2.theme-light .mix-bar{background:rgba(22,32,42,.1)}
+.research-v2.theme-light .rsi-track{background:rgba(22,32,42,.1)}
+.research-v2.theme-light .rsi-dot{box-shadow:0 0 0 2px #fff}
+.research-v2.theme-light .asset-detail td{background:rgba(14,116,144,.04)}
+.research-v2.theme-light .detail-link{background:rgba(14,116,144,.07);border-color:rgba(14,116,144,.3)}
+.research-v2.theme-light .gauge-svg{filter:none}
+.research-v2.theme-light .footer{background:none}
+.research-v2.theme-light .market-read h2,
+.research-v2.theme-light .eyebrow,
+.research-v2.theme-light .section-title::before{filter:none}
+
 </style>
 </head>
 <body class="research-v2 profile-field-v2">
@@ -1157,7 +1314,7 @@ body.research-v2.profile-field-v2::after{
   </div>
   <div class="topbar-meta">
     <span>Research snapshot</span>
-    <time>03/07/2026 19:08 BRT</time>
+    <time>03/07/2026 20:23 BRT</time>
   </div>
 </header>
 
@@ -1170,20 +1327,20 @@ body.research-v2.profile-field-v2::after{
   </div>
   <aside class="market-read" aria-label="Signal distribution">
     <h2>Signal Allocation</h2>
-    <div class="mix-row"><span>Ultra Buy</span><strong>1</strong><div class="mix-bar"><span style="--w:1.1%;--c:var(--rm-green)"></span></div></div>
-    <div class="mix-row"><span>Buy</span><strong>0</strong><div class="mix-bar"><span style="--w:0.0%;--c:var(--rm-green)"></span></div></div>
-    <div class="mix-row"><span>Neutral</span><strong>81</strong><div class="mix-bar"><span style="--w:91.0%;--c:var(--rm-blue)"></span></div></div>
-    <div class="mix-row"><span>Sell</span><strong>7</strong><div class="mix-bar"><span style="--w:7.9%;--c:var(--rm-red)"></span></div></div>
+    <div class="mix-row"><span class="signal-badge sig-ultrabuy">Ultra Buy</span><div class="mix-bar"><span style="--w:1.1%;--c:var(--rm-green)"></span></div><strong>1</strong></div>
+    <div class="mix-row"><span class="signal-badge sig-buy">Buy</span><div class="mix-bar"><span style="--w:0.0%;--c:var(--rm-green)"></span></div><strong>0</strong></div>
+    <div class="mix-row"><span class="signal-badge sig-neutral">Neutral</span><div class="mix-bar"><span style="--w:91.0%;--c:var(--rm-blue)"></span></div><strong>81</strong></div>
+    <div class="mix-row"><span class="signal-badge sig-sell">Sell</span><div class="mix-bar"><span style="--w:7.9%;--c:var(--rm-red)"></span></div><strong>7</strong></div>
   </aside>
 </section>
 
 <!-- KPI STRIP -->
 <div class="kpi-strip" aria-label="Key indicators">
-  <div class="kpi-cell"><div class="kpi-num" style="color:var(--rm-cyan)">89</div><div class="kpi-label">Assets in coverage</div></div>
-  <div class="kpi-cell"><div class="kpi-num" style="color:var(--rm-green)">1</div><div class="kpi-label">Extreme asymmetry</div></div>
-  <div class="kpi-cell"><div class="kpi-num" style="color:var(--rm-green)">0</div><div class="kpi-label">Buy zone</div></div>
-  <div class="kpi-cell"><div class="kpi-num" style="color:var(--rm-blue)">81</div><div class="kpi-label">Neutral</div></div>
-  <div class="kpi-cell"><div class="kpi-num" style="color:var(--rm-red)">7</div><div class="kpi-label">Overbought</div></div>
+  <div class="kpi-cell"><div class="kpi-num" style="color:var(--rm-cyan)">89</div><div class="kpi-label">Assets in coverage</div><div class="kpi-delta"><span class="d-flat">—</span><span class="d-ctx">vs yesterday</span></div></div>
+  <div class="kpi-cell"><div class="kpi-num" style="color:var(--rm-green)">1</div><div class="kpi-label">Extreme asymmetry</div><div class="kpi-delta"><span class="d-flat">—</span><span class="d-ctx">vs yesterday</span></div></div>
+  <div class="kpi-cell"><div class="kpi-num" style="color:var(--rm-green)">0</div><div class="kpi-label">Buy zone</div><div class="kpi-delta"><span class="d-flat">—</span><span class="d-ctx">vs yesterday</span></div></div>
+  <div class="kpi-cell"><div class="kpi-num" style="color:var(--rm-blue)">81</div><div class="kpi-label">Neutral</div><div class="kpi-delta"><span class="d-flat">—</span><span class="d-ctx">vs yesterday</span></div></div>
+  <div class="kpi-cell"><div class="kpi-num" style="color:var(--rm-red)">7</div><div class="kpi-label">Overbought</div><div class="kpi-delta"><span class="d-flat">—</span><span class="d-ctx">vs yesterday</span></div></div>
 </div>
 
 
@@ -1399,10 +1556,14 @@ body.research-v2.profile-field-v2::after{
         <span class="badge-zone zone-buy">BUY ZONE</span>
       </div>
       <div class="oc-body">
-        <div class="oc-gauge"><svg viewBox="0 0 120 70" class="gauge-svg">
-      <path d="M 10 60 A 50 50 0 0 1 110 60" fill="none" stroke="#2c3650" stroke-width="8" stroke-linecap="round"/>
-      <path d="M 10.0 60.0 A 50 50 0 0 1 21.4 28.2" fill="none" stroke="#4ade80" stroke-width="8" stroke-linecap="round"/>
-      <text x="60" y="58" text-anchor="middle" fill="#4ade80" font-size="14" font-weight="800" font-family="monospace">1.158</text>
+        <div class="oc-gauge"><svg viewBox="0 0 120 80" class="gauge-svg" role="img">
+      <defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#35d08f"/><stop offset="33%" stop-color="#33c6b7"/><stop offset="67%" stop-color="#f1bc4b"/><stop offset="100%" stop-color="#f06f68"/></linearGradient></defs>
+      <path d="M 10 60 A 50 50 0 0 1 110 60" fill="none" stroke="url(#g1)" stroke-opacity=".22" stroke-width="8" stroke-linecap="round"/>
+      <path class="g-arc" style="--arc:21.9" d="M 10 60 A 50 50 0 0 1 110 60" pathLength="100" fill="none" stroke="#35d08f" stroke-width="8" stroke-linecap="round"/>
+      <line class="g-tick" x1="28.9" y1="28.9" x2="20.4" y2="20.4" stroke-width="2.5"/><line class="g-tick" x1="60.0" y1="16.0" x2="60.0" y2="4.0" stroke-width="2.5"/><line class="g-tick" x1="91.1" y1="28.9" x2="99.6" y2="20.4" stroke-width="2.5"/>
+      <text x="60" y="54" text-anchor="middle" fill="#35d08f" font-size="15" font-weight="800" class="g-val">1.158</text>
+      <text x="12" y="76" text-anchor="middle" class="g-lab" font-size="7">0.5</text>
+      <text x="108" y="76" text-anchor="middle" class="g-lab" font-size="7">3.5</text>
     </svg></div>
         <div class="oc-metrics">
           <div class="oc-row"><span class="oc-k">Price</span><span class="oc-v">$61,438</span></div>
@@ -1425,10 +1586,14 @@ body.research-v2.profile-field-v2::after{
         <span class="badge-zone zone-buy">DEEP VALUE</span>
       </div>
       <div class="oc-body">
-        <div class="oc-gauge"><svg viewBox="0 0 120 70" class="gauge-svg">
-      <path d="M 10 60 A 50 50 0 0 1 110 60" fill="none" stroke="#2c3650" stroke-width="8" stroke-linecap="round"/>
-      <path d="M 10.0 60.0 A 50 50 0 0 1 19.7 30.4" fill="none" stroke="#4ade80" stroke-width="8" stroke-linecap="round"/>
-      <text x="60" y="58" text-anchor="middle" fill="#4ade80" font-size="14" font-weight="800" font-family="monospace">0.864</text>
+        <div class="oc-gauge"><svg viewBox="0 0 120 80" class="gauge-svg" role="img">
+      <defs><linearGradient id="g2" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#35d08f"/><stop offset="33%" stop-color="#33c6b7"/><stop offset="67%" stop-color="#f1bc4b"/><stop offset="100%" stop-color="#f06f68"/></linearGradient></defs>
+      <path d="M 10 60 A 50 50 0 0 1 110 60" fill="none" stroke="url(#g2)" stroke-opacity=".22" stroke-width="8" stroke-linecap="round"/>
+      <path class="g-arc" style="--arc:20.2" d="M 10 60 A 50 50 0 0 1 110 60" pathLength="100" fill="none" stroke="#35d08f" stroke-width="8" stroke-linecap="round"/>
+      <line class="g-tick" x1="28.9" y1="28.9" x2="20.4" y2="20.4" stroke-width="2.5"/><line class="g-tick" x1="60.0" y1="16.0" x2="60.0" y2="4.0" stroke-width="2.5"/><line class="g-tick" x1="91.1" y1="28.9" x2="99.6" y2="20.4" stroke-width="2.5"/>
+      <text x="60" y="54" text-anchor="middle" fill="#35d08f" font-size="15" font-weight="800" class="g-val">0.864</text>
+      <text x="12" y="76" text-anchor="middle" class="g-lab" font-size="7">0.4</text>
+      <text x="108" y="76" text-anchor="middle" class="g-lab" font-size="7">2.7</text>
     </svg></div>
         <div class="oc-metrics">
           <div class="oc-row"><span class="oc-k">Price</span><span class="oc-v">$1,696</span></div>
@@ -1451,10 +1616,14 @@ body.research-v2.profile-field-v2::after{
         <span class="badge-zone fg-extreme-fear">EXTREME FEAR</span>
       </div>
       <div class="oc-body">
-        <div class="oc-gauge"><svg viewBox="0 0 120 70" class="gauge-svg">
-      <path d="M 10 60 A 50 50 0 0 1 110 60" fill="none" stroke="#2c3650" stroke-width="8" stroke-linecap="round"/>
-      <path d="M 10.0 60.0 A 50 50 0 0 1 20.5 29.4" fill="none" stroke="#f87171" stroke-width="8" stroke-linecap="round"/>
-      <text x="60" y="58" text-anchor="middle" fill="#f87171" font-size="14" font-weight="800" font-family="monospace">21</text>
+        <div class="oc-gauge"><svg viewBox="0 0 120 80" class="gauge-svg" role="img">
+      <defs><linearGradient id="g3" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#f06f68"/><stop offset="25%" stop-color="#ff7a45"/><stop offset="50%" stop-color="#f1bc4b"/><stop offset="75%" stop-color="#35d08f"/><stop offset="100%" stop-color="#4ade80"/></linearGradient></defs>
+      <path d="M 10 60 A 50 50 0 0 1 110 60" fill="none" stroke="url(#g3)" stroke-opacity=".22" stroke-width="8" stroke-linecap="round"/>
+      <path class="g-arc" style="--arc:21.0" d="M 10 60 A 50 50 0 0 1 110 60" pathLength="100" fill="none" stroke="#f06f68" stroke-width="8" stroke-linecap="round"/>
+      <line class="g-tick" x1="28.9" y1="28.9" x2="20.4" y2="20.4" stroke-width="2.5"/><line class="g-tick" x1="54.5" y1="16.3" x2="53.0" y2="4.4" stroke-width="2.5"/><line class="g-tick" x1="66.9" y1="16.5" x2="68.8" y2="4.7" stroke-width="2.5"/><line class="g-tick" x1="92.1" y1="29.9" x2="100.8" y2="21.7" stroke-width="2.5"/>
+      <text x="60" y="54" text-anchor="middle" fill="#f06f68" font-size="15" font-weight="800" class="g-val">21</text>
+      <text x="12" y="76" text-anchor="middle" class="g-lab" font-size="7">0</text>
+      <text x="108" y="76" text-anchor="middle" class="g-lab" font-size="7">100</text>
     </svg></div>
         <div class="oc-metrics">
           <div class="oc-row"><span class="oc-k">Index</span><span class="oc-v oc-highlight">21 / 100</span></div>
@@ -1511,48 +1680,48 @@ body.research-v2.profile-field-v2::after{
               </tr>
             </thead>
             <tbody>
-            <tr class="asset-row" data-signal="Neutral" data-market="indices" data-ticker="bvsp" data-name="ibovespa">
+            <tr class="asset-row" data-signal="Neutral" data-market="indices" data-ticker="bvsp" data-name="ibovespa" data-peak-close="197,324" data-peak-date="06/04/2026" data-dd="-11.8%" data-yahoo="https://finance.yahoo.com/quote/%5EBVSP" data-tv="https://www.tradingview.com/chart/?symbol=BMFBOVESPA%3AIBOV">
               <td class="col-tk"><span class="tk-badge">BVSP</span></td>
               <td class="col-name">Ibovespa</td>
               <td class="col-price">174,070</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="50">50</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="66">66</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="50" data-zone="watch">50</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:50%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="warm"><span class="rsi-pill" data-rsi="66" data-zone="warm">66</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:66%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 197,324 | Date: 06/04/2026">-11.8%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="indices" data-ticker="gdaxi" data-name="dax">
+            <tr class="asset-row" data-signal="Neutral" data-market="indices" data-ticker="gdaxi" data-name="dax" data-peak-close="25,779" data-peak-date="29/06/2026" data-dd="0.0%" data-yahoo="https://finance.yahoo.com/quote/%5EGDAXI" data-tv="https://www.tradingview.com/chart/?symbol=XETR%3ADAX">
               <td class="col-tk"><span class="tk-badge">GDAXI</span></td>
               <td class="col-name">DAX</td>
               <td class="col-price">25,779</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="61">61</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="69">69</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="warm"><span class="rsi-pill" data-rsi="61" data-zone="warm">61</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:61%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="warm"><span class="rsi-pill" data-rsi="69" data-zone="warm">69</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:69%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 25,779 | Date: 29/06/2026">0.0%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="indices" data-ticker="ndx" data-name="nasdaq 100">
+            <tr class="asset-row" data-signal="Neutral" data-market="indices" data-ticker="ndx" data-name="nasdaq 100" data-peak-close="30,406" data-peak-date="15/06/2026" data-dd="-3.5%" data-yahoo="https://finance.yahoo.com/quote/%5ENDX" data-tv="https://www.tradingview.com/chart/?symbol=NASDAQ%3ANDX">
               <td class="col-tk"><span class="tk-badge">NDX</span></td>
               <td class="col-name">Nasdaq 100</td>
               <td class="col-price">29,329</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="62">62</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="72">72</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="warm"><span class="rsi-pill" data-rsi="62" data-zone="warm">62</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:62%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="hot"><span class="rsi-pill" data-rsi="72" data-zone="hot">72</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:72%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 30,406 | Date: 15/06/2026">-3.5%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="indices" data-ticker="gspc" data-name="s&amp;p 500">
+            <tr class="asset-row" data-signal="Neutral" data-market="indices" data-ticker="gspc" data-name="s&amp;p 500" data-peak-close="7,580" data-peak-date="25/05/2026" data-dd="-1.3%" data-yahoo="https://finance.yahoo.com/quote/%5EGSPC" data-tv="https://www.tradingview.com/chart/?symbol=SP%3ASPX">
               <td class="col-tk"><span class="tk-badge">GSPC</span></td>
               <td class="col-name">S&amp;P 500</td>
               <td class="col-price">7,483</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="63">63</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="73">73</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="warm"><span class="rsi-pill" data-rsi="63" data-zone="warm">63</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:63%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="hot"><span class="rsi-pill" data-rsi="73" data-zone="hot">73</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:73%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 7,580 | Date: 25/05/2026">-1.3%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Sell" data-market="indices" data-ticker="dji" data-name="dow jones">
+            <tr class="asset-row" data-signal="Sell" data-market="indices" data-ticker="dji" data-name="dow jones" data-peak-close="52,900" data-peak-date="29/06/2026" data-dd="0.0%" data-yahoo="https://finance.yahoo.com/quote/%5EDJI" data-tv="https://www.tradingview.com/chart/?symbol=DJ%3ADJI">
               <td class="col-tk"><span class="tk-badge">DJI</span></td>
               <td class="col-name">Dow Jones</td>
               <td class="col-price">52,900</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="72">72</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="72">72</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="hot"><span class="rsi-pill" data-rsi="72" data-zone="hot">72</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:72%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="hot"><span class="rsi-pill" data-rsi="72" data-zone="hot">72</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:72%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 52,900 | Date: 29/06/2026">0.0%</span></td>
               <td class="col-sig"><span class="signal-badge sig-sell">SELL</span></td>
             </tr>
@@ -1580,31 +1749,31 @@ body.research-v2.profile-field-v2::after{
               </tr>
             </thead>
             <tbody>
-            <tr class="asset-row" data-signal="Neutral" data-market="cripto" data-ticker="eth" data-name="ethereum">
+            <tr class="asset-row" data-signal="Neutral" data-market="cripto" data-ticker="eth" data-name="ethereum" data-peak-close="4,780" data-peak-date="18/08/2025" data-dd="-63.2%" data-yahoo="https://finance.yahoo.com/quote/ETH-USD" data-tv="https://www.tradingview.com/chart/?symbol=ETHUSD">
               <td class="col-tk"><span class="tk-badge">ETH</span></td>
               <td class="col-name">Ethereum</td>
-              <td class="col-price">1,757</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="37">37</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="42">42</span></td>
+              <td class="col-price">1,759</td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="value"><span class="rsi-pill" data-rsi="37" data-zone="value">37</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:37%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="42" data-zone="watch">42</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:42%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-stress" title="Top close: 4,780 | Date: 18/08/2025">-63.2%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="cripto" data-ticker="btc" data-name="bitcoin">
+            <tr class="asset-row" data-signal="Neutral" data-market="cripto" data-ticker="btc" data-name="bitcoin" data-peak-close="123,513" data-peak-date="29/09/2025" data-dd="-49.3%" data-yahoo="https://finance.yahoo.com/quote/BTC-USD" data-tv="https://www.tradingview.com/chart/?symbol=BTCUSD">
               <td class="col-tk"><span class="tk-badge">BTC</span></td>
               <td class="col-name">Bitcoin</td>
-              <td class="col-price">62,563</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="37">37</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="43">43</span></td>
-              <td class="col-dd"><span class="dd-pill dd-deep" title="Top close: 123,513 | Date: 29/09/2025">-49.4%</span></td>
+              <td class="col-price">62,584</td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="value"><span class="rsi-pill" data-rsi="37" data-zone="value">37</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:37%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="43" data-zone="watch">43</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:43%"></span></span></span></td>
+              <td class="col-dd"><span class="dd-pill dd-deep" title="Top close: 123,513 | Date: 29/09/2025">-49.3%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="cripto" data-ticker="sol" data-name="solana">
+            <tr class="asset-row" data-signal="Neutral" data-market="cripto" data-ticker="sol" data-name="solana" data-peak-close="252.92" data-peak-date="18/11/2024" data-dd="-67.5%" data-yahoo="https://finance.yahoo.com/quote/SOL-USD" data-tv="https://www.tradingview.com/chart/?symbol=SOLUSD">
               <td class="col-tk"><span class="tk-badge">SOL</span></td>
               <td class="col-name">Solana</td>
-              <td class="col-price">82.37</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="43">43</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="42">42</span></td>
-              <td class="col-dd"><span class="dd-pill dd-stress" title="Top close: 252.92 | Date: 18/11/2024">-67.4%</span></td>
+              <td class="col-price">82.22</td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="43" data-zone="watch">43</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:43%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="42" data-zone="watch">42</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:42%"></span></span></span></td>
+              <td class="col-dd"><span class="dd-pill dd-stress" title="Top close: 252.92 | Date: 18/11/2024">-67.5%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
             </tbody>
@@ -1631,381 +1800,381 @@ body.research-v2.profile-field-v2::after{
               </tr>
             </thead>
             <tbody>
-            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="mstr" data-name="strategy">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="mstr" data-name="strategy" data-peak-close="434.58" data-peak-date="07/07/2025" data-dd="-76.8%" data-yahoo="https://finance.yahoo.com/quote/MSTR" data-tv="https://www.tradingview.com/chart/?symbol=MSTR">
               <td class="col-tk"><span class="tk-badge">MSTR</span></td>
               <td class="col-name">Strategy</td>
               <td class="col-price">100.77</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="35">35</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="40">40</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="value"><span class="rsi-pill" data-rsi="35" data-zone="value">35</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:35%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="value"><span class="rsi-pill" data-rsi="40" data-zone="value">40</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:40%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-stress" title="Top close: 434.58 | Date: 07/07/2025">-76.8%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="tm" data-name="toyota">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="tm" data-name="toyota" data-peak-close="248.29" data-peak-date="09/02/2026" data-dd="-29.7%" data-yahoo="https://finance.yahoo.com/quote/TM" data-tv="https://www.tradingview.com/chart/?symbol=TM">
               <td class="col-tk"><span class="tk-badge">TM</span></td>
               <td class="col-name">Toyota</td>
               <td class="col-price">174.59</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="35">35</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="45">45</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="value"><span class="rsi-pill" data-rsi="35" data-zone="value">35</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:35%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="45" data-zone="watch">45</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:45%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-deep" title="Top close: 248.29 | Date: 09/02/2026">-29.7%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="nflx" data-name="netflix">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="nflx" data-name="netflix" data-peak-close="132.31" data-peak-date="23/06/2025" data-dd="-41.3%" data-yahoo="https://finance.yahoo.com/quote/NFLX" data-tv="https://www.tradingview.com/chart/?symbol=NFLX">
               <td class="col-tk"><span class="tk-badge">NFLX</span></td>
               <td class="col-name">Netflix</td>
               <td class="col-price">77.65</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="37">37</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="45">45</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="value"><span class="rsi-pill" data-rsi="37" data-zone="value">37</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:37%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="45" data-zone="watch">45</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:45%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-deep" title="Top close: 132.31 | Date: 23/06/2025">-41.3%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="orcl" data-name="oracle">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="orcl" data-name="oracle" data-peak-close="306.24" data-peak-date="15/09/2025" data-dd="-54.2%" data-yahoo="https://finance.yahoo.com/quote/ORCL" data-tv="https://www.tradingview.com/chart/?symbol=ORCL">
               <td class="col-tk"><span class="tk-badge">ORCL</span></td>
               <td class="col-name">Oracle</td>
               <td class="col-price">140.27</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="39">39</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="46">46</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="value"><span class="rsi-pill" data-rsi="39" data-zone="value">39</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:39%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="46" data-zone="watch">46</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:46%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-stress" title="Top close: 306.24 | Date: 15/09/2025">-54.2%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="wmt" data-name="walmart">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="wmt" data-name="walmart" data-peak-close="133.36" data-peak-date="09/02/2026" data-dd="-16.1%" data-yahoo="https://finance.yahoo.com/quote/WMT" data-tv="https://www.tradingview.com/chart/?symbol=WMT">
               <td class="col-tk"><span class="tk-badge">WMT</span></td>
               <td class="col-name">Walmart</td>
               <td class="col-price">111.84</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="41">41</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="60">60</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="41" data-zone="watch">41</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:41%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="warm"><span class="rsi-pill" data-rsi="60" data-zone="warm">60</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:60%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 133.36 | Date: 09/02/2026">-16.1%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="msft" data-name="microsoft">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="msft" data-name="microsoft" data-peak-close="520.31" data-peak-date="20/10/2025" data-dd="-24.9%" data-yahoo="https://finance.yahoo.com/quote/MSFT" data-tv="https://www.tradingview.com/chart/?symbol=MSFT">
               <td class="col-tk"><span class="tk-badge">MSFT</span></td>
               <td class="col-name">Microsoft</td>
               <td class="col-price">390.49</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="44">44</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="46">46</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="44" data-zone="watch">44</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:44%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="46" data-zone="watch">46</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:46%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 520.31 | Date: 20/10/2025">-24.9%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="meta" data-name="meta">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="meta" data-name="meta" data-peak-close="782.66" data-peak-date="11/08/2025" data-dd="-25.5%" data-yahoo="https://finance.yahoo.com/quote/META" data-tv="https://www.tradingview.com/chart/?symbol=META">
               <td class="col-tk"><span class="tk-badge">META</span></td>
               <td class="col-name">Meta</td>
               <td class="col-price">582.90</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="45">45</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="50">50</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="45" data-zone="watch">45</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:45%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="50" data-zone="watch">50</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:50%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-deep" title="Top close: 782.66 | Date: 11/08/2025">-25.5%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="pltr" data-name="palantir">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="pltr" data-name="palantir" data-peak-close="200.47" data-peak-date="27/10/2025" data-dd="-35.5%" data-yahoo="https://finance.yahoo.com/quote/PLTR" data-tv="https://www.tradingview.com/chart/?symbol=PLTR">
               <td class="col-tk"><span class="tk-badge">PLTR</span></td>
               <td class="col-name">Palantir</td>
               <td class="col-price">129.30</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="45">45</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="54">54</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="45" data-zone="watch">45</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:45%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="neutral"><span class="rsi-pill" data-rsi="54" data-zone="neutral">54</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:54%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-deep" title="Top close: 200.47 | Date: 27/10/2025">-35.5%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="now" data-name="servicenow">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="now" data-name="servicenow" data-peak-close="225.00" data-peak-date="20/01/2025" data-dd="-52.8%" data-yahoo="https://finance.yahoo.com/quote/NOW" data-tv="https://www.tradingview.com/chart/?symbol=NOW">
               <td class="col-tk"><span class="tk-badge">NOW</span></td>
               <td class="col-name">ServiceNow</td>
               <td class="col-price">106.32</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="46">46</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="40">40</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="46" data-zone="watch">46</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:46%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="value"><span class="rsi-pill" data-rsi="40" data-zone="value">40</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:40%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-stress" title="Top close: 225.00 | Date: 20/01/2025">-52.8%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="blk" data-name="blackrock">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="blk" data-name="blackrock" data-peak-close="1,150" data-peak-date="12/01/2026" data-dd="-13.4%" data-yahoo="https://finance.yahoo.com/quote/BLK" data-tv="https://www.tradingview.com/chart/?symbol=BLK">
               <td class="col-tk"><span class="tk-badge">BLK</span></td>
               <td class="col-name">BlackRock</td>
               <td class="col-price">995.73</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="46">46</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="52">52</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="46" data-zone="watch">46</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:46%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="neutral"><span class="rsi-pill" data-rsi="52" data-zone="neutral">52</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:52%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 1,150 | Date: 12/01/2026">-13.4%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="cost" data-name="costco">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="cost" data-name="costco" data-peak-close="1,064" data-peak-date="10/02/2025" data-dd="-10.6%" data-yahoo="https://finance.yahoo.com/quote/COST" data-tv="https://www.tradingview.com/chart/?symbol=COST">
               <td class="col-tk"><span class="tk-badge">COST</span></td>
               <td class="col-name">Costco</td>
               <td class="col-price">951.67</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="46">46</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="56">56</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="46" data-zone="watch">46</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:46%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="neutral"><span class="rsi-pill" data-rsi="56" data-zone="neutral">56</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:56%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 1,064 | Date: 10/02/2025">-10.6%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="xom" data-name="exxon">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="xom" data-name="exxon" data-peak-close="169.84" data-peak-date="23/03/2026" data-dd="-19.3%" data-yahoo="https://finance.yahoo.com/quote/XOM" data-tv="https://www.tradingview.com/chart/?symbol=XOM">
               <td class="col-tk"><span class="tk-badge">XOM</span></td>
               <td class="col-name">Exxon</td>
               <td class="col-price">137.09</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="46">46</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="59">59</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="46" data-zone="watch">46</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:46%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="neutral"><span class="rsi-pill" data-rsi="59" data-zone="neutral">59</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:59%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 169.84 | Date: 23/03/2026">-19.3%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="nu" data-name="nubank">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="nu" data-name="nubank" data-peak-close="18.04" data-peak-date="19/01/2026" data-dd="-24.6%" data-yahoo="https://finance.yahoo.com/quote/NU" data-tv="https://www.tradingview.com/chart/?symbol=NU">
               <td class="col-tk"><span class="tk-badge">NU</span></td>
               <td class="col-name">Nubank</td>
               <td class="col-price">13.61</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="47">47</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="51">51</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="47" data-zone="watch">47</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:47%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="neutral"><span class="rsi-pill" data-rsi="51" data-zone="neutral">51</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:51%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 18.04 | Date: 19/01/2026">-24.6%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="tsla" data-name="tesla">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="tsla" data-name="tesla" data-peak-close="481.20" data-peak-date="15/12/2025" data-dd="-18.2%" data-yahoo="https://finance.yahoo.com/quote/TSLA" data-tv="https://www.tradingview.com/chart/?symbol=TSLA">
               <td class="col-tk"><span class="tk-badge">TSLA</span></td>
               <td class="col-name">Tesla</td>
               <td class="col-price">393.45</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="48">48</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="55">55</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="48" data-zone="watch">48</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:48%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="neutral"><span class="rsi-pill" data-rsi="55" data-zone="neutral">55</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:55%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 481.20 | Date: 15/12/2025">-18.2%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="avgo" data-name="broadcom">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="avgo" data-name="broadcom" data-peak-close="446.06" data-peak-date="25/05/2026" data-dd="-19.2%" data-yahoo="https://finance.yahoo.com/quote/AVGO" data-tv="https://www.tradingview.com/chart/?symbol=AVGO">
               <td class="col-tk"><span class="tk-badge">AVGO</span></td>
               <td class="col-name">Broadcom</td>
               <td class="col-price">360.45</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="48">48</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="60">60</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="48" data-zone="watch">48</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:48%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="warm"><span class="rsi-pill" data-rsi="60" data-zone="warm">60</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:60%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 446.06 | Date: 25/05/2026">-19.2%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="qcom" data-name="qualcomm">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="qcom" data-name="qualcomm" data-peak-close="250.10" data-peak-date="25/05/2026" data-dd="-29.5%" data-yahoo="https://finance.yahoo.com/quote/QCOM" data-tv="https://www.tradingview.com/chart/?symbol=QCOM">
               <td class="col-tk"><span class="tk-badge">QCOM</span></td>
               <td class="col-name">Qualcomm</td>
               <td class="col-price">176.25</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="49">49</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="53">53</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="49" data-zone="watch">49</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:49%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="neutral"><span class="rsi-pill" data-rsi="53" data-zone="neutral">53</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:53%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-deep" title="Top close: 250.10 | Date: 25/05/2026">-29.5%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="nvda" data-name="nvidia">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="nvda" data-name="nvidia" data-peak-close="225.06" data-peak-date="11/05/2026" data-dd="-13.4%" data-yahoo="https://finance.yahoo.com/quote/NVDA" data-tv="https://www.tradingview.com/chart/?symbol=NVDA">
               <td class="col-tk"><span class="tk-badge">NVDA</span></td>
               <td class="col-name">Nvidia</td>
               <td class="col-price">194.83</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="50">50</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="64">64</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="50" data-zone="watch">50</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:50%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="warm"><span class="rsi-pill" data-rsi="64" data-zone="warm">64</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:64%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 225.06 | Date: 11/05/2026">-13.4%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="amzn" data-name="amazon">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="amzn" data-name="amazon" data-peak-close="272.68" data-peak-date="04/05/2026" data-dd="-11.0%" data-yahoo="https://finance.yahoo.com/quote/AMZN" data-tv="https://www.tradingview.com/chart/?symbol=AMZN">
               <td class="col-tk"><span class="tk-badge">AMZN</span></td>
               <td class="col-name">Amazon</td>
               <td class="col-price">242.67</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="52">52</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="57">57</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="neutral"><span class="rsi-pill" data-rsi="52" data-zone="neutral">52</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:52%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="neutral"><span class="rsi-pill" data-rsi="57" data-zone="neutral">57</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:57%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 272.68 | Date: 04/05/2026">-11.0%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="app" data-name="applovin">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="app" data-name="applovin" data-peak-close="721.37" data-peak-date="15/12/2025" data-dd="-26.9%" data-yahoo="https://finance.yahoo.com/quote/APP" data-tv="https://www.tradingview.com/chart/?symbol=APP">
               <td class="col-tk"><span class="tk-badge">APP</span></td>
               <td class="col-name">AppLovin</td>
               <td class="col-price">527.06</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="53">53</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="58">58</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="neutral"><span class="rsi-pill" data-rsi="53" data-zone="neutral">53</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:53%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="neutral"><span class="rsi-pill" data-rsi="58" data-zone="neutral">58</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:58%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-deep" title="Top close: 721.37 | Date: 15/12/2025">-26.9%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="spgi" data-name="s&amp;p global">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="spgi" data-name="s&amp;p global" data-peak-close="522.46" data-peak-date="04/08/2025" data-dd="-15.8%" data-yahoo="https://finance.yahoo.com/quote/SPGI" data-tv="https://www.tradingview.com/chart/?symbol=SPGI">
               <td class="col-tk"><span class="tk-badge">SPGI</span></td>
               <td class="col-name">S&amp;P Global</td>
               <td class="col-price">439.89</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="56">56</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="50">50</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="neutral"><span class="rsi-pill" data-rsi="56" data-zone="neutral">56</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:56%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="50" data-zone="watch">50</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:50%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 522.46 | Date: 04/08/2025">-15.8%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="anet" data-name="arista">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="anet" data-name="arista" data-peak-close="176.91" data-peak-date="20/04/2026" data-dd="-9.6%" data-yahoo="https://finance.yahoo.com/quote/ANET" data-tv="https://www.tradingview.com/chart/?symbol=ANET">
               <td class="col-tk"><span class="tk-badge">ANET</span></td>
               <td class="col-name">Arista</td>
               <td class="col-price">159.99</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="56">56</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="63">63</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="neutral"><span class="rsi-pill" data-rsi="56" data-zone="neutral">56</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:56%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="warm"><span class="rsi-pill" data-rsi="63" data-zone="warm">63</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:63%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 176.91 | Date: 20/04/2026">-9.6%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="googl" data-name="google">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="googl" data-name="google" data-peak-close="400.56" data-peak-date="04/05/2026" data-dd="-10.2%" data-yahoo="https://finance.yahoo.com/quote/GOOGL" data-tv="https://www.tradingview.com/chart/?symbol=GOOGL">
               <td class="col-tk"><span class="tk-badge">GOOGL</span></td>
               <td class="col-name">Google</td>
               <td class="col-price">359.91</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="57">57</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="69">69</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="neutral"><span class="rsi-pill" data-rsi="57" data-zone="neutral">57</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:57%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="warm"><span class="rsi-pill" data-rsi="69" data-zone="warm">69</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:69%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 400.56 | Date: 04/05/2026">-10.2%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="ma" data-name="mastercard">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="ma" data-name="mastercard" data-peak-close="596.25" data-peak-date="18/08/2025" data-dd="-9.5%" data-yahoo="https://finance.yahoo.com/quote/MA" data-tv="https://www.tradingview.com/chart/?symbol=MA">
               <td class="col-tk"><span class="tk-badge">MA</span></td>
               <td class="col-name">Mastercard</td>
               <td class="col-price">539.39</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="59">59</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="56">56</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="neutral"><span class="rsi-pill" data-rsi="59" data-zone="neutral">59</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:59%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="neutral"><span class="rsi-pill" data-rsi="56" data-zone="neutral">56</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:56%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 596.25 | Date: 18/08/2025">-9.5%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="mco" data-name="moody&#x27;s">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="mco" data-name="moody&#x27;s" data-peak-close="536.48" data-peak-date="12/01/2026" data-dd="-8.6%" data-yahoo="https://finance.yahoo.com/quote/MCO" data-tv="https://www.tradingview.com/chart/?symbol=MCO">
               <td class="col-tk"><span class="tk-badge">MCO</span></td>
               <td class="col-name">Moody&#x27;s</td>
               <td class="col-price">490.51</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="59">59</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="56">56</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="neutral"><span class="rsi-pill" data-rsi="59" data-zone="neutral">59</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:59%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="neutral"><span class="rsi-pill" data-rsi="56" data-zone="neutral">56</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:56%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 536.48 | Date: 12/01/2026">-8.6%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="brk-b" data-name="berkshire">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="brk-b" data-name="berkshire" data-peak-close="539.80" data-peak-date="28/04/2025" data-dd="-5.9%" data-yahoo="https://finance.yahoo.com/quote/BRK-B" data-tv="https://www.tradingview.com/chart/?symbol=BRK.B">
               <td class="col-tk"><span class="tk-badge">BRK-B</span></td>
               <td class="col-name">Berkshire</td>
               <td class="col-price">507.78</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="61">61</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="58">58</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="warm"><span class="rsi-pill" data-rsi="61" data-zone="warm">61</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:61%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="neutral"><span class="rsi-pill" data-rsi="58" data-zone="neutral">58</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:58%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 539.80 | Date: 28/04/2025">-5.9%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="aapl" data-name="apple">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="aapl" data-name="apple" data-peak-close="312.06" data-peak-date="25/05/2026" data-dd="-1.1%" data-yahoo="https://finance.yahoo.com/quote/AAPL" data-tv="https://www.tradingview.com/chart/?symbol=AAPL">
               <td class="col-tk"><span class="tk-badge">AAPL</span></td>
               <td class="col-name">Apple</td>
               <td class="col-price">308.63</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="63">63</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="67">67</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="warm"><span class="rsi-pill" data-rsi="63" data-zone="warm">63</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:63%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="warm"><span class="rsi-pill" data-rsi="67" data-zone="warm">67</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:67%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 312.06 | Date: 25/05/2026">-1.1%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="jpm" data-name="jp morgan">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="jpm" data-name="jp morgan" data-peak-close="334.47" data-peak-date="29/06/2026" data-dd="0.0%" data-yahoo="https://finance.yahoo.com/quote/JPM" data-tv="https://www.tradingview.com/chart/?symbol=JPM">
               <td class="col-tk"><span class="tk-badge">JPM</span></td>
               <td class="col-name">JP Morgan</td>
               <td class="col-price">334.47</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="64">64</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="71">71</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="warm"><span class="rsi-pill" data-rsi="64" data-zone="warm">64</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:64%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="hot"><span class="rsi-pill" data-rsi="71" data-zone="hot">71</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:71%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 334.47 | Date: 29/06/2026">0.0%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="asml" data-name="asml">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="asml" data-name="asml" data-peak-close="1,930" data-peak-date="15/06/2026" data-dd="-8.3%" data-yahoo="https://finance.yahoo.com/quote/ASML" data-tv="https://www.tradingview.com/chart/?symbol=ASML">
               <td class="col-tk"><span class="tk-badge">ASML</span></td>
               <td class="col-name">ASML</td>
               <td class="col-price">1,769</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="66">66</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="71">71</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="warm"><span class="rsi-pill" data-rsi="66" data-zone="warm">66</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:66%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="hot"><span class="rsi-pill" data-rsi="71" data-zone="hot">71</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:71%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 1,930 | Date: 15/06/2026">-8.3%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="intc" data-name="intel">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="intc" data-name="intel" data-peak-close="133.99" data-peak-date="15/06/2026" data-dd="-10.2%" data-yahoo="https://finance.yahoo.com/quote/INTC" data-tv="https://www.tradingview.com/chart/?symbol=INTC">
               <td class="col-tk"><span class="tk-badge">INTC</span></td>
               <td class="col-name">Intel</td>
               <td class="col-price">120.35</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="66">66</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="76">76</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="warm"><span class="rsi-pill" data-rsi="66" data-zone="warm">66</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:66%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="hot"><span class="rsi-pill" data-rsi="76" data-zone="hot">76</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:76%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 133.99 | Date: 15/06/2026">-10.2%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="smh" data-name="semis etf">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="smh" data-name="semis etf" data-peak-close="659.88" data-peak-date="15/06/2026" data-dd="-10.2%" data-yahoo="https://finance.yahoo.com/quote/SMH" data-tv="https://www.tradingview.com/chart/?symbol=SMH">
               <td class="col-tk"><span class="tk-badge">SMH</span></td>
               <td class="col-name">Semis ETF</td>
               <td class="col-price">592.29</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="66">66</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="77">77</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="warm"><span class="rsi-pill" data-rsi="66" data-zone="warm">66</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:66%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="hot"><span class="rsi-pill" data-rsi="77" data-zone="hot">77</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:77%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 659.88 | Date: 15/06/2026">-10.2%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="v" data-name="visa">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="v" data-name="visa" data-peak-close="367.32" data-peak-date="02/06/2025" data-dd="-1.4%" data-yahoo="https://finance.yahoo.com/quote/V" data-tv="https://www.tradingview.com/chart/?symbol=V">
               <td class="col-tk"><span class="tk-badge">V</span></td>
               <td class="col-name">Visa</td>
               <td class="col-price">362.13</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="67">67</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="63">63</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="warm"><span class="rsi-pill" data-rsi="67" data-zone="warm">67</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:67%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="warm"><span class="rsi-pill" data-rsi="63" data-zone="warm">63</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:63%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 367.32 | Date: 02/06/2025">-1.4%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="lin" data-name="linde">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="lin" data-name="linde" data-peak-close="546.64" data-peak-date="29/06/2026" data-dd="0.0%" data-yahoo="https://finance.yahoo.com/quote/LIN" data-tv="https://www.tradingview.com/chart/?symbol=LIN">
               <td class="col-tk"><span class="tk-badge">LIN</span></td>
               <td class="col-name">Linde</td>
               <td class="col-price">546.64</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="67">67</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="69">69</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="warm"><span class="rsi-pill" data-rsi="67" data-zone="warm">67</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:67%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="warm"><span class="rsi-pill" data-rsi="69" data-zone="warm">69</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:69%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 546.64 | Date: 29/06/2026">0.0%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="tsm" data-name="tsmc">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="tsm" data-name="tsmc" data-peak-close="462.12" data-peak-date="15/06/2026" data-dd="-6.0%" data-yahoo="https://finance.yahoo.com/quote/TSM" data-tv="https://www.tradingview.com/chart/?symbol=TSM">
               <td class="col-tk"><span class="tk-badge">TSM</span></td>
               <td class="col-name">TSMC</td>
               <td class="col-price">434.16</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="67">67</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="73">73</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="warm"><span class="rsi-pill" data-rsi="67" data-zone="warm">67</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:67%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="hot"><span class="rsi-pill" data-rsi="73" data-zone="hot">73</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:73%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 462.12 | Date: 15/06/2026">-6.0%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="lrcx" data-name="lam research">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="lrcx" data-name="lam research" data-peak-close="389.04" data-peak-date="15/06/2026" data-dd="-9.7%" data-yahoo="https://finance.yahoo.com/quote/LRCX" data-tv="https://www.tradingview.com/chart/?symbol=LRCX">
               <td class="col-tk"><span class="tk-badge">LRCX</span></td>
               <td class="col-name">Lam Research</td>
               <td class="col-price">351.41</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="67">67</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="73">73</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="warm"><span class="rsi-pill" data-rsi="67" data-zone="warm">67</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:67%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="hot"><span class="rsi-pill" data-rsi="73" data-zone="hot">73</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:73%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 389.04 | Date: 15/06/2026">-9.7%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="klac" data-name="kla">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="klac" data-name="kla" data-peak-close="259.56" data-peak-date="15/06/2026" data-dd="-9.2%" data-yahoo="https://finance.yahoo.com/quote/KLAC" data-tv="https://www.tradingview.com/chart/?symbol=KLAC">
               <td class="col-tk"><span class="tk-badge">KLAC</span></td>
               <td class="col-name">KLA</td>
               <td class="col-price">235.55</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="68">68</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="71">71</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="warm"><span class="rsi-pill" data-rsi="68" data-zone="warm">68</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:68%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="hot"><span class="rsi-pill" data-rsi="71" data-zone="hot">71</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:71%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 259.56 | Date: 15/06/2026">-9.2%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="lly" data-name="eli lilly">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="lly" data-name="eli lilly" data-peak-close="1,214" data-peak-date="29/06/2026" data-dd="0.0%" data-yahoo="https://finance.yahoo.com/quote/LLY" data-tv="https://www.tradingview.com/chart/?symbol=LLY">
               <td class="col-tk"><span class="tk-badge">LLY</span></td>
               <td class="col-name">Eli Lilly</td>
               <td class="col-price">1,214</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="69">69</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="69">69</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="warm"><span class="rsi-pill" data-rsi="69" data-zone="warm">69</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:69%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="warm"><span class="rsi-pill" data-rsi="69" data-zone="warm">69</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:69%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 1,214 | Date: 29/06/2026">0.0%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="mu" data-name="micron">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="mu" data-name="micron" data-peak-close="1,134" data-peak-date="15/06/2026" data-dd="-14.0%" data-yahoo="https://finance.yahoo.com/quote/MU" data-tv="https://www.tradingview.com/chart/?symbol=MU">
               <td class="col-tk"><span class="tk-badge">MU</span></td>
               <td class="col-name">Micron</td>
               <td class="col-price">975.56</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="69">69</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="78">78</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="warm"><span class="rsi-pill" data-rsi="69" data-zone="warm">69</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:69%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="hot"><span class="rsi-pill" data-rsi="78" data-zone="hot">78</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:78%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 1,134 | Date: 15/06/2026">-14.0%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="unh" data-name="unitedhealth">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="unh" data-name="unitedhealth" data-peak-close="590.72" data-peak-date="04/11/2024" data-dd="-28.0%" data-yahoo="https://finance.yahoo.com/quote/UNH" data-tv="https://www.tradingview.com/chart/?symbol=UNH">
               <td class="col-tk"><span class="tk-badge">UNH</span></td>
               <td class="col-name">UnitedHealth</td>
               <td class="col-price">425.36</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="70">70</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="54">54</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="hot"><span class="rsi-pill" data-rsi="70" data-zone="hot">70</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:70%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="neutral"><span class="rsi-pill" data-rsi="54" data-zone="neutral">54</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:54%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-deep" title="Top close: 590.72 | Date: 04/11/2024">-28.0%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Sell" data-market="eua" data-ticker="panw" data-name="palo alto">
+            <tr class="asset-row" data-signal="Sell" data-market="eua" data-ticker="panw" data-name="palo alto" data-peak-close="348.06" data-peak-date="29/06/2026" data-dd="0.0%" data-yahoo="https://finance.yahoo.com/quote/PANW" data-tv="https://www.tradingview.com/chart/?symbol=PANW">
               <td class="col-tk"><span class="tk-badge">PANW</span></td>
               <td class="col-name">Palo Alto</td>
               <td class="col-price">348.06</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="82">82</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="76">76</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="hot"><span class="rsi-pill" data-rsi="82" data-zone="hot">82</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:82%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="hot"><span class="rsi-pill" data-rsi="76" data-zone="hot">76</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:76%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 348.06 | Date: 29/06/2026">0.0%</span></td>
               <td class="col-sig"><span class="signal-badge sig-sell">SELL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Sell" data-market="eua" data-ticker="amat" data-name="applied mat">
+            <tr class="asset-row" data-signal="Sell" data-market="eua" data-ticker="amat" data-name="applied mat" data-peak-close="626.84" data-peak-date="22/06/2026" data-dd="-3.8%" data-yahoo="https://finance.yahoo.com/quote/AMAT" data-tv="https://www.tradingview.com/chart/?symbol=AMAT">
               <td class="col-tk"><span class="tk-badge">AMAT</span></td>
               <td class="col-name">Applied Mat</td>
               <td class="col-price">603.04</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="79">79</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="73">73</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="hot"><span class="rsi-pill" data-rsi="79" data-zone="hot">79</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:79%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="hot"><span class="rsi-pill" data-rsi="73" data-zone="hot">73</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:73%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 626.84 | Date: 22/06/2026">-3.8%</span></td>
               <td class="col-sig"><span class="signal-badge sig-sell">SELL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Sell" data-market="eua" data-ticker="cat" data-name="caterpillar">
+            <tr class="asset-row" data-signal="Sell" data-market="eua" data-ticker="cat" data-name="caterpillar" data-peak-close="997.47" data-peak-date="22/06/2026" data-dd="-3.4%" data-yahoo="https://finance.yahoo.com/quote/CAT" data-tv="https://www.tradingview.com/chart/?symbol=CAT">
               <td class="col-tk"><span class="tk-badge">CAT</span></td>
               <td class="col-name">Caterpillar</td>
               <td class="col-price">963.53</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="75">75</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="76">76</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="hot"><span class="rsi-pill" data-rsi="75" data-zone="hot">75</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:75%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="hot"><span class="rsi-pill" data-rsi="76" data-zone="hot">76</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:76%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 997.47 | Date: 22/06/2026">-3.4%</span></td>
               <td class="col-sig"><span class="signal-badge sig-sell">SELL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Sell" data-market="eua" data-ticker="amd" data-name="amd">
+            <tr class="asset-row" data-signal="Sell" data-market="eua" data-ticker="amd" data-name="amd" data-peak-close="537.37" data-peak-date="15/06/2026" data-dd="-3.6%" data-yahoo="https://finance.yahoo.com/quote/AMD" data-tv="https://www.tradingview.com/chart/?symbol=AMD">
               <td class="col-tk"><span class="tk-badge">AMD</span></td>
               <td class="col-name">AMD</td>
               <td class="col-price">517.82</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="73">73</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="75">75</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="hot"><span class="rsi-pill" data-rsi="73" data-zone="hot">73</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:73%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="hot"><span class="rsi-pill" data-rsi="75" data-zone="hot">75</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:75%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 537.37 | Date: 15/06/2026">-3.6%</span></td>
               <td class="col-sig"><span class="signal-badge sig-sell">SELL</span></td>
             </tr>
@@ -2033,345 +2202,345 @@ body.research-v2.profile-field-v2::after{
               </tr>
             </thead>
             <tbody>
-            <tr class="asset-row" data-signal="UltraBuy" data-market="brasil" data-ticker="inbr32" data-name="banco inter">
+            <tr class="asset-row" data-signal="UltraBuy" data-market="brasil" data-ticker="inbr32" data-name="banco inter" data-peak-close="49.68" data-peak-date="03/11/2025" data-dd="-42.8%" data-yahoo="https://finance.yahoo.com/quote/INBR32.SA" data-tv="https://www.tradingview.com/chart/?symbol=BMFBOVESPA%3AINBR32">
               <td class="col-tk"><span class="tk-badge">INBR32</span></td>
               <td class="col-name">Banco Inter</td>
               <td class="col-price">28.40</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="28">28</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="41">41</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="deep"><span class="rsi-pill" data-rsi="28" data-zone="deep">28</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:28%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="41" data-zone="watch">41</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:41%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-deep" title="Top close: 49.68 | Date: 03/11/2025">-42.8%</span></td>
               <td class="col-sig"><span class="signal-badge sig-ultrabuy">ULTRA BUY</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="soja3" data-name="boa safra">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="soja3" data-name="boa safra" data-peak-close="16.42" data-peak-date="22/04/2024" data-dd="-62.7%" data-yahoo="https://finance.yahoo.com/quote/SOJA3.SA" data-tv="https://www.tradingview.com/chart/?symbol=BMFBOVESPA%3ASOJA3">
               <td class="col-tk"><span class="tk-badge">SOJA3</span></td>
               <td class="col-name">Boa Safra</td>
               <td class="col-price">6.13</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="32">32</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="31">31</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="value"><span class="rsi-pill" data-rsi="32" data-zone="value">32</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:32%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="value"><span class="rsi-pill" data-rsi="31" data-zone="value">31</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:31%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-stress" title="Top close: 16.42 | Date: 22/04/2024">-62.7%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="suzb3" data-name="suzano">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="suzb3" data-name="suzano" data-peak-close="62.01" data-peak-date="02/12/2024" data-dd="-34.2%" data-yahoo="https://finance.yahoo.com/quote/SUZB3.SA" data-tv="https://www.tradingview.com/chart/?symbol=BMFBOVESPA%3ASUZB3">
               <td class="col-tk"><span class="tk-badge">SUZB3</span></td>
               <td class="col-name">Suzano</td>
               <td class="col-price">40.80</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="35">35</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="40">40</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="value"><span class="rsi-pill" data-rsi="35" data-zone="value">35</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:35%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="value"><span class="rsi-pill" data-rsi="40" data-zone="value">40</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:40%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-deep" title="Top close: 62.01 | Date: 02/12/2024">-34.2%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="radl3" data-name="droga raia">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="radl3" data-name="droga raia" data-peak-close="27.79" data-peak-date="12/08/2024" data-dd="-38.6%" data-yahoo="https://finance.yahoo.com/quote/RADL3.SA" data-tv="https://www.tradingview.com/chart/?symbol=BMFBOVESPA%3ARADL3">
               <td class="col-tk"><span class="tk-badge">RADL3</span></td>
               <td class="col-name">Droga Raia</td>
               <td class="col-price">17.07</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="36">36</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="41">41</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="value"><span class="rsi-pill" data-rsi="36" data-zone="value">36</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:36%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="41" data-zone="watch">41</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:41%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-deep" title="Top close: 27.79 | Date: 12/08/2024">-38.6%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="tots3" data-name="totvs">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="tots3" data-name="totvs" data-peak-close="47.43" data-peak-date="10/11/2025" data-dd="-36.8%" data-yahoo="https://finance.yahoo.com/quote/TOTS3.SA" data-tv="https://www.tradingview.com/chart/?symbol=BMFBOVESPA%3ATOTS3">
               <td class="col-tk"><span class="tk-badge">TOTS3</span></td>
               <td class="col-name">Totvs</td>
               <td class="col-price">30.00</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="41">41</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="42">42</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="41" data-zone="watch">41</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:41%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="42" data-zone="watch">42</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:42%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-deep" title="Top close: 47.43 | Date: 10/11/2025">-36.8%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="bbas3" data-name="banco do brasil">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="bbas3" data-name="banco do brasil" data-peak-close="28.33" data-peak-date="05/05/2025" data-dd="-29.5%" data-yahoo="https://finance.yahoo.com/quote/BBAS3.SA" data-tv="https://www.tradingview.com/chart/?symbol=BMFBOVESPA%3ABBAS3">
               <td class="col-tk"><span class="tk-badge">BBAS3</span></td>
               <td class="col-name">Banco do Brasil</td>
               <td class="col-price">19.98</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="41">41</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="44">44</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="41" data-zone="watch">41</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:41%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="44" data-zone="watch">44</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:44%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-deep" title="Top close: 28.33 | Date: 05/05/2025">-29.5%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="sanb11" data-name="santander">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="sanb11" data-name="santander" data-peak-close="36.08" data-peak-date="16/02/2026" data-dd="-25.3%" data-yahoo="https://finance.yahoo.com/quote/SANB11.SA" data-tv="https://www.tradingview.com/chart/?symbol=BMFBOVESPA%3ASANB11">
               <td class="col-tk"><span class="tk-badge">SANB11</span></td>
               <td class="col-name">Santander</td>
               <td class="col-price">26.95</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="41">41</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="48">48</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="41" data-zone="watch">41</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:41%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="48" data-zone="watch">48</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:48%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-deep" title="Top close: 36.08 | Date: 16/02/2026">-25.3%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="klbn4" data-name="klabin">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="klbn4" data-name="klabin" data-peak-close="4.16" data-peak-date="23/12/2024" data-dd="-17.8%" data-yahoo="https://finance.yahoo.com/quote/KLBN4.SA" data-tv="https://www.tradingview.com/chart/?symbol=BMFBOVESPA%3AKLBN4">
               <td class="col-tk"><span class="tk-badge">KLBN4</span></td>
               <td class="col-name">Klabin</td>
               <td class="col-price">3.42</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="43">43</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="47">47</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="43" data-zone="watch">43</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:43%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="47" data-zone="watch">47</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:47%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 4.16 | Date: 23/12/2024">-17.8%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="b3sa3" data-name="b3">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="b3sa3" data-name="b3" data-peak-close="19.22" data-peak-date="06/04/2026" data-dd="-23.2%" data-yahoo="https://finance.yahoo.com/quote/B3SA3.SA" data-tv="https://www.tradingview.com/chart/?symbol=BMFBOVESPA%3AB3SA3">
               <td class="col-tk"><span class="tk-badge">B3SA3</span></td>
               <td class="col-name">B3</td>
               <td class="col-price">14.76</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="43">43</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="54">54</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="43" data-zone="watch">43</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:43%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="neutral"><span class="rsi-pill" data-rsi="54" data-zone="neutral">54</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:54%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 19.22 | Date: 06/04/2026">-23.2%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="brsr6" data-name="banrisul">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="brsr6" data-name="banrisul" data-peak-close="18.54" data-peak-date="16/02/2026" data-dd="-25.0%" data-yahoo="https://finance.yahoo.com/quote/BRSR6.SA" data-tv="https://www.tradingview.com/chart/?symbol=BMFBOVESPA%3ABRSR6">
               <td class="col-tk"><span class="tk-badge">BRSR6</span></td>
               <td class="col-name">Banrisul</td>
               <td class="col-price">13.90</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="43">43</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="57">57</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="43" data-zone="watch">43</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:43%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="neutral"><span class="rsi-pill" data-rsi="57" data-zone="neutral">57</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:57%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-deep" title="Top close: 18.54 | Date: 16/02/2026">-25.0%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="rani3" data-name="irani">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="rani3" data-name="irani" data-peak-close="10.37" data-peak-date="25/09/2023" data-dd="-23.6%" data-yahoo="https://finance.yahoo.com/quote/RANI3.SA" data-tv="https://www.tradingview.com/chart/?symbol=BMFBOVESPA%3ARANI3">
               <td class="col-tk"><span class="tk-badge">RANI3</span></td>
               <td class="col-name">Irani</td>
               <td class="col-price">7.92</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="44">44</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="52">52</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="44" data-zone="watch">44</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:44%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="neutral"><span class="rsi-pill" data-rsi="52" data-zone="neutral">52</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:52%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 10.37 | Date: 25/09/2023">-23.6%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="prio3" data-name="prio">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="prio3" data-name="prio" data-peak-close="70.82" data-peak-date="23/03/2026" data-dd="-25.2%" data-yahoo="https://finance.yahoo.com/quote/PRIO3.SA" data-tv="https://www.tradingview.com/chart/?symbol=BMFBOVESPA%3APRIO3">
               <td class="col-tk"><span class="tk-badge">PRIO3</span></td>
               <td class="col-name">Prio</td>
               <td class="col-price">52.96</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="44">44</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="56">56</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="44" data-zone="watch">44</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:44%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="neutral"><span class="rsi-pill" data-rsi="56" data-zone="neutral">56</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:56%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-deep" title="Top close: 70.82 | Date: 23/03/2026">-25.2%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="sapr11" data-name="sanepar">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="sapr11" data-name="sanepar" data-peak-close="47.36" data-peak-date="16/02/2026" data-dd="-21.8%" data-yahoo="https://finance.yahoo.com/quote/SAPR11.SA" data-tv="https://www.tradingview.com/chart/?symbol=BMFBOVESPA%3ASAPR11">
               <td class="col-tk"><span class="tk-badge">SAPR11</span></td>
               <td class="col-name">Sanepar</td>
               <td class="col-price">37.04</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="44">44</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="57">57</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="44" data-zone="watch">44</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:44%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="neutral"><span class="rsi-pill" data-rsi="57" data-zone="neutral">57</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:57%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 47.36 | Date: 16/02/2026">-21.8%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="rent3" data-name="localiza">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="rent3" data-name="localiza" data-peak-close="63.29" data-peak-date="31/10/2022" data-dd="-34.5%" data-yahoo="https://finance.yahoo.com/quote/RENT3.SA" data-tv="https://www.tradingview.com/chart/?symbol=BMFBOVESPA%3ARENT3">
               <td class="col-tk"><span class="tk-badge">RENT3</span></td>
               <td class="col-name">Localiza</td>
               <td class="col-price">41.45</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="46">46</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="50">50</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="46" data-zone="watch">46</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:46%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="50" data-zone="watch">50</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:50%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-deep" title="Top close: 63.29 | Date: 31/10/2022">-34.5%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="petr4" data-name="petrobras">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="petr4" data-name="petrobras" data-peak-close="48.27" data-peak-date="27/04/2026" data-dd="-20.8%" data-yahoo="https://finance.yahoo.com/quote/PETR4.SA" data-tv="https://www.tradingview.com/chart/?symbol=BMFBOVESPA%3APETR4">
               <td class="col-tk"><span class="tk-badge">PETR4</span></td>
               <td class="col-name">Petrobras</td>
               <td class="col-price">38.25</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="46">46</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="58">58</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="46" data-zone="watch">46</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:46%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="neutral"><span class="rsi-pill" data-rsi="58" data-zone="neutral">58</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:58%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 48.27 | Date: 27/04/2026">-20.8%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="egie3" data-name="engie brasil">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="egie3" data-name="engie brasil" data-peak-close="36.99" data-peak-date="13/04/2026" data-dd="-13.1%" data-yahoo="https://finance.yahoo.com/quote/EGIE3.SA" data-tv="https://www.tradingview.com/chart/?symbol=BMFBOVESPA%3AEGIE3">
               <td class="col-tk"><span class="tk-badge">EGIE3</span></td>
               <td class="col-name">Engie Brasil</td>
               <td class="col-price">32.14</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="47">47</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="56">56</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="47" data-zone="watch">47</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:47%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="neutral"><span class="rsi-pill" data-rsi="56" data-zone="neutral">56</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:56%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 36.99 | Date: 13/04/2026">-13.1%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="isae3" data-name="isa energia brasil on">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="isae3" data-name="isa energia brasil on" data-peak-close="34.80" data-peak-date="27/04/2026" data-dd="-6.8%" data-yahoo="https://finance.yahoo.com/quote/ISAE3.SA" data-tv="https://www.tradingview.com/chart/?symbol=BMFBOVESPA%3AISAE3">
               <td class="col-tk"><span class="tk-badge">ISAE3</span></td>
               <td class="col-name">ISA Energia Brasil ON</td>
               <td class="col-price">32.44</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="47">47</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="58">58</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="47" data-zone="watch">47</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:47%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="neutral"><span class="rsi-pill" data-rsi="58" data-zone="neutral">58</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:58%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 34.80 | Date: 27/04/2026">-6.8%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="pine4" data-name="banco pine">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="pine4" data-name="banco pine" data-peak-close="15.56" data-peak-date="13/04/2026" data-dd="-21.3%" data-yahoo="https://finance.yahoo.com/quote/PINE4.SA" data-tv="https://www.tradingview.com/chart/?symbol=BMFBOVESPA%3APINE4">
               <td class="col-tk"><span class="tk-badge">PINE4</span></td>
               <td class="col-name">Banco Pine</td>
               <td class="col-price">12.25</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="47">47</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="71">71</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="47" data-zone="watch">47</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:47%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="hot"><span class="rsi-pill" data-rsi="71" data-zone="hot">71</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:71%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 15.56 | Date: 13/04/2026">-21.3%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="vivt3" data-name="vivo">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="vivt3" data-name="vivo" data-peak-close="41.13" data-peak-date="23/02/2026" data-dd="-15.5%" data-yahoo="https://finance.yahoo.com/quote/VIVT3.SA" data-tv="https://www.tradingview.com/chart/?symbol=BMFBOVESPA%3AVIVT3">
               <td class="col-tk"><span class="tk-badge">VIVT3</span></td>
               <td class="col-name">Vivo</td>
               <td class="col-price">34.75</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="49">49</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="60">60</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="49" data-zone="watch">49</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:49%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="warm"><span class="rsi-pill" data-rsi="60" data-zone="warm">60</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:60%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 41.13 | Date: 23/02/2026">-15.5%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="bbdc4" data-name="bradesco">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="bbdc4" data-name="bradesco" data-peak-close="21.32" data-peak-date="16/02/2026" data-dd="-14.3%" data-yahoo="https://finance.yahoo.com/quote/BBDC4.SA" data-tv="https://www.tradingview.com/chart/?symbol=BMFBOVESPA%3ABBDC4">
               <td class="col-tk"><span class="tk-badge">BBDC4</span></td>
               <td class="col-name">Bradesco</td>
               <td class="col-price">18.26</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="50">50</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="59">59</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="50" data-zone="watch">50</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:50%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="neutral"><span class="rsi-pill" data-rsi="59" data-zone="neutral">59</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:59%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 21.32 | Date: 16/02/2026">-14.3%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="alup11" data-name="alupar">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="alup11" data-name="alupar" data-peak-close="36.43" data-peak-date="06/04/2026" data-dd="-9.3%" data-yahoo="https://finance.yahoo.com/quote/ALUP11.SA" data-tv="https://www.tradingview.com/chart/?symbol=BMFBOVESPA%3AALUP11">
               <td class="col-tk"><span class="tk-badge">ALUP11</span></td>
               <td class="col-name">Alupar</td>
               <td class="col-price">33.04</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="50">50</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="60">60</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="50" data-zone="watch">50</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:50%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="warm"><span class="rsi-pill" data-rsi="60" data-zone="warm">60</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:60%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 36.43 | Date: 06/04/2026">-9.3%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="eqtl3" data-name="equatorial">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="eqtl3" data-name="equatorial" data-peak-close="45.19" data-peak-date="13/04/2026" data-dd="-12.7%" data-yahoo="https://finance.yahoo.com/quote/EQTL3.SA" data-tv="https://www.tradingview.com/chart/?symbol=BMFBOVESPA%3AEQTL3">
               <td class="col-tk"><span class="tk-badge">EQTL3</span></td>
               <td class="col-name">Equatorial</td>
               <td class="col-price">39.44</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="50">50</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="60">60</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="50" data-zone="watch">50</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:50%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="warm"><span class="rsi-pill" data-rsi="60" data-zone="warm">60</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:60%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 45.19 | Date: 13/04/2026">-12.7%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="cmig4" data-name="cemig">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="cmig4" data-name="cemig" data-peak-close="13.28" data-peak-date="06/04/2026" data-dd="-16.9%" data-yahoo="https://finance.yahoo.com/quote/CMIG4.SA" data-tv="https://www.tradingview.com/chart/?symbol=BMFBOVESPA%3ACMIG4">
               <td class="col-tk"><span class="tk-badge">CMIG4</span></td>
               <td class="col-name">Cemig</td>
               <td class="col-price">11.03</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="50">50</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="63">63</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="50" data-zone="watch">50</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:50%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="warm"><span class="rsi-pill" data-rsi="63" data-zone="warm">63</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:63%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 13.28 | Date: 06/04/2026">-16.9%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="isae4" data-name="isa energia brasil pfd">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="isae4" data-name="isa energia brasil pfd" data-peak-close="30.89" data-peak-date="13/04/2026" data-dd="-10.5%" data-yahoo="https://finance.yahoo.com/quote/ISAE4.SA" data-tv="https://www.tradingview.com/chart/?symbol=BMFBOVESPA%3AISAE4">
               <td class="col-tk"><span class="tk-badge">ISAE4</span></td>
               <td class="col-name">ISA Energia Brasil PFD</td>
               <td class="col-price">27.65</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="51">51</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="64">64</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="neutral"><span class="rsi-pill" data-rsi="51" data-zone="neutral">51</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:51%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="warm"><span class="rsi-pill" data-rsi="64" data-zone="warm">64</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:64%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 30.89 | Date: 13/04/2026">-10.5%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="vale3" data-name="vale">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="vale3" data-name="vale" data-peak-close="89.75" data-peak-date="13/04/2026" data-dd="-12.2%" data-yahoo="https://finance.yahoo.com/quote/VALE3.SA" data-tv="https://www.tradingview.com/chart/?symbol=BMFBOVESPA%3AVALE3">
               <td class="col-tk"><span class="tk-badge">VALE3</span></td>
               <td class="col-name">Vale</td>
               <td class="col-price">78.84</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="51">51</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="65">65</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="neutral"><span class="rsi-pill" data-rsi="51" data-zone="neutral">51</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:51%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="warm"><span class="rsi-pill" data-rsi="65" data-zone="warm">65</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:65%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 89.75 | Date: 13/04/2026">-12.2%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="wege3" data-name="weg">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="wege3" data-name="weg" data-peak-close="54.62" data-peak-date="20/01/2025" data-dd="-14.9%" data-yahoo="https://finance.yahoo.com/quote/WEGE3.SA" data-tv="https://www.tradingview.com/chart/?symbol=BMFBOVESPA%3AWEGE3">
               <td class="col-tk"><span class="tk-badge">WEGE3</span></td>
               <td class="col-name">WEG</td>
               <td class="col-price">46.48</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="52">52</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="55">55</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="neutral"><span class="rsi-pill" data-rsi="52" data-zone="neutral">52</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:52%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="neutral"><span class="rsi-pill" data-rsi="55" data-zone="neutral">55</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:55%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 54.62 | Date: 20/01/2025">-14.9%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="cpfe3" data-name="cpfl energia">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="cpfe3" data-name="cpfl energia" data-peak-close="51.09" data-peak-date="19/01/2026" data-dd="-10.6%" data-yahoo="https://finance.yahoo.com/quote/CPFE3.SA" data-tv="https://www.tradingview.com/chart/?symbol=BMFBOVESPA%3ACPFE3">
               <td class="col-tk"><span class="tk-badge">CPFE3</span></td>
               <td class="col-name">CPFL Energia</td>
               <td class="col-price">45.69</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="52">52</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="62">62</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="neutral"><span class="rsi-pill" data-rsi="52" data-zone="neutral">52</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:52%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="warm"><span class="rsi-pill" data-rsi="62" data-zone="warm">62</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:62%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 51.09 | Date: 19/01/2026">-10.6%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="bpac11" data-name="btg pactual">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="bpac11" data-name="btg pactual" data-peak-close="63.60" data-peak-date="13/04/2026" data-dd="-12.2%" data-yahoo="https://finance.yahoo.com/quote/BPAC11.SA" data-tv="https://www.tradingview.com/chart/?symbol=BMFBOVESPA%3ABPAC11">
               <td class="col-tk"><span class="tk-badge">BPAC11</span></td>
               <td class="col-name">BTG Pactual</td>
               <td class="col-price">55.84</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="53">53</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="64">64</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="neutral"><span class="rsi-pill" data-rsi="53" data-zone="neutral">53</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:53%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="warm"><span class="rsi-pill" data-rsi="64" data-zone="warm">64</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:64%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 63.60 | Date: 13/04/2026">-12.2%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="taee11" data-name="taesa">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="taee11" data-name="taesa" data-peak-close="43.66" data-peak-date="06/04/2026" data-dd="-5.9%" data-yahoo="https://finance.yahoo.com/quote/TAEE11.SA" data-tv="https://www.tradingview.com/chart/?symbol=BMFBOVESPA%3ATAEE11">
               <td class="col-tk"><span class="tk-badge">TAEE11</span></td>
               <td class="col-name">Taesa</td>
               <td class="col-price">41.07</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="55">55</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="65">65</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="neutral"><span class="rsi-pill" data-rsi="55" data-zone="neutral">55</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:55%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="warm"><span class="rsi-pill" data-rsi="65" data-zone="warm">65</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:65%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 43.66 | Date: 06/04/2026">-5.9%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="itub4" data-name="itaú">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="itub4" data-name="itaú" data-peak-close="48.29" data-peak-date="16/02/2026" data-dd="-11.5%" data-yahoo="https://finance.yahoo.com/quote/ITUB4.SA" data-tv="https://www.tradingview.com/chart/?symbol=BMFBOVESPA%3AITUB4">
               <td class="col-tk"><span class="tk-badge">ITUB4</span></td>
               <td class="col-name">Itaú</td>
               <td class="col-price">42.74</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="56">56</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="68">68</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="neutral"><span class="rsi-pill" data-rsi="56" data-zone="neutral">56</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:56%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="warm"><span class="rsi-pill" data-rsi="68" data-zone="warm">68</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:68%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 48.29 | Date: 16/02/2026">-11.5%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="sbsp3" data-name="sabesp">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="sbsp3" data-name="sabesp" data-peak-close="34.46" data-peak-date="20/04/2026" data-dd="-11.9%" data-yahoo="https://finance.yahoo.com/quote/SBSP3.SA" data-tv="https://www.tradingview.com/chart/?symbol=BMFBOVESPA%3ASBSP3">
               <td class="col-tk"><span class="tk-badge">SBSP3</span></td>
               <td class="col-name">Sabesp</td>
               <td class="col-price">30.37</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="56">56</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="69">69</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="neutral"><span class="rsi-pill" data-rsi="56" data-zone="neutral">56</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:56%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="warm"><span class="rsi-pill" data-rsi="69" data-zone="warm">69</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:69%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 34.46 | Date: 20/04/2026">-11.9%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="abev3" data-name="ambev">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="abev3" data-name="ambev" data-peak-close="16.73" data-peak-date="22/06/2026" data-dd="-2.6%" data-yahoo="https://finance.yahoo.com/quote/ABEV3.SA" data-tv="https://www.tradingview.com/chart/?symbol=BMFBOVESPA%3AABEV3">
               <td class="col-tk"><span class="tk-badge">ABEV3</span></td>
               <td class="col-name">Ambev</td>
               <td class="col-price">16.29</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="58">58</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="66">66</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="neutral"><span class="rsi-pill" data-rsi="58" data-zone="neutral">58</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:58%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="warm"><span class="rsi-pill" data-rsi="66" data-zone="warm">66</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:66%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 16.73 | Date: 22/06/2026">-2.6%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="cple3" data-name="copel">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="cple3" data-name="copel" data-peak-close="16.41" data-peak-date="06/04/2026" data-dd="-8.2%" data-yahoo="https://finance.yahoo.com/quote/CPLE3.SA" data-tv="https://www.tradingview.com/chart/?symbol=BMFBOVESPA%3ACPLE3">
               <td class="col-tk"><span class="tk-badge">CPLE3</span></td>
               <td class="col-name">Copel</td>
               <td class="col-price">15.06</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="58">58</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="74">74</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="neutral"><span class="rsi-pill" data-rsi="58" data-zone="neutral">58</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:58%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="hot"><span class="rsi-pill" data-rsi="74" data-zone="hot">74</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:74%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 16.41 | Date: 06/04/2026">-8.2%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="itsa4" data-name="itaúsa">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="itsa4" data-name="itaúsa" data-peak-close="14.73" data-peak-date="16/02/2026" data-dd="-7.7%" data-yahoo="https://finance.yahoo.com/quote/ITSA4.SA" data-tv="https://www.tradingview.com/chart/?symbol=BMFBOVESPA%3AITSA4">
               <td class="col-tk"><span class="tk-badge">ITSA4</span></td>
               <td class="col-name">Itaúsa</td>
               <td class="col-price">13.60</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="59">59</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="73">73</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="neutral"><span class="rsi-pill" data-rsi="59" data-zone="neutral">59</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:59%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="hot"><span class="rsi-pill" data-rsi="73" data-zone="hot">73</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:73%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 14.73 | Date: 16/02/2026">-7.7%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="pssa3" data-name="porto seguro">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="pssa3" data-name="porto seguro" data-peak-close="54.19" data-peak-date="29/06/2026" data-dd="0.0%" data-yahoo="https://finance.yahoo.com/quote/PSSA3.SA" data-tv="https://www.tradingview.com/chart/?symbol=BMFBOVESPA%3APSSA3">
               <td class="col-tk"><span class="tk-badge">PSSA3</span></td>
               <td class="col-name">Porto Seguro</td>
               <td class="col-price">54.19</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="62">62</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="73">73</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="warm"><span class="rsi-pill" data-rsi="62" data-zone="warm">62</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:62%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="hot"><span class="rsi-pill" data-rsi="73" data-zone="hot">73</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:73%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 54.19 | Date: 29/06/2026">0.0%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="bbse3" data-name="bb seguridade">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="bbse3" data-name="bb seguridade" data-peak-close="39.17" data-peak-date="22/06/2026" data-dd="-1.3%" data-yahoo="https://finance.yahoo.com/quote/BBSE3.SA" data-tv="https://www.tradingview.com/chart/?symbol=BMFBOVESPA%3ABBSE3">
               <td class="col-tk"><span class="tk-badge">BBSE3</span></td>
               <td class="col-name">BB Seguridade</td>
               <td class="col-price">38.65</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="69">69</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="70">70</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="warm"><span class="rsi-pill" data-rsi="69" data-zone="warm">69</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:69%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="hot"><span class="rsi-pill" data-rsi="70" data-zone="hot">70</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:70%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 39.17 | Date: 22/06/2026">-1.3%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Sell" data-market="brasil" data-ticker="cxse3" data-name="caixa seguros">
+            <tr class="asset-row" data-signal="Sell" data-market="brasil" data-ticker="cxse3" data-name="caixa seguros" data-peak-close="20.53" data-peak-date="29/06/2026" data-dd="0.0%" data-yahoo="https://finance.yahoo.com/quote/CXSE3.SA" data-tv="https://www.tradingview.com/chart/?symbol=BMFBOVESPA%3ACXSE3">
               <td class="col-tk"><span class="tk-badge">CXSE3</span></td>
               <td class="col-name">Caixa Seguros</td>
               <td class="col-price">20.53</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="74">74</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="81">81</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="hot"><span class="rsi-pill" data-rsi="74" data-zone="hot">74</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:74%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="hot"><span class="rsi-pill" data-rsi="81" data-zone="hot">81</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:81%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 20.53 | Date: 29/06/2026">0.0%</span></td>
               <td class="col-sig"><span class="signal-badge sig-sell">SELL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Sell" data-market="brasil" data-ticker="csmg3" data-name="copasa">
+            <tr class="asset-row" data-signal="Sell" data-market="brasil" data-ticker="csmg3" data-name="copasa" data-peak-close="62.11" data-peak-date="29/06/2026" data-dd="0.0%" data-yahoo="https://finance.yahoo.com/quote/CSMG3.SA" data-tv="https://www.tradingview.com/chart/?symbol=BMFBOVESPA%3ACSMG3">
               <td class="col-tk"><span class="tk-badge">CSMG3</span></td>
               <td class="col-name">Copasa</td>
               <td class="col-price">62.11</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="72">72</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="82">82</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="hot"><span class="rsi-pill" data-rsi="72" data-zone="hot">72</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:72%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="hot"><span class="rsi-pill" data-rsi="82" data-zone="hot">82</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:82%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 62.11 | Date: 29/06/2026">0.0%</span></td>
               <td class="col-sig"><span class="signal-badge sig-sell">SELL</span></td>
             </tr>
@@ -2399,12 +2568,12 @@ body.research-v2.profile-field-v2::after{
               </tr>
             </thead>
             <tbody>
-            <tr class="asset-row" data-signal="Neutral" data-market="moeda" data-ticker="brl=x" data-name="dolar">
+            <tr class="asset-row" data-signal="Neutral" data-market="moeda" data-ticker="brl=x" data-name="dolar" data-peak-close="6.19" data-peak-date="23/12/2024" data-dd="-16.6%" data-yahoo="https://finance.yahoo.com/quote/BRL%3DX" data-tv="https://www.tradingview.com/chart/?symbol=FX_IDC%3AUSDBRL">
               <td class="col-tk"><span class="tk-badge">BRL=X</span></td>
               <td class="col-name">Dolar</td>
               <td class="col-price">5.17</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="50">50</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="45">45</span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="50" data-zone="watch">50</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:50%"></span></span></span></td>
+              <td class="col-rsi"><span class="rsi-meter" data-zone="watch"><span class="rsi-pill" data-rsi="45" data-zone="watch">45</span><span class="rsi-track"><span class="rsi-tick" style="left:30%"></span><span class="rsi-tick" style="left:70%"></span><span class="rsi-dot" style="left:45%"></span></span></span></td>
               <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 6.19 | Date: 23/12/2024">-16.6%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
@@ -2417,7 +2586,7 @@ body.research-v2.profile-field-v2::after{
 </div>
 
 <div class="footer">
-  Financial Monitor Research · Updated <a>03/07/2026 19:08 BRT</a> · Data: Yahoo Finance + CoinMetrics · Static research dashboard
+  Financial Monitor Research · Updated <a>03/07/2026 20:23 BRT</a> · Data: Yahoo Finance + CoinMetrics · Static research dashboard
 </div>
 
 <script>
@@ -2564,16 +2733,6 @@ body.research-v2.profile-field-v2::after{
     });
   });
 
-  document.querySelectorAll('.rsi-pill').forEach(pill => {
-    const v = parseInt(pill.dataset.rsi);
-    if(v <= 30) pill.dataset.zone = 'deep';
-    else if(v <= 40) pill.dataset.zone = 'value';
-    else if(v <= 50) pill.dataset.zone = 'watch';
-    else if(v >= 70) pill.dataset.zone = 'hot';
-    else if(v >= 60) pill.dataset.zone = 'warm';
-    else pill.dataset.zone = 'neutral';
-  });
-
   document.addEventListener('keydown', (e) => {
     if(e.key === '/' && searchInput && document.activeElement !== searchInput) {
       e.preventDefault();
@@ -2589,6 +2748,87 @@ body.research-v2.profile-field-v2::after{
 
   rows.forEach(row => row.hidden = false);
   applyViewState();
+})();
+
+</script>
+<script>
+
+(function(){
+  "use strict";
+
+  /* ---- Theme toggle (persisted in localStorage) ---- */
+  const metaBox = document.querySelector('.topbar-meta');
+  const themeBtn = document.createElement('button');
+  themeBtn.className = 'theme-btn';
+  themeBtn.type = 'button';
+  themeBtn.title = 'Toggle light/dark theme';
+  themeBtn.setAttribute('aria-label', 'Toggle light/dark theme');
+  function applyTheme(t){
+    document.body.classList.toggle('theme-light', t === 'light');
+    themeBtn.textContent = t === 'light' ? '☾' : '☀';
+  }
+  let theme = 'dark';
+  try { theme = localStorage.getItem('fm-theme') || 'dark'; } catch(e){}
+  applyTheme(theme);
+  themeBtn.addEventListener('click', function(){
+    theme = theme === 'light' ? 'dark' : 'light';
+    try { localStorage.setItem('fm-theme', theme); } catch(e){}
+    applyTheme(theme);
+  });
+  if(metaBox) metaBox.appendChild(themeBtn);
+
+  /* ---- Expandable asset rows ---- */
+  function closeDetail(row){
+    row.classList.remove('expanded');
+    row.setAttribute('aria-expanded', 'false');
+    if(row._detail && row._detail.parentNode) row._detail.parentNode.removeChild(row._detail);
+    row._detail = null;
+  }
+  function closeAllDetails(){
+    document.querySelectorAll('.asset-row.expanded').forEach(closeDetail);
+  }
+  function openDetail(row){
+    const d = row.dataset;
+    const yahoo = d.yahoo ? '<a class="detail-link" target="_blank" rel="noopener" href="' + d.yahoo + '">Yahoo Finance ↗</a>' : '';
+    const tv = d.tv ? '<a class="detail-link" target="_blank" rel="noopener" href="' + d.tv + '">TradingView ↗</a>' : '';
+    const tr = document.createElement('tr');
+    tr.className = 'asset-detail';
+    tr.innerHTML = '<td colspan="' + row.children.length + '"><div class="detail-inner">'
+      + '<span class="detail-item"><span class="k">Peak close</span><span class="v">' + (d.peakClose || '—') + '</span></span>'
+      + '<span class="detail-item"><span class="k">Peak date</span><span class="v">' + (d.peakDate || '—') + '</span></span>'
+      + '<span class="detail-item"><span class="k">From peak</span><span class="v">' + (d.dd || '—') + '</span></span>'
+      + '<span class="detail-links">' + yahoo + tv + '</span>'
+      + '</div></td>';
+    row.after(tr);
+    row._detail = tr;
+    row.classList.add('expanded');
+    row.setAttribute('aria-expanded', 'true');
+  }
+  document.querySelectorAll('.asset-row').forEach(function(row){
+    row.tabIndex = 0;
+    row.setAttribute('aria-expanded', 'false');
+    row.addEventListener('click', function(e){
+      if(e.target.closest('a')) return;
+      if(row.classList.contains('expanded')) closeDetail(row); else openDetail(row);
+    });
+    row.addEventListener('keydown', function(e){
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); row.click(); }
+    });
+  });
+  // Sorting re-appends every <tr>; close details first (capture runs before the sort handler).
+  document.addEventListener('click', function(e){
+    if(e.target.closest && e.target.closest('.th-sort')) closeAllDetails();
+  }, true);
+  // Filters toggle [hidden] on rows; close the detail of any row that disappears.
+  const mo = new MutationObserver(function(muts){
+    muts.forEach(function(m){
+      const el = m.target;
+      if(el.classList && el.classList.contains('asset-row') && el.hidden && el._detail) closeDetail(el);
+    });
+  });
+  document.querySelectorAll('.t-assets tbody').forEach(function(tb){
+    mo.observe(tb, {attributes: true, subtree: true, attributeFilter: ['hidden']});
+  });
 })();
 
 </script>

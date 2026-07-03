@@ -46,6 +46,16 @@ jobs:
           done
           exit 1
 
+      - name: Restore snapshot history
+        uses: actions/cache@v4
+        with:
+          path: snapshot_history.json
+          # Unique key per run → restore always falls back to the latest
+          # "fm-snapshot-" prefix, and the post-job step saves the updated file.
+          key: fm-snapshot-${{ github.run_id }}
+          restore-keys: |
+            fm-snapshot-
+
       - name: Generate dashboard
         env:
           YFINANCE_CACHE_DIR: ${{ runner.temp }}/yfinance-cache

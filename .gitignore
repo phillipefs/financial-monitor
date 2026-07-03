@@ -216,3 +216,6 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Financial Monitor — rolling KPI snapshot (persisted in CI via actions/cache)
+snapshot_history.json

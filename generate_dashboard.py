@@ -5,12 +5,15 @@ Output: dashboard.html (open in browser)
 """
 from __future__ import annotations
 
+import json
+import math
 import os
 import sys
 from datetime import datetime, timedelta, timezone
 from html import escape
 from pathlib import Path
 from typing import Dict
+from urllib.parse import quote
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 import urllib3
@@ -1161,16 +1164,6 @@ RESEARCH_V2_SCRIPT = r"""
     });
   });
 
-  document.querySelectorAll('.rsi-pill').forEach(pill => {
-    const v = parseInt(pill.dataset.rsi);
-    if(v <= 30) pill.dataset.zone = 'deep';
-    else if(v <= 40) pill.dataset.zone = 'value';
-    else if(v <= 50) pill.dataset.zone = 'watch';
-    else if(v >= 70) pill.dataset.zone = 'hot';
-    else if(v >= 60) pill.dataset.zone = 'warm';
-    else pill.dataset.zone = 'neutral';
-  });
-
   document.addEventListener('keydown', (e) => {
     if(e.key === '/' && searchInput && document.activeElement !== searchInput) {
       e.preventDefault();
@@ -1186,6 +1179,243 @@ RESEARCH_V2_SCRIPT = r"""
 
   rows.forEach(row => row.hidden = false);
   applyViewState();
+})();
+"""
+
+
+RESEARCH_V3_CSS = """
+/* ===== V3 ENHANCEMENTS ===== */
+
+/* Typography */
+body.research-v2{font-family:Inter,"Segoe UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif}
+.research-v2 .brief-copy h1,.research-v2 .brand-name,.research-v2 .section-title{letter-spacing:-.02em}
+.research-v2 .col-price,.research-v2 .col-dd,.research-v2 .highlight-chip{font-variant-numeric:tabular-nums}
+
+/* Radius unification */
+.research-v2 .brief-copy,.research-v2 .market-read,.research-v2 .kpi-cell,.research-v2 .oc-card,
+.research-v2 .highlight-card,.research-v2 .table-wrap,.research-v2 .filter-strip{border-radius:12px}
+
+/* KPI deltas */
+.research-v2 .kpi-delta{display:flex;align-items:baseline;gap:6px;margin-top:8px;font-family:var(--mono);font-size:.68rem;font-weight:700}
+.research-v2 .kpi-delta .d-good{color:var(--rm-green)}
+.research-v2 .kpi-delta .d-bad{color:var(--rm-red)}
+.research-v2 .kpi-delta .d-flat{color:var(--rm-muted)}
+.research-v2 .kpi-delta .d-ctx{color:var(--rm-dim);font-family:var(--font);font-weight:600}
+
+/* Signal Allocation — reuse the signal-badge look, KPI-style count */
+.research-v2 .market-read .mix-row{grid-template-columns:auto 1fr auto;gap:14px;min-height:40px}
+.research-v2 .market-read .mix-row .signal-badge{min-width:84px;text-align:center;justify-self:start}
+.research-v2 .market-read .mix-row .mix-bar{height:8px}
+.research-v2 .market-read .mix-row strong{font-size:1.05rem;font-weight:850;color:var(--rm-text)}
+
+/* RSI position meters */
+.research-v2 .rsi-meter{display:inline-flex;flex-direction:column;align-items:center;gap:6px;min-width:64px}
+.research-v2 .rsi-meter .rsi-pill{background:transparent;border:0;padding:0;min-width:0;font-size:.8rem}
+.research-v2 .rsi-track{position:relative;width:64px;height:4px;border-radius:999px;background:rgba(148,163,184,.16)}
+.research-v2 .rsi-track::before{content:"";position:absolute;inset:0;border-radius:inherit;opacity:.4;
+  background:linear-gradient(90deg,rgba(53,208,143,.55) 0 30%,transparent 30% 70%,rgba(240,111,104,.55) 70% 100%)}
+.research-v2 .rsi-tick{position:absolute;top:-2px;bottom:-2px;width:1px;background:rgba(148,163,184,.38)}
+.research-v2 .rsi-dot{position:absolute;top:50%;width:9px;height:9px;border-radius:50%;transform:translate(-50%,-50%);
+  background:var(--rm-muted);box-shadow:0 0 0 2px var(--rm-surface)}
+.research-v2 .rsi-meter[data-zone="deep"] .rsi-dot,.research-v2 .rsi-meter[data-zone="value"] .rsi-dot{background:var(--rm-green)}
+.research-v2 .rsi-meter[data-zone="watch"] .rsi-dot{background:var(--rm-cyan)}
+.research-v2 .rsi-meter[data-zone="warm"] .rsi-dot{background:var(--rm-yellow)}
+.research-v2 .rsi-meter[data-zone="hot"] .rsi-dot{background:var(--rm-red)}
+
+/* Gauges */
+.research-v2 .gauge-svg{overflow:visible}
+.research-v2 .gauge-svg .g-tick{stroke:var(--rm-surface)}
+.research-v2 .gauge-svg .g-lab{fill:var(--rm-dim);font-weight:700;font-family:var(--mono)}
+.research-v2 .gauge-svg .g-val{font-family:var(--mono)}
+.research-v2 .g-arc{stroke-dasharray:var(--arc) 100}
+@media (prefers-reduced-motion:no-preference){
+  @keyframes gaugeGrow{from{stroke-dasharray:0 100}}
+  .research-v2 .g-arc{animation:gaugeGrow 1.1s cubic-bezier(.25,.75,.3,1)}
+}
+
+/* Expandable rows */
+.research-v2 .asset-row{cursor:pointer}
+.research-v2 .asset-row .col-tk{white-space:nowrap}
+.research-v2 .asset-row .col-tk::before{content:"\\203a";display:inline-block;margin-right:8px;color:var(--rm-dim);
+  font-weight:800;transition:transform .2s ease,color .2s ease}
+.research-v2 .asset-row.expanded .col-tk::before{transform:rotate(90deg);color:var(--rm-cyan)}
+.research-v2 .asset-detail td{padding:0;border-bottom:1px solid var(--rm-line-soft);background:rgba(67,215,232,.035)}
+.research-v2 .detail-inner{display:flex;flex-wrap:wrap;align-items:center;gap:22px;padding:14px 18px 14px 44px}
+.research-v2 .detail-item{display:flex;flex-direction:column;gap:3px}
+.research-v2 .detail-item .k{font-size:.6rem;font-weight:800;color:var(--rm-dim);text-transform:uppercase;letter-spacing:.5px}
+.research-v2 .detail-item .v{font-family:var(--mono);font-size:.82rem;font-weight:700;color:var(--rm-text)}
+.research-v2 .detail-links{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap}
+.research-v2 .detail-link{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;
+  border:1px solid rgba(67,215,232,.35);background:rgba(67,215,232,.08);color:var(--rm-cyan);
+  font-size:.72rem;font-weight:800;text-decoration:none;transition:.2s;white-space:nowrap}
+.research-v2 .detail-link:hover{background:rgba(67,215,232,.16)}
+
+/* Entrance motion */
+@media (prefers-reduced-motion:no-preference){
+  @keyframes v3Up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  .research-v2 .brief-copy,.research-v2 .market-read,.research-v2 .kpi-cell,
+  .research-v2 .oc-card,.research-v2 .highlight-card{animation:v3Up .6s cubic-bezier(.22,.7,.3,1) both}
+  .research-v2 .market-read{animation-delay:.08s}
+  .research-v2 .kpi-cell:nth-child(2){animation-delay:.05s}
+  .research-v2 .kpi-cell:nth-child(3){animation-delay:.1s}
+  .research-v2 .kpi-cell:nth-child(4){animation-delay:.15s}
+  .research-v2 .kpi-cell:nth-child(5){animation-delay:.2s}
+  .research-v2 .oc-card:nth-child(2){animation-delay:.08s}
+  .research-v2 .oc-card:nth-child(3){animation-delay:.16s}
+  .research-v2 .highlight-card:nth-child(2){animation-delay:.1s}
+}
+
+/* Focus visibility */
+.research-v2 .fbtn:focus-visible,.research-v2 .sector-tab:focus-visible,.research-v2 .asset-row:focus-visible,
+.research-v2 .theme-btn:focus-visible,.research-v2 .detail-link:focus-visible,.research-v2 .search-input:focus-visible{
+  outline:2px solid var(--rm-cyan);outline-offset:2px}
+
+/* Theme toggle button */
+.research-v2 .theme-btn{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;
+  border:1px solid var(--rm-line);background:transparent;color:var(--rm-muted);cursor:pointer;font-size:.9rem;transition:.2s}
+.research-v2 .theme-btn:hover{color:var(--rm-cyan);border-color:rgba(67,215,232,.5)}
+
+/* ===== LIGHT THEME ===== */
+body.research-v2.theme-light{
+  --rm-bg:#eef2f6;--rm-bg-soft:#e9eef4;--rm-surface:#ffffff;--rm-surface-2:#f4f7fa;--rm-surface-3:#e9eef4;
+  --rm-line:#d9e1e9;--rm-line-soft:rgba(22,32,42,.12);
+  --rm-text:#16202a;--rm-muted:#48586a;--rm-dim:#7b8a99;
+  --rm-cyan:#0e7490;--rm-green:#087f5b;--rm-yellow:#b45309;--rm-red:#c92a2a;--rm-blue:#1d4ed8;
+  --rm-shadow:0 18px 44px rgba(15,30,45,.1);
+  --teal:#0e7490;--green:#087f5b;--red:#c92a2a;--yellow:#b45309;--blue:#1d4ed8;--orange:#c2410c;
+  --txt:#16202a;--muted:#48586a;--dim:#7b8a99;--line:#d9e1e9;--glow-teal:rgba(14,116,144,.14);
+  color:var(--rm-text);
+}
+body.research-v2.profile-field-v2.theme-light{
+  background:linear-gradient(160deg,#f7fafc 0%,#eef2f6 45%,#e7edf3 100%);
+  background-attachment:fixed;animation:none;
+}
+body.research-v2.profile-field-v2.theme-light::before,
+body.research-v2.profile-field-v2.theme-light::after{display:none}
+.research-v2.theme-light .topbar{background:rgba(255,255,255,.88);border-bottom-color:var(--rm-line);box-shadow:0 10px 30px rgba(15,30,45,.06)}
+.research-v2.theme-light .brief-copy,
+.research-v2.theme-light .market-read,
+.research-v2.theme-light .highlight-card,
+.research-v2.theme-light .kpi-cell,
+.research-v2.theme-light .oc-card,
+.research-v2.theme-light .filter-strip,
+.research-v2.theme-light .table-wrap,
+.research-v2.theme-light .global-empty-state{
+  border-color:var(--rm-line);background:#fff;box-shadow:0 14px 34px rgba(15,30,45,.08);backdrop-filter:none;
+}
+.research-v2.theme-light .brief-copy{background:linear-gradient(135deg,rgba(14,116,144,.06),transparent 40%),#fff}
+.research-v2.theme-light .oc-card{background:linear-gradient(120deg,rgba(14,116,144,.04),transparent 44%),#fff}
+.research-v2.theme-light .oc-card:hover{border-color:rgba(14,116,144,.4);box-shadow:0 18px 44px rgba(15,30,45,.12)}
+.research-v2.theme-light .kpi-cell:hover{background:#f4f7fa;border-color:rgba(14,116,144,.4)}
+.research-v2.theme-light .search-input,
+.research-v2.theme-light .topbar-meta,
+.research-v2.theme-light .sector-tab,
+.research-v2.theme-light .ps-item,
+.research-v2.theme-light .empty-state{background:#fff;border-color:var(--rm-line)}
+.research-v2.theme-light .oc-icon{background:#f4f7fa;border-color:var(--rm-line)}
+.research-v2.theme-light .t-assets thead,
+.research-v2.theme-light .t-assets th{background:#f4f7fa;border-color:var(--rm-line)}
+.research-v2.theme-light .t-assets td{background:transparent}
+.research-v2.theme-light .t-assets tbody tr:hover td{background:rgba(14,116,144,.05)}
+.research-v2.theme-light .tk-badge,
+.research-v2.theme-light .dd-pill{background:#f2f5f8}
+.research-v2.theme-light .rsi-meter .rsi-pill{background:transparent}
+.research-v2.theme-light .fbtn{background:#fff}
+.research-v2.theme-light .fbtn[data-filter="UltraBuy"],.research-v2.theme-light .fbtn[data-filter="Buy"]{background:rgba(8,127,91,.08)}
+.research-v2.theme-light .fbtn[data-filter="Neutral"]{background:rgba(29,78,216,.07)}
+.research-v2.theme-light .fbtn[data-filter="Sell"]{background:rgba(201,42,42,.07)}
+.research-v2.theme-light .fbtn[data-filter="all"],.research-v2.theme-light .fbtn[data-market]{background:rgba(14,116,144,.07)}
+.research-v2.theme-light .highlight-chip{background:#f2f5f8;border-color:var(--rm-line);color:var(--rm-muted)}
+.research-v2.theme-light .mix-bar{background:rgba(22,32,42,.1)}
+.research-v2.theme-light .rsi-track{background:rgba(22,32,42,.1)}
+.research-v2.theme-light .rsi-dot{box-shadow:0 0 0 2px #fff}
+.research-v2.theme-light .asset-detail td{background:rgba(14,116,144,.04)}
+.research-v2.theme-light .detail-link{background:rgba(14,116,144,.07);border-color:rgba(14,116,144,.3)}
+.research-v2.theme-light .gauge-svg{filter:none}
+.research-v2.theme-light .footer{background:none}
+.research-v2.theme-light .market-read h2,
+.research-v2.theme-light .eyebrow,
+.research-v2.theme-light .section-title::before{filter:none}
+"""
+
+
+RESEARCH_V3_SCRIPT = r"""
+(function(){
+  "use strict";
+
+  /* ---- Theme toggle (persisted in localStorage) ---- */
+  const metaBox = document.querySelector('.topbar-meta');
+  const themeBtn = document.createElement('button');
+  themeBtn.className = 'theme-btn';
+  themeBtn.type = 'button';
+  themeBtn.title = 'Toggle light/dark theme';
+  themeBtn.setAttribute('aria-label', 'Toggle light/dark theme');
+  function applyTheme(t){
+    document.body.classList.toggle('theme-light', t === 'light');
+    themeBtn.textContent = t === 'light' ? '☾' : '☀';
+  }
+  let theme = 'dark';
+  try { theme = localStorage.getItem('fm-theme') || 'dark'; } catch(e){}
+  applyTheme(theme);
+  themeBtn.addEventListener('click', function(){
+    theme = theme === 'light' ? 'dark' : 'light';
+    try { localStorage.setItem('fm-theme', theme); } catch(e){}
+    applyTheme(theme);
+  });
+  if(metaBox) metaBox.appendChild(themeBtn);
+
+  /* ---- Expandable asset rows ---- */
+  function closeDetail(row){
+    row.classList.remove('expanded');
+    row.setAttribute('aria-expanded', 'false');
+    if(row._detail && row._detail.parentNode) row._detail.parentNode.removeChild(row._detail);
+    row._detail = null;
+  }
+  function closeAllDetails(){
+    document.querySelectorAll('.asset-row.expanded').forEach(closeDetail);
+  }
+  function openDetail(row){
+    const d = row.dataset;
+    const yahoo = d.yahoo ? '<a class="detail-link" target="_blank" rel="noopener" href="' + d.yahoo + '">Yahoo Finance ↗</a>' : '';
+    const tv = d.tv ? '<a class="detail-link" target="_blank" rel="noopener" href="' + d.tv + '">TradingView ↗</a>' : '';
+    const tr = document.createElement('tr');
+    tr.className = 'asset-detail';
+    tr.innerHTML = '<td colspan="' + row.children.length + '"><div class="detail-inner">'
+      + '<span class="detail-item"><span class="k">Peak close</span><span class="v">' + (d.peakClose || '—') + '</span></span>'
+      + '<span class="detail-item"><span class="k">Peak date</span><span class="v">' + (d.peakDate || '—') + '</span></span>'
+      + '<span class="detail-item"><span class="k">From peak</span><span class="v">' + (d.dd || '—') + '</span></span>'
+      + '<span class="detail-links">' + yahoo + tv + '</span>'
+      + '</div></td>';
+    row.after(tr);
+    row._detail = tr;
+    row.classList.add('expanded');
+    row.setAttribute('aria-expanded', 'true');
+  }
+  document.querySelectorAll('.asset-row').forEach(function(row){
+    row.tabIndex = 0;
+    row.setAttribute('aria-expanded', 'false');
+    row.addEventListener('click', function(e){
+      if(e.target.closest('a')) return;
+      if(row.classList.contains('expanded')) closeDetail(row); else openDetail(row);
+    });
+    row.addEventListener('keydown', function(e){
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); row.click(); }
+    });
+  });
+  // Sorting re-appends every <tr>; close details first (capture runs before the sort handler).
+  document.addEventListener('click', function(e){
+    if(e.target.closest && e.target.closest('.th-sort')) closeAllDetails();
+  }, true);
+  // Filters toggle [hidden] on rows; close the detail of any row that disappears.
+  const mo = new MutationObserver(function(muts){
+    muts.forEach(function(m){
+      const el = m.target;
+      if(el.classList && el.classList.contains('asset-row') && el.hidden && el._detail) closeDetail(el);
+    });
+  });
+  document.querySelectorAll('.t-assets tbody').forEach(function(tb){
+    mo.observe(tb, {attributes: true, subtree: true, attributeFilter: ['hidden']});
+  });
 })();
 """
 
@@ -1288,41 +1518,59 @@ def _drawdown_class(value: float) -> str:
     return "dd-stress"
 
 
-def _mvrv_gauge_svg(mvrv: float, coin: str) -> str:
-    """SVG semicircular gauge for MVRV."""
-    if coin == "BTC":
-        pct = max(0, min(100, (mvrv - 0.5) / 3.0 * 100))
-    else:
-        pct = max(0, min(100, (mvrv - 0.4) / 2.3 * 100))
+# Monotonic id so each gauge's <linearGradient> gets a unique document id.
+_gauge_gid = 0
 
-    # Arc calculation (180 degrees)
-    angle = 180 * (pct / 100)
-    # Colors based on position
+
+def _gauge_svg(pct, value_text, color, grad_stops, ticks_pct, lab_min, lab_max, gid) -> str:
+    """Semicircular gauge: gradient track, zone-threshold ticks, min/max labels,
+    and a value arc that animates in via CSS (see ``.g-arc`` in RESEARCH_V3_CSS)."""
+    pct = max(0.0, min(100.0, float(pct)))
+
+    ticks = ""
+    for tp in ticks_pct:
+        a = math.pi * (1 + tp / 100.0)
+        x1, y1 = 60 + 44 * math.cos(a), 60 + 44 * math.sin(a)
+        x2, y2 = 60 + 56 * math.cos(a), 60 + 56 * math.sin(a)
+        ticks += (f'<line class="g-tick" x1="{x1:.1f}" y1="{y1:.1f}" '
+                  f'x2="{x2:.1f}" y2="{y2:.1f}" stroke-width="2.5"/>')
+
+    last = len(grad_stops) - 1
+    stops = "".join(
+        f'<stop offset="{round(i / last * 100)}%" stop-color="{c}"/>'
+        for i, c in enumerate(grad_stops)
+    )
+
+    return f'''<svg viewBox="0 0 120 80" class="gauge-svg" role="img">
+      <defs><linearGradient id="{gid}" x1="0" y1="0" x2="1" y2="0">{stops}</linearGradient></defs>
+      <path d="M 10 60 A 50 50 0 0 1 110 60" fill="none" stroke="url(#{gid})" stroke-opacity=".22" stroke-width="8" stroke-linecap="round"/>
+      <path class="g-arc" style="--arc:{pct:.1f}" d="M 10 60 A 50 50 0 0 1 110 60" pathLength="100" fill="none" stroke="{color}" stroke-width="8" stroke-linecap="round"/>
+      {ticks}
+      <text x="60" y="54" text-anchor="middle" fill="{color}" font-size="15" font-weight="800" class="g-val">{value_text}</text>
+      <text x="12" y="76" text-anchor="middle" class="g-lab" font-size="7">{lab_min}</text>
+      <text x="108" y="76" text-anchor="middle" class="g-lab" font-size="7">{lab_max}</text>
+    </svg>'''
+
+
+def _mvrv_gauge_svg(mvrv: float, coin: str) -> str:
+    """SVG semicircular gauge for MVRV (green = undervalued, red = overvalued)."""
+    global _gauge_gid
+    lo, hi = (0.5, 3.5) if coin == "BTC" else (0.4, 2.7)
+    pct = max(0.0, min(100.0, (mvrv - lo) / (hi - lo) * 100))
     if pct < 25:
-        color = "#4ade80"
+        color = "#35d08f"
     elif pct < 50:
         color = "#33c6b7"
     elif pct < 75:
-        color = "#ffc94d"
+        color = "#f1bc4b"
     else:
-        color = "#f87171"
-
-    # SVG arc path
-    import math
-    cx, cy, r = 60, 60, 50
-    start_angle = math.radians(180)
-    end_angle = math.radians(180 + angle)
-    x1 = cx + r * math.cos(start_angle)
-    y1 = cy + r * math.sin(start_angle)
-    x2 = cx + r * math.cos(end_angle)
-    y2 = cy + r * math.sin(end_angle)
-    large_arc = 1 if angle > 180 else 0
-
-    return f'''<svg viewBox="0 0 120 70" class="gauge-svg">
-      <path d="M 10 60 A 50 50 0 0 1 110 60" fill="none" stroke="#2c3650" stroke-width="8" stroke-linecap="round"/>
-      <path d="M {x1:.1f} {y1:.1f} A 50 50 0 {large_arc} 1 {x2:.1f} {y2:.1f}" fill="none" stroke="{color}" stroke-width="8" stroke-linecap="round"/>
-      <text x="60" y="58" text-anchor="middle" fill="{color}" font-size="14" font-weight="800" font-family="monospace">{mvrv:.3f}</text>
-    </svg>'''
+        color = "#f06f68"
+    _gauge_gid += 1
+    return _gauge_svg(
+        pct, f"{mvrv:.3f}", color,
+        ["#35d08f", "#33c6b7", "#f1bc4b", "#f06f68"],
+        [25, 50, 75], f"{lo:g}", f"{hi:g}", f"g{_gauge_gid}",
+    )
 
 
 def _build_onchain_card(coin: str, data: Dict) -> str:
@@ -1363,45 +1611,32 @@ def _build_onchain_card(coin: str, data: Dict) -> str:
 
 
 def _fng_gauge_svg(value) -> str:
-    """SVG semicircular gauge for the Fear & Greed Index (0-100)."""
-    import math
-
-    cx, cy, r = 60, 60, 50
-    track = ('<path d="M 10 60 A 50 50 0 0 1 110 60" fill="none" '
-             'stroke="#2c3650" stroke-width="8" stroke-linecap="round"/>')
-
+    """SVG semicircular gauge for the Fear & Greed Index (red = fear, green = greed)."""
+    global _gauge_gid
     if value is None:
-        return f'''<svg viewBox="0 0 120 70" class="gauge-svg">
-      {track}
-      <text x="60" y="58" text-anchor="middle" fill="#64748b" font-size="14" font-weight="800" font-family="monospace">-</text>
+        return '''<svg viewBox="0 0 120 80" class="gauge-svg" role="img">
+      <path d="M 10 60 A 50 50 0 0 1 110 60" fill="none" stroke="#2c3650" stroke-width="8" stroke-linecap="round"/>
+      <text x="60" y="54" text-anchor="middle" fill="#64748b" font-size="15" font-weight="800" class="g-val">-</text>
     </svg>'''
 
     v = max(0, min(100, int(value)))
     if v < 25:
-        color = "#f87171"
+        color = "#f06f68"
     elif v < 46:
-        color = "#ff5f46"
+        color = "#ff7a45"
     elif v < 55:
-        color = "#ffc94d"
+        color = "#f1bc4b"
     elif v < 76:
-        color = "#34d399"
+        color = "#35d08f"
     else:
         color = "#4ade80"
 
-    angle = 180 * (v / 100)
-    start_angle = math.radians(180)
-    end_angle = math.radians(180 + angle)
-    x1 = cx + r * math.cos(start_angle)
-    y1 = cy + r * math.sin(start_angle)
-    x2 = cx + r * math.cos(end_angle)
-    y2 = cy + r * math.sin(end_angle)
-    large_arc = 1 if angle > 180 else 0
-
-    return f'''<svg viewBox="0 0 120 70" class="gauge-svg">
-      {track}
-      <path d="M {x1:.1f} {y1:.1f} A 50 50 0 {large_arc} 1 {x2:.1f} {y2:.1f}" fill="none" stroke="{color}" stroke-width="8" stroke-linecap="round"/>
-      <text x="60" y="58" text-anchor="middle" fill="{color}" font-size="14" font-weight="800" font-family="monospace">{v}</text>
-    </svg>'''
+    _gauge_gid += 1
+    return _gauge_svg(
+        float(v), str(v), color,
+        ["#f06f68", "#ff7a45", "#f1bc4b", "#35d08f", "#4ade80"],
+        [25, 46, 55, 76], "0", "100", f"g{_gauge_gid}",
+    )
 
 
 def _fng_class(value, classification: str) -> str:
@@ -1588,6 +1823,77 @@ def _build_executive_rankings(df: pd.DataFrame) -> str:
 </section>'''
 
 
+def _rsi_zone(v: int) -> str:
+    """RSI zone bucket (mirrors the former client-side logic)."""
+    if v <= 30:
+        return "deep"
+    if v <= 40:
+        return "value"
+    if v <= 50:
+        return "watch"
+    if v >= 70:
+        return "hot"
+    if v >= 60:
+        return "warm"
+    return "neutral"
+
+
+def _rsi_meter(v: int) -> str:
+    """RSI value + a 0-100 position track with 30/70 markers and a zone-colored dot."""
+    zone = _rsi_zone(v)
+    pos = max(3, min(97, v))
+    return (
+        f'<span class="rsi-meter" data-zone="{zone}">'
+        f'<span class="rsi-pill" data-rsi="{v}" data-zone="{zone}">{v}</span>'
+        f'<span class="rsi-track">'
+        f'<span class="rsi-tick" style="left:30%"></span>'
+        f'<span class="rsi-tick" style="left:70%"></span>'
+        f'<span class="rsi-dot" style="left:{pos}%"></span>'
+        f'</span></span>'
+    )
+
+
+# TradingView symbols for indices can't be reconstructed by rule — map the 5 covered.
+_TV_INDEX_MAP = {
+    "BVSP": "BMFBOVESPA:IBOV",
+    "GSPC": "SP:SPX",
+    "NDX": "NASDAQ:NDX",
+    "DJI": "DJ:DJI",
+    "GDAXI": "XETR:DAX",
+}
+
+
+def _asset_links(ticker: str, setor: str) -> tuple:
+    """Reconstruct Yahoo Finance and TradingView URLs from the normalized ticker + group.
+
+    The DataFrame ticker is normalized (``.SA``/``^``/``-USD`` stripped), so the raw
+    symbol is rebuilt per group. Returns ``(yahoo_url, tradingview_url_or_None)``.
+    """
+    tk = str(ticker).upper()
+    tk_q = quote(tk, safe="")
+
+    if setor == "Indices":
+        yahoo = f"https://finance.yahoo.com/quote/{quote('^' + tk, safe='')}"
+        tv_sym = _TV_INDEX_MAP.get(tk)
+    elif setor == "Cripto":
+        yahoo = f"https://finance.yahoo.com/quote/{quote(tk + '-USD', safe='')}"
+        tv_sym = f"{tk}USD"
+    elif setor == "Brasil":
+        yahoo = f"https://finance.yahoo.com/quote/{quote(tk + '.SA', safe='')}"
+        tv_sym = f"BMFBOVESPA:{tk}"
+    elif setor == "Moeda":
+        yahoo = f"https://finance.yahoo.com/quote/{tk_q}"
+        tv_sym = "FX_IDC:USDBRL" if tk == "BRL=X" else None
+    else:  # EUA and anything else: plain symbol
+        yahoo = f"https://finance.yahoo.com/quote/{tk_q}"
+        tv_sym = tk.replace("-", ".")
+
+    tv_url = None
+    if tv_sym:
+        tv_url = f"https://www.tradingview.com/chart/?symbol={quote(tv_sym, safe='')}"
+    return yahoo, tv_url
+
+
 def _build_sector_rows(df_sector: pd.DataFrame, market_key: str) -> str:
     rows_html = ""
     for sig in SIGNAL_ORDER:
@@ -1609,23 +1915,103 @@ def _build_sector_rows(df_sector: pd.DataFrame, market_key: str) -> str:
             drawdown = float(r.get("Drawdown_Pct", 0.0))
             dd_cls = _drawdown_class(drawdown)
             peak_date = _format_peak_date(r.get("Peak_Date"))
-            peak_meta = f"Top close: {_format_price(float(r.get('Peak_Close', r['Weekly_Close'])))}"
+            peak_close = _format_price(float(r.get("Peak_Close", r["Weekly_Close"])))
+            peak_meta = f"Top close: {peak_close}"
             if peak_date:
                 peak_meta += f" | Date: {peak_date}"
+            yahoo_url, tv_url = _asset_links(r["Ticker"], str(r.get("Setor", "")))
             rows_html += f'''
-            <tr class="asset-row" data-signal="{r['Signal']}" data-market="{escape(market_key)}" data-ticker="{escape(str(r['Ticker']).lower())}" data-name="{escape(str(r['Name']).lower())}">
+            <tr class="asset-row" data-signal="{r['Signal']}" data-market="{escape(market_key)}" data-ticker="{escape(str(r['Ticker']).lower())}" data-name="{escape(str(r['Name']).lower())}" data-peak-close="{escape(peak_close, quote=True)}" data-peak-date="{escape(peak_date, quote=True)}" data-dd="{escape(_format_percent(drawdown), quote=True)}" data-yahoo="{escape(yahoo_url, quote=True)}" data-tv="{escape(tv_url or '', quote=True)}">
               <td class="col-tk"><span class="tk-badge">{escape(str(r['Ticker']))}</span></td>
               <td class="col-name">{escape(str(r['Name']))}</td>
               <td class="col-price">{_format_price(r['Weekly_Close'])}</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="{rsi_w}">{rsi_w}</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="{rsi_m}">{rsi_m}</span></td>
+              <td class="col-rsi">{_rsi_meter(rsi_w)}</td>
+              <td class="col-rsi">{_rsi_meter(rsi_m)}</td>
               <td class="col-dd"><span class="dd-pill {dd_cls}" title="{escape(peak_meta, quote=True)}">{_format_percent(drawdown)}</span></td>
               <td class="col-sig"><span class="signal-badge {sig_cls}">{sig_lbl}</span></td>
             </tr>'''
     return rows_html
 
 
-def generate_html(df: pd.DataFrame, onchain: Dict) -> str:
+SNAPSHOT_FILE = Path(__file__).parent / "snapshot_history.json"
+SNAPSHOT_KEYS = ["total", "UltraBuy", "Buy", "Neutral", "Sell"]
+
+
+def _load_snapshot_history() -> list:
+    try:
+        data = json.loads(SNAPSHOT_FILE.read_text(encoding="utf-8"))
+        return data if isinstance(data, list) else []
+    except (FileNotFoundError, ValueError, OSError):
+        return []
+
+
+def _count_signals(df: pd.DataFrame) -> dict:
+    counts = df["Signal"].value_counts().to_dict()
+    return {
+        "total": int(len(df)),
+        "UltraBuy": int(counts.get("UltraBuy", 0)),
+        "Buy": int(counts.get("Buy", 0)),
+        "Neutral": int(counts.get("Neutral", 0)),
+        "Sell": int(counts.get("Sell", 0)),
+    }
+
+
+def _update_snapshot(df: pd.DataFrame) -> dict | None:
+    """Append today's signal counts to a rolling history file and return day-over-day
+    deltas vs the most recent snapshot from a *previous* calendar day (São Paulo tz).
+
+    Returns None when there is no prior-day baseline yet (first run or same day).
+    Writing/reading a small JSON is negligible next to the network fetches.
+    """
+    now = sao_paulo_now()
+    today = now.strftime("%Y-%m-%d")
+    counts = _count_signals(df)
+
+    history = _load_snapshot_history()
+    baseline = next(
+        (s for s in reversed(history) if s.get("date") and s["date"] != today),
+        None,
+    )
+
+    deltas = None
+    if baseline:
+        prev = baseline.get("counts", {})
+        deltas = {k: counts[k] - int(prev.get(k, counts[k])) for k in SNAPSHOT_KEYS}
+
+    history.append({"ts": now.isoformat(timespec="seconds"), "date": today, "counts": counts})
+    history = history[-30:]
+    try:
+        SNAPSHOT_FILE.write_text(
+            json.dumps(history, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
+    except OSError as exc:
+        print(f"  [WARN] Could not write snapshot history: {exc}")
+
+    return deltas
+
+
+def _kpi_delta_html(key: str, deltas) -> str:
+    """One '▲ +N vs yesterday' line under a KPI number, colored by signal semantics."""
+    if not deltas or key not in deltas:
+        return ('<div class="kpi-delta"><span class="d-flat">—</span>'
+                '<span class="d-ctx">vs yesterday</span></div>')
+    d = deltas[key]
+    if d == 0:
+        cls, txt = "d-flat", "= 0"
+    else:
+        arrow = "▲" if d > 0 else "▼"
+        txt = f"{arrow} {d:+d}"
+        if key in ("UltraBuy", "Buy"):
+            cls = "d-good" if d > 0 else "d-bad"
+        elif key == "Sell":
+            cls = "d-bad" if d > 0 else "d-good"
+        else:
+            cls = "d-flat"
+    return (f'<div class="kpi-delta"><span class="{cls}">{txt}</span>'
+            f'<span class="d-ctx">vs yesterday</span></div>')
+
+
+def generate_html(df: pd.DataFrame, onchain: Dict, deltas: dict | None = None) -> str:
     now = sao_paulo_now().strftime("%d/%m/%Y %H:%M BRT")
     counts = df["Signal"].value_counts().to_dict()
     total = len(df)
@@ -1693,6 +2079,9 @@ def generate_html(df: pd.DataFrame, onchain: Dict) -> str:
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Financial Monitor Research — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet"/>
 <style>
 /* ===== DESIGN TOKENS ===== */
 :root{{
@@ -1866,6 +2255,7 @@ body{{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:
   .kpi-cell{{min-width:48%;flex:1 1 48%}}
 }}
 {RESEARCH_V2_CSS}
+{RESEARCH_V3_CSS}
 </style>
 </head>
 <body class="research-v2 profile-field-v2">
@@ -1895,20 +2285,20 @@ body{{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:
   </div>
   <aside class="market-read" aria-label="Signal distribution">
     <h2>Signal Allocation</h2>
-    <div class="mix-row"><span>Ultra Buy</span><strong>{ub}</strong><div class="mix-bar"><span style="--w:{ub_pct:.1f}%;--c:var(--rm-green)"></span></div></div>
-    <div class="mix-row"><span>Buy</span><strong>{b}</strong><div class="mix-bar"><span style="--w:{b_pct:.1f}%;--c:var(--rm-green)"></span></div></div>
-    <div class="mix-row"><span>Neutral</span><strong>{n}</strong><div class="mix-bar"><span style="--w:{n_pct:.1f}%;--c:var(--rm-blue)"></span></div></div>
-    <div class="mix-row"><span>Sell</span><strong>{s}</strong><div class="mix-bar"><span style="--w:{s_pct:.1f}%;--c:var(--rm-red)"></span></div></div>
+    <div class="mix-row"><span class="signal-badge sig-ultrabuy">Ultra Buy</span><div class="mix-bar"><span style="--w:{ub_pct:.1f}%;--c:var(--rm-green)"></span></div><strong>{ub}</strong></div>
+    <div class="mix-row"><span class="signal-badge sig-buy">Buy</span><div class="mix-bar"><span style="--w:{b_pct:.1f}%;--c:var(--rm-green)"></span></div><strong>{b}</strong></div>
+    <div class="mix-row"><span class="signal-badge sig-neutral">Neutral</span><div class="mix-bar"><span style="--w:{n_pct:.1f}%;--c:var(--rm-blue)"></span></div><strong>{n}</strong></div>
+    <div class="mix-row"><span class="signal-badge sig-sell">Sell</span><div class="mix-bar"><span style="--w:{s_pct:.1f}%;--c:var(--rm-red)"></span></div><strong>{s}</strong></div>
   </aside>
 </section>
 
 <!-- KPI STRIP -->
 <div class="kpi-strip" aria-label="Key indicators">
-  <div class="kpi-cell"><div class="kpi-num" style="color:var(--rm-cyan)">{total}</div><div class="kpi-label">Assets in coverage</div></div>
-  <div class="kpi-cell"><div class="kpi-num" style="color:var(--rm-green)">{ub}</div><div class="kpi-label">Extreme asymmetry</div></div>
-  <div class="kpi-cell"><div class="kpi-num" style="color:var(--rm-green)">{b}</div><div class="kpi-label">Buy zone</div></div>
-  <div class="kpi-cell"><div class="kpi-num" style="color:var(--rm-blue)">{n}</div><div class="kpi-label">Neutral</div></div>
-  <div class="kpi-cell"><div class="kpi-num" style="color:var(--rm-red)">{s}</div><div class="kpi-label">Overbought</div></div>
+  <div class="kpi-cell"><div class="kpi-num" style="color:var(--rm-cyan)">{total}</div><div class="kpi-label">Assets in coverage</div>{_kpi_delta_html("total", deltas)}</div>
+  <div class="kpi-cell"><div class="kpi-num" style="color:var(--rm-green)">{ub}</div><div class="kpi-label">Extreme asymmetry</div>{_kpi_delta_html("UltraBuy", deltas)}</div>
+  <div class="kpi-cell"><div class="kpi-num" style="color:var(--rm-green)">{b}</div><div class="kpi-label">Buy zone</div>{_kpi_delta_html("Buy", deltas)}</div>
+  <div class="kpi-cell"><div class="kpi-num" style="color:var(--rm-blue)">{n}</div><div class="kpi-label">Neutral</div>{_kpi_delta_html("Neutral", deltas)}</div>
+  <div class="kpi-cell"><div class="kpi-num" style="color:var(--rm-red)">{s}</div><div class="kpi-label">Overbought</div>{_kpi_delta_html("Sell", deltas)}</div>
 </div>
 
 {executive_rankings}
@@ -1955,6 +2345,9 @@ body{{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:
 <script>
 {RESEARCH_V2_SCRIPT}
 </script>
+<script>
+{RESEARCH_V3_SCRIPT}
+</script>
 </body>
 </html>'''
 
@@ -1979,8 +2372,10 @@ def main():
 
     print(f"  [OK] {len(df)} assets processed")
 
+    deltas = _update_snapshot(df)
+
     print("[3/3] Generating dashboard HTML...")
-    html = generate_html(df, onchain)
+    html = generate_html(df, onchain, deltas)
     OUTPUT_FILE.write_text(html, encoding="utf-8")
     print(f"  [OK] Saved to: {OUTPUT_FILE}")
     print(f"\n  Open in browser: file:///{OUTPUT_FILE.as_posix()}")
