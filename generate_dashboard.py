@@ -665,6 +665,120 @@ body.research-v2{
   border-color:rgba(240,111,104,.34);
 }
 
+.research-v2 .desk-highlights{
+  max-width:1440px;
+  margin:0 auto;
+  padding:0 clamp(16px,3vw,34px) 24px;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:22px;
+}
+
+.research-v2 .highlight-card{
+  min-height:252px;
+  padding:18px 20px 16px;
+  border:1px solid var(--rm-line);
+  border-radius:8px;
+  background:rgba(17,24,32,.86);
+  box-shadow:0 18px 44px rgba(0,0,0,.22);
+}
+
+.research-v2 .highlight-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:14px;
+  margin-bottom:12px;
+}
+
+.research-v2 .highlight-head h2{
+  margin:0;
+  color:var(--rm-text);
+  font-size:.98rem;
+  font-weight:850;
+}
+
+.research-v2 .highlight-head span{
+  color:var(--rm-dim);
+  font-size:.72rem;
+  font-family:var(--mono);
+  font-weight:800;
+  white-space:nowrap;
+}
+
+.research-v2 .highlight-card.opportunities h2{color:var(--rm-green)}
+.research-v2 .highlight-card.risks h2{color:var(--rm-red)}
+
+.research-v2 .highlight-list{
+  display:grid;
+  gap:0;
+}
+
+.research-v2 .highlight-row{
+  display:grid;
+  grid-template-columns:30px minmax(0,1fr) minmax(108px,auto);
+  align-items:center;
+  gap:12px;
+  min-height:42px;
+  padding:10px 0;
+  border-top:1px solid var(--rm-line-soft);
+}
+
+.research-v2 .highlight-rank{
+  color:var(--rm-dim);
+  font-family:var(--mono);
+  font-size:.72rem;
+  font-weight:900;
+}
+
+.research-v2 .highlight-main{
+  min-width:0;
+}
+
+.research-v2 .highlight-title{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+}
+
+.research-v2 .highlight-title .tk-badge{
+  flex:0 0 auto;
+}
+
+.research-v2 .highlight-name{
+  overflow:hidden;
+  color:var(--rm-text);
+  font-size:.84rem;
+  font-weight:750;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.research-v2 .highlight-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-top:6px;
+}
+
+.research-v2 .highlight-chip{
+  color:var(--rm-muted);
+  background:rgba(8,11,15,.72);
+  border:1px solid var(--rm-line-soft);
+  border-radius:5px;
+  padding:2px 7px;
+  font-family:var(--mono);
+  font-size:.68rem;
+  font-weight:800;
+  white-space:nowrap;
+}
+
+.research-v2 .highlight-signal{
+  display:flex;
+  justify-content:flex-end;
+}
+
 .research-v2 .empty-state{
   display:none;
   padding:26px;
@@ -705,6 +819,7 @@ body.research-v2{
 
 @media(max-width:980px){
   .research-v2 .executive-board{grid-template-columns:1fr}
+  .research-v2 .desk-highlights{grid-template-columns:1fr}
   .research-v2 .oc-grid{grid-template-columns:1fr}
   .research-v2 .topbar-brand{min-width:auto}
 }
@@ -737,6 +852,7 @@ body.research-v2{
 
 @media(max-width:480px){
   .research-v2 .executive-board,
+  .research-v2 .desk-highlights,
   .research-v2 .main,
   .research-v2 .kpi-strip{
     padding-left:12px;
@@ -816,6 +932,7 @@ body.research-v2.profile-field-v2::after{
 }
 
 .research-v2.profile-field-v2 .executive-board,
+.research-v2.profile-field-v2 .desk-highlights,
 .research-v2.profile-field-v2 .kpi-strip,
 .research-v2.profile-field-v2 .main,
 .research-v2.profile-field-v2 .footer{
@@ -825,6 +942,7 @@ body.research-v2.profile-field-v2::after{
 
 .research-v2.profile-field-v2 .brief-copy,
 .research-v2.profile-field-v2 .market-read,
+.research-v2.profile-field-v2 .highlight-card,
 .research-v2.profile-field-v2 .kpi-cell,
 .research-v2.profile-field-v2 .oc-card,
 .research-v2.profile-field-v2 .filter-strip,
@@ -1240,6 +1358,87 @@ def _build_onchain_card(coin: str, data: Dict) -> str:
     </div>'''
 
 
+def _market_title(market: object) -> str:
+    return GROUP_TITLES.get(str(market), str(market))
+
+
+def _opportunity_rank(row: pd.Series) -> tuple:
+    signal_rank = {"UltraBuy": 0, "Buy": 1, "Neutral": 2, "Sell": 3}
+    return (
+        signal_rank.get(str(row.get("Signal", "")), 9),
+        float(row.get("Weekly_RSI", 100)),
+        float(row.get("Monthly_RSI", 100)),
+        float(row.get("Drawdown_Pct", 0.0)),
+    )
+
+
+def _risk_rank(row: pd.Series) -> tuple:
+    signal_rank = {"Sell": 0, "Neutral": 1, "Buy": 2, "UltraBuy": 3}
+    return (
+        signal_rank.get(str(row.get("Signal", "")), 9),
+        -float(row.get("Weekly_RSI", 0)),
+        -float(row.get("Monthly_RSI", 0)),
+        -float(row.get("Drawdown_Pct", -100.0)),
+    )
+
+
+def _build_highlight_rows(df_ranked: pd.DataFrame) -> str:
+    rows_html = ""
+    for index, (_, r) in enumerate(df_ranked.iterrows(), start=1):
+        sig_cls = _signal_class(r["Signal"])
+        sig_lbl = _signal_label(r["Signal"])
+        rows_html += f'''
+      <div class="highlight-row">
+        <div class="highlight-rank">{index:02d}</div>
+        <div class="highlight-main">
+          <div class="highlight-title">
+            <span class="tk-badge">{escape(str(r["Ticker"]))}</span>
+            <span class="highlight-name">{escape(str(r["Name"]))}</span>
+          </div>
+          <div class="highlight-meta">
+            <span class="highlight-chip">{escape(_market_title(r.get("Setor", "")))}</span>
+            <span class="highlight-chip">RSI W {int(r["Weekly_RSI"])}</span>
+            <span class="highlight-chip">RSI M {int(r["Monthly_RSI"])}</span>
+            <span class="highlight-chip">DD {_format_percent(float(r.get("Drawdown_Pct", 0.0)))}</span>
+          </div>
+        </div>
+        <div class="highlight-signal">
+          <span class="signal-badge {sig_cls}">{sig_lbl}</span>
+        </div>
+      </div>'''
+    return rows_html
+
+
+def _build_executive_rankings(df: pd.DataFrame) -> str:
+    opportunity = df.copy()
+    opportunity["__rank"] = opportunity.apply(_opportunity_rank, axis=1)
+    opportunity = opportunity.sort_values("__rank").head(5).drop(columns="__rank")
+
+    risk = df.copy()
+    risk["__rank"] = risk.apply(_risk_rank, axis=1)
+    risk = risk.sort_values("__rank").head(5).drop(columns="__rank")
+
+    return f'''
+<section class="desk-highlights" aria-label="Executive rankings">
+  <article class="highlight-card opportunities">
+    <div class="highlight-head">
+      <h2>Top Opportunities</h2>
+      <span>TOP 5</span>
+    </div>
+    <div class="highlight-list">{_build_highlight_rows(opportunity)}
+    </div>
+  </article>
+  <article class="highlight-card risks">
+    <div class="highlight-head">
+      <h2>Top Risks</h2>
+      <span>TOP 5</span>
+    </div>
+    <div class="highlight-list">{_build_highlight_rows(risk)}
+    </div>
+  </article>
+</section>'''
+
+
 def _build_sector_rows(df_sector: pd.DataFrame, market_key: str) -> str:
     rows_html = ""
     for sig in SIGNAL_ORDER:
@@ -1293,6 +1492,7 @@ def generate_html(df: pd.DataFrame, onchain: Dict) -> str:
     # Build on-chain section
     btc_card = _build_onchain_card("BTC", onchain.get("BTC")) if onchain else ""
     eth_card = _build_onchain_card("ETH", onchain.get("ETH")) if onchain else ""
+    executive_rankings = _build_executive_rankings(df)
 
     # Build market filter buttons + table content
     market_buttons = '''<button class="fbtn active" data-market="all">All</button>'''
@@ -1553,6 +1753,8 @@ body{{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:
   <div class="kpi-cell"><div class="kpi-num" style="color:var(--rm-blue)">{n}</div><div class="kpi-label">Neutral</div></div>
   <div class="kpi-cell"><div class="kpi-num" style="color:var(--rm-red)">{s}</div><div class="kpi-label">Overbought</div></div>
 </div>
+
+{executive_rankings}
 
 <div class="main">
 

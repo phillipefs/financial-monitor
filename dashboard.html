@@ -783,6 +783,120 @@ body.research-v2{
   border-color:rgba(240,111,104,.34);
 }
 
+.research-v2 .desk-highlights{
+  max-width:1440px;
+  margin:0 auto;
+  padding:0 clamp(16px,3vw,34px) 24px;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:22px;
+}
+
+.research-v2 .highlight-card{
+  min-height:252px;
+  padding:18px 20px 16px;
+  border:1px solid var(--rm-line);
+  border-radius:8px;
+  background:rgba(17,24,32,.86);
+  box-shadow:0 18px 44px rgba(0,0,0,.22);
+}
+
+.research-v2 .highlight-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:14px;
+  margin-bottom:12px;
+}
+
+.research-v2 .highlight-head h2{
+  margin:0;
+  color:var(--rm-text);
+  font-size:.98rem;
+  font-weight:850;
+}
+
+.research-v2 .highlight-head span{
+  color:var(--rm-dim);
+  font-size:.72rem;
+  font-family:var(--mono);
+  font-weight:800;
+  white-space:nowrap;
+}
+
+.research-v2 .highlight-card.opportunities h2{color:var(--rm-green)}
+.research-v2 .highlight-card.risks h2{color:var(--rm-red)}
+
+.research-v2 .highlight-list{
+  display:grid;
+  gap:0;
+}
+
+.research-v2 .highlight-row{
+  display:grid;
+  grid-template-columns:30px minmax(0,1fr) minmax(108px,auto);
+  align-items:center;
+  gap:12px;
+  min-height:42px;
+  padding:10px 0;
+  border-top:1px solid var(--rm-line-soft);
+}
+
+.research-v2 .highlight-rank{
+  color:var(--rm-dim);
+  font-family:var(--mono);
+  font-size:.72rem;
+  font-weight:900;
+}
+
+.research-v2 .highlight-main{
+  min-width:0;
+}
+
+.research-v2 .highlight-title{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+}
+
+.research-v2 .highlight-title .tk-badge{
+  flex:0 0 auto;
+}
+
+.research-v2 .highlight-name{
+  overflow:hidden;
+  color:var(--rm-text);
+  font-size:.84rem;
+  font-weight:750;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.research-v2 .highlight-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-top:6px;
+}
+
+.research-v2 .highlight-chip{
+  color:var(--rm-muted);
+  background:rgba(8,11,15,.72);
+  border:1px solid var(--rm-line-soft);
+  border-radius:5px;
+  padding:2px 7px;
+  font-family:var(--mono);
+  font-size:.68rem;
+  font-weight:800;
+  white-space:nowrap;
+}
+
+.research-v2 .highlight-signal{
+  display:flex;
+  justify-content:flex-end;
+}
+
 .research-v2 .empty-state{
   display:none;
   padding:26px;
@@ -823,6 +937,7 @@ body.research-v2{
 
 @media(max-width:980px){
   .research-v2 .executive-board{grid-template-columns:1fr}
+  .research-v2 .desk-highlights{grid-template-columns:1fr}
   .research-v2 .oc-grid{grid-template-columns:1fr}
   .research-v2 .topbar-brand{min-width:auto}
 }
@@ -855,6 +970,7 @@ body.research-v2{
 
 @media(max-width:480px){
   .research-v2 .executive-board,
+  .research-v2 .desk-highlights,
   .research-v2 .main,
   .research-v2 .kpi-strip{
     padding-left:12px;
@@ -934,6 +1050,7 @@ body.research-v2.profile-field-v2::after{
 }
 
 .research-v2.profile-field-v2 .executive-board,
+.research-v2.profile-field-v2 .desk-highlights,
 .research-v2.profile-field-v2 .kpi-strip,
 .research-v2.profile-field-v2 .main,
 .research-v2.profile-field-v2 .footer{
@@ -943,6 +1060,7 @@ body.research-v2.profile-field-v2::after{
 
 .research-v2.profile-field-v2 .brief-copy,
 .research-v2.profile-field-v2 .market-read,
+.research-v2.profile-field-v2 .highlight-card,
 .research-v2.profile-field-v2 .kpi-cell,
 .research-v2.profile-field-v2 .oc-card,
 .research-v2.profile-field-v2 .filter-strip,
@@ -1032,7 +1150,7 @@ body.research-v2.profile-field-v2::after{
   </div>
   <div class="topbar-meta">
     <span>Research snapshot</span>
-    <time>03/07/2026 16:49 BRT</time>
+    <time>03/07/2026 17:54 BRT</time>
   </div>
 </header>
 
@@ -1060,6 +1178,206 @@ body.research-v2.profile-field-v2::after{
   <div class="kpi-cell"><div class="kpi-num" style="color:var(--rm-blue)">81</div><div class="kpi-label">Neutral</div></div>
   <div class="kpi-cell"><div class="kpi-num" style="color:var(--rm-red)">7</div><div class="kpi-label">Overbought</div></div>
 </div>
+
+
+<section class="desk-highlights" aria-label="Executive rankings">
+  <article class="highlight-card opportunities">
+    <div class="highlight-head">
+      <h2>Top Opportunities</h2>
+      <span>TOP 5</span>
+    </div>
+    <div class="highlight-list">
+      <div class="highlight-row">
+        <div class="highlight-rank">01</div>
+        <div class="highlight-main">
+          <div class="highlight-title">
+            <span class="tk-badge">INBR32</span>
+            <span class="highlight-name">Banco Inter</span>
+          </div>
+          <div class="highlight-meta">
+            <span class="highlight-chip">Brazilian Market</span>
+            <span class="highlight-chip">RSI W 28</span>
+            <span class="highlight-chip">RSI M 41</span>
+            <span class="highlight-chip">DD -42.8%</span>
+          </div>
+        </div>
+        <div class="highlight-signal">
+          <span class="signal-badge sig-ultrabuy">ULTRA BUY</span>
+        </div>
+      </div>
+      <div class="highlight-row">
+        <div class="highlight-rank">02</div>
+        <div class="highlight-main">
+          <div class="highlight-title">
+            <span class="tk-badge">SOJA3</span>
+            <span class="highlight-name">Boa Safra</span>
+          </div>
+          <div class="highlight-meta">
+            <span class="highlight-chip">Brazilian Market</span>
+            <span class="highlight-chip">RSI W 32</span>
+            <span class="highlight-chip">RSI M 31</span>
+            <span class="highlight-chip">DD -62.7%</span>
+          </div>
+        </div>
+        <div class="highlight-signal">
+          <span class="signal-badge sig-neutral">NEUTRAL</span>
+        </div>
+      </div>
+      <div class="highlight-row">
+        <div class="highlight-rank">03</div>
+        <div class="highlight-main">
+          <div class="highlight-title">
+            <span class="tk-badge">MSTR</span>
+            <span class="highlight-name">Strategy</span>
+          </div>
+          <div class="highlight-meta">
+            <span class="highlight-chip">U.S. Market</span>
+            <span class="highlight-chip">RSI W 35</span>
+            <span class="highlight-chip">RSI M 40</span>
+            <span class="highlight-chip">DD -76.8%</span>
+          </div>
+        </div>
+        <div class="highlight-signal">
+          <span class="signal-badge sig-neutral">NEUTRAL</span>
+        </div>
+      </div>
+      <div class="highlight-row">
+        <div class="highlight-rank">04</div>
+        <div class="highlight-main">
+          <div class="highlight-title">
+            <span class="tk-badge">SUZB3</span>
+            <span class="highlight-name">Suzano</span>
+          </div>
+          <div class="highlight-meta">
+            <span class="highlight-chip">Brazilian Market</span>
+            <span class="highlight-chip">RSI W 35</span>
+            <span class="highlight-chip">RSI M 40</span>
+            <span class="highlight-chip">DD -34.2%</span>
+          </div>
+        </div>
+        <div class="highlight-signal">
+          <span class="signal-badge sig-neutral">NEUTRAL</span>
+        </div>
+      </div>
+      <div class="highlight-row">
+        <div class="highlight-rank">05</div>
+        <div class="highlight-main">
+          <div class="highlight-title">
+            <span class="tk-badge">TM</span>
+            <span class="highlight-name">Toyota</span>
+          </div>
+          <div class="highlight-meta">
+            <span class="highlight-chip">U.S. Market</span>
+            <span class="highlight-chip">RSI W 35</span>
+            <span class="highlight-chip">RSI M 45</span>
+            <span class="highlight-chip">DD -29.7%</span>
+          </div>
+        </div>
+        <div class="highlight-signal">
+          <span class="signal-badge sig-neutral">NEUTRAL</span>
+        </div>
+      </div>
+    </div>
+  </article>
+  <article class="highlight-card risks">
+    <div class="highlight-head">
+      <h2>Top Risks</h2>
+      <span>TOP 5</span>
+    </div>
+    <div class="highlight-list">
+      <div class="highlight-row">
+        <div class="highlight-rank">01</div>
+        <div class="highlight-main">
+          <div class="highlight-title">
+            <span class="tk-badge">PANW</span>
+            <span class="highlight-name">Palo Alto</span>
+          </div>
+          <div class="highlight-meta">
+            <span class="highlight-chip">U.S. Market</span>
+            <span class="highlight-chip">RSI W 82</span>
+            <span class="highlight-chip">RSI M 76</span>
+            <span class="highlight-chip">DD 0.0%</span>
+          </div>
+        </div>
+        <div class="highlight-signal">
+          <span class="signal-badge sig-sell">SELL</span>
+        </div>
+      </div>
+      <div class="highlight-row">
+        <div class="highlight-rank">02</div>
+        <div class="highlight-main">
+          <div class="highlight-title">
+            <span class="tk-badge">AMAT</span>
+            <span class="highlight-name">Applied Mat</span>
+          </div>
+          <div class="highlight-meta">
+            <span class="highlight-chip">U.S. Market</span>
+            <span class="highlight-chip">RSI W 79</span>
+            <span class="highlight-chip">RSI M 73</span>
+            <span class="highlight-chip">DD -3.8%</span>
+          </div>
+        </div>
+        <div class="highlight-signal">
+          <span class="signal-badge sig-sell">SELL</span>
+        </div>
+      </div>
+      <div class="highlight-row">
+        <div class="highlight-rank">03</div>
+        <div class="highlight-main">
+          <div class="highlight-title">
+            <span class="tk-badge">CAT</span>
+            <span class="highlight-name">Caterpillar</span>
+          </div>
+          <div class="highlight-meta">
+            <span class="highlight-chip">U.S. Market</span>
+            <span class="highlight-chip">RSI W 75</span>
+            <span class="highlight-chip">RSI M 76</span>
+            <span class="highlight-chip">DD -3.4%</span>
+          </div>
+        </div>
+        <div class="highlight-signal">
+          <span class="signal-badge sig-sell">SELL</span>
+        </div>
+      </div>
+      <div class="highlight-row">
+        <div class="highlight-rank">04</div>
+        <div class="highlight-main">
+          <div class="highlight-title">
+            <span class="tk-badge">CXSE3</span>
+            <span class="highlight-name">Caixa Seguros</span>
+          </div>
+          <div class="highlight-meta">
+            <span class="highlight-chip">Brazilian Market</span>
+            <span class="highlight-chip">RSI W 74</span>
+            <span class="highlight-chip">RSI M 81</span>
+            <span class="highlight-chip">DD 0.0%</span>
+          </div>
+        </div>
+        <div class="highlight-signal">
+          <span class="signal-badge sig-sell">SELL</span>
+        </div>
+      </div>
+      <div class="highlight-row">
+        <div class="highlight-rank">05</div>
+        <div class="highlight-main">
+          <div class="highlight-title">
+            <span class="tk-badge">AMD</span>
+            <span class="highlight-name">AMD</span>
+          </div>
+          <div class="highlight-meta">
+            <span class="highlight-chip">U.S. Market</span>
+            <span class="highlight-chip">RSI W 73</span>
+            <span class="highlight-chip">RSI M 75</span>
+            <span class="highlight-chip">DD -3.6%</span>
+          </div>
+        </div>
+        <div class="highlight-signal">
+          <span class="signal-badge sig-sell">SELL</span>
+        </div>
+      </div>
+    </div>
+  </article>
+</section>
 
 <div class="main">
 
@@ -1164,7 +1482,7 @@ body.research-v2.profile-field-v2::after{
             <tr class="asset-row" data-signal="Neutral" data-market="indices" data-ticker="bvsp" data-name="ibovespa">
               <td class="col-tk"><span class="tk-badge">BVSP</span></td>
               <td class="col-name">Ibovespa</td>
-              <td class="col-price">174,126</td>
+              <td class="col-price">174,070</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="50">50</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="66">66</span></td>
               <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 197,324 | Date: 06/04/2026">-11.8%</span></td>
@@ -1230,28 +1548,28 @@ body.research-v2.profile-field-v2::after{
               </tr>
             </thead>
             <tbody>
-            <tr class="asset-row" data-signal="Neutral" data-market="cripto" data-ticker="btc" data-name="bitcoin">
-              <td class="col-tk"><span class="tk-badge">BTC</span></td>
-              <td class="col-name">Bitcoin</td>
-              <td class="col-price">62,165</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="36">36</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="43">43</span></td>
-              <td class="col-dd"><span class="dd-pill dd-deep" title="Top close: 123,513 | Date: 29/09/2025">-49.7%</span></td>
-              <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
-            </tr>
             <tr class="asset-row" data-signal="Neutral" data-market="cripto" data-ticker="eth" data-name="ethereum">
               <td class="col-tk"><span class="tk-badge">ETH</span></td>
               <td class="col-name">Ethereum</td>
-              <td class="col-price">1,745</td>
+              <td class="col-price">1,767</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="37">37</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="42">42</span></td>
-              <td class="col-dd"><span class="dd-pill dd-stress" title="Top close: 4,780 | Date: 18/08/2025">-63.5%</span></td>
+              <td class="col-dd"><span class="dd-pill dd-stress" title="Top close: 4,780 | Date: 18/08/2025">-63.0%</span></td>
+              <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
+            </tr>
+            <tr class="asset-row" data-signal="Neutral" data-market="cripto" data-ticker="btc" data-name="bitcoin">
+              <td class="col-tk"><span class="tk-badge">BTC</span></td>
+              <td class="col-name">Bitcoin</td>
+              <td class="col-price">62,756</td>
+              <td class="col-rsi"><span class="rsi-pill" data-rsi="37">37</span></td>
+              <td class="col-rsi"><span class="rsi-pill" data-rsi="43">43</span></td>
+              <td class="col-dd"><span class="dd-pill dd-deep" title="Top close: 123,513 | Date: 29/09/2025">-49.2%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
             <tr class="asset-row" data-signal="Neutral" data-market="cripto" data-ticker="sol" data-name="solana">
               <td class="col-tk"><span class="tk-badge">SOL</span></td>
               <td class="col-name">Solana</td>
-              <td class="col-price">82.58</td>
+              <td class="col-price">82.73</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="43">43</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="42">42</span></td>
               <td class="col-dd"><span class="dd-pill dd-stress" title="Top close: 252.92 | Date: 18/11/2024">-67.3%</span></td>
@@ -1686,7 +2004,7 @@ body.research-v2.profile-field-v2::after{
             <tr class="asset-row" data-signal="UltraBuy" data-market="brasil" data-ticker="inbr32" data-name="banco inter">
               <td class="col-tk"><span class="tk-badge">INBR32</span></td>
               <td class="col-name">Banco Inter</td>
-              <td class="col-price">28.43</td>
+              <td class="col-price">28.40</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="28">28</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="41">41</span></td>
               <td class="col-dd"><span class="dd-pill dd-deep" title="Top close: 49.68 | Date: 03/11/2025">-42.8%</span></td>
@@ -1695,16 +2013,16 @@ body.research-v2.profile-field-v2::after{
             <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="soja3" data-name="boa safra">
               <td class="col-tk"><span class="tk-badge">SOJA3</span></td>
               <td class="col-name">Boa Safra</td>
-              <td class="col-price">6.11</td>
+              <td class="col-price">6.13</td>
+              <td class="col-rsi"><span class="rsi-pill" data-rsi="32">32</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="31">31</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="31">31</span></td>
-              <td class="col-dd"><span class="dd-pill dd-stress" title="Top close: 16.42 | Date: 22/04/2024">-62.8%</span></td>
+              <td class="col-dd"><span class="dd-pill dd-stress" title="Top close: 16.42 | Date: 22/04/2024">-62.7%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
             <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="suzb3" data-name="suzano">
               <td class="col-tk"><span class="tk-badge">SUZB3</span></td>
               <td class="col-name">Suzano</td>
-              <td class="col-price">40.82</td>
+              <td class="col-price">40.80</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="35">35</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="40">40</span></td>
               <td class="col-dd"><span class="dd-pill dd-deep" title="Top close: 62.01 | Date: 02/12/2024">-34.2%</span></td>
@@ -1713,28 +2031,28 @@ body.research-v2.profile-field-v2::after{
             <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="radl3" data-name="droga raia">
               <td class="col-tk"><span class="tk-badge">RADL3</span></td>
               <td class="col-name">Droga Raia</td>
-              <td class="col-price">17.09</td>
+              <td class="col-price">17.07</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="36">36</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="41">41</span></td>
-              <td class="col-dd"><span class="dd-pill dd-deep" title="Top close: 27.79 | Date: 12/08/2024">-38.5%</span></td>
+              <td class="col-dd"><span class="dd-pill dd-deep" title="Top close: 27.79 | Date: 12/08/2024">-38.6%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
             <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="tots3" data-name="totvs">
               <td class="col-tk"><span class="tk-badge">TOTS3</span></td>
               <td class="col-name">Totvs</td>
-              <td class="col-price">30.03</td>
+              <td class="col-price">30.00</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="41">41</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="42">42</span></td>
-              <td class="col-dd"><span class="dd-pill dd-deep" title="Top close: 47.43 | Date: 10/11/2025">-36.7%</span></td>
+              <td class="col-dd"><span class="dd-pill dd-deep" title="Top close: 47.43 | Date: 10/11/2025">-36.8%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
             <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="bbas3" data-name="banco do brasil">
               <td class="col-tk"><span class="tk-badge">BBAS3</span></td>
               <td class="col-name">Banco do Brasil</td>
-              <td class="col-price">20.02</td>
+              <td class="col-price">19.98</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="41">41</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="44">44</span></td>
-              <td class="col-dd"><span class="dd-pill dd-deep" title="Top close: 28.33 | Date: 05/05/2025">-29.3%</span></td>
+              <td class="col-dd"><span class="dd-pill dd-deep" title="Top close: 28.33 | Date: 05/05/2025">-29.5%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
             <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="sanb11" data-name="santander">
@@ -1746,154 +2064,154 @@ body.research-v2.profile-field-v2::after{
               <td class="col-dd"><span class="dd-pill dd-deep" title="Top close: 36.08 | Date: 16/02/2026">-25.3%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="klbn4" data-name="klabin">
+              <td class="col-tk"><span class="tk-badge">KLBN4</span></td>
+              <td class="col-name">Klabin</td>
+              <td class="col-price">3.42</td>
+              <td class="col-rsi"><span class="rsi-pill" data-rsi="43">43</span></td>
+              <td class="col-rsi"><span class="rsi-pill" data-rsi="47">47</span></td>
+              <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 4.16 | Date: 23/12/2024">-17.8%</span></td>
+              <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
+            </tr>
             <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="b3sa3" data-name="b3">
               <td class="col-tk"><span class="tk-badge">B3SA3</span></td>
               <td class="col-name">B3</td>
-              <td class="col-price">14.81</td>
+              <td class="col-price">14.76</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="43">43</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="54">54</span></td>
-              <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 19.22 | Date: 06/04/2026">-23.0%</span></td>
+              <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 19.22 | Date: 06/04/2026">-23.2%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
             <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="brsr6" data-name="banrisul">
               <td class="col-tk"><span class="tk-badge">BRSR6</span></td>
               <td class="col-name">Banrisul</td>
-              <td class="col-price">13.97</td>
+              <td class="col-price">13.90</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="43">43</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="57">57</span></td>
-              <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 18.54 | Date: 16/02/2026">-24.6%</span></td>
-              <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
-            </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="klbn4" data-name="klabin">
-              <td class="col-tk"><span class="tk-badge">KLBN4</span></td>
-              <td class="col-name">Klabin</td>
-              <td class="col-price">3.43</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="44">44</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="47">47</span></td>
-              <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 4.16 | Date: 23/12/2024">-17.6%</span></td>
+              <td class="col-dd"><span class="dd-pill dd-deep" title="Top close: 18.54 | Date: 16/02/2026">-25.0%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
             <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="rani3" data-name="irani">
               <td class="col-tk"><span class="tk-badge">RANI3</span></td>
               <td class="col-name">Irani</td>
-              <td class="col-price">7.95</td>
+              <td class="col-price">7.92</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="44">44</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="52">52</span></td>
-              <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 10.37 | Date: 25/09/2023">-23.3%</span></td>
+              <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 10.37 | Date: 25/09/2023">-23.6%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
             <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="prio3" data-name="prio">
               <td class="col-tk"><span class="tk-badge">PRIO3</span></td>
               <td class="col-name">Prio</td>
-              <td class="col-price">53.11</td>
+              <td class="col-price">52.96</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="44">44</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="56">56</span></td>
-              <td class="col-dd"><span class="dd-pill dd-deep" title="Top close: 70.82 | Date: 23/03/2026">-25.0%</span></td>
+              <td class="col-dd"><span class="dd-pill dd-deep" title="Top close: 70.82 | Date: 23/03/2026">-25.2%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
             <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="sapr11" data-name="sanepar">
               <td class="col-tk"><span class="tk-badge">SAPR11</span></td>
               <td class="col-name">Sanepar</td>
-              <td class="col-price">37.27</td>
+              <td class="col-price">37.04</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="44">44</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="57">57</span></td>
-              <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 47.36 | Date: 16/02/2026">-21.3%</span></td>
-              <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
-            </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="isae3" data-name="isa energia brasil on">
-              <td class="col-tk"><span class="tk-badge">ISAE3</span></td>
-              <td class="col-name">ISA Energia Brasil ON</td>
-              <td class="col-price">32.15</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="45">45</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="57">57</span></td>
-              <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 34.80 | Date: 27/04/2026">-7.6%</span></td>
-              <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
-            </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="petr4" data-name="petrobras">
-              <td class="col-tk"><span class="tk-badge">PETR4</span></td>
-              <td class="col-name">Petrobras</td>
-              <td class="col-price">38.23</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="45">45</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="58">58</span></td>
-              <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 48.27 | Date: 27/04/2026">-20.8%</span></td>
+              <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 47.36 | Date: 16/02/2026">-21.8%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
             <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="rent3" data-name="localiza">
               <td class="col-tk"><span class="tk-badge">RENT3</span></td>
               <td class="col-name">Localiza</td>
-              <td class="col-price">41.50</td>
+              <td class="col-price">41.45</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="46">46</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="50">50</span></td>
-              <td class="col-dd"><span class="dd-pill dd-deep" title="Top close: 63.29 | Date: 31/10/2022">-34.4%</span></td>
+              <td class="col-dd"><span class="dd-pill dd-deep" title="Top close: 63.29 | Date: 31/10/2022">-34.5%</span></td>
+              <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
+            </tr>
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="petr4" data-name="petrobras">
+              <td class="col-tk"><span class="tk-badge">PETR4</span></td>
+              <td class="col-name">Petrobras</td>
+              <td class="col-price">38.25</td>
+              <td class="col-rsi"><span class="rsi-pill" data-rsi="46">46</span></td>
+              <td class="col-rsi"><span class="rsi-pill" data-rsi="58">58</span></td>
+              <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 48.27 | Date: 27/04/2026">-20.8%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
             <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="egie3" data-name="engie brasil">
               <td class="col-tk"><span class="tk-badge">EGIE3</span></td>
               <td class="col-name">Engie Brasil</td>
-              <td class="col-price">32.17</td>
+              <td class="col-price">32.14</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="47">47</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="56">56</span></td>
-              <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 36.99 | Date: 13/04/2026">-13.0%</span></td>
+              <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 36.99 | Date: 13/04/2026">-13.1%</span></td>
+              <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
+            </tr>
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="isae3" data-name="isa energia brasil on">
+              <td class="col-tk"><span class="tk-badge">ISAE3</span></td>
+              <td class="col-name">ISA Energia Brasil ON</td>
+              <td class="col-price">32.44</td>
+              <td class="col-rsi"><span class="rsi-pill" data-rsi="47">47</span></td>
+              <td class="col-rsi"><span class="rsi-pill" data-rsi="58">58</span></td>
+              <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 34.80 | Date: 27/04/2026">-6.8%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
             <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="pine4" data-name="banco pine">
               <td class="col-tk"><span class="tk-badge">PINE4</span></td>
               <td class="col-name">Banco Pine</td>
-              <td class="col-price">12.24</td>
+              <td class="col-price">12.25</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="47">47</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="71">71</span></td>
               <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 15.56 | Date: 13/04/2026">-21.3%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="alup11" data-name="alupar">
-              <td class="col-tk"><span class="tk-badge">ALUP11</span></td>
-              <td class="col-name">Alupar</td>
-              <td class="col-price">32.87</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="49">49</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="60">60</span></td>
-              <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 36.43 | Date: 06/04/2026">-9.8%</span></td>
-              <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
-            </tr>
             <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="vivt3" data-name="vivo">
               <td class="col-tk"><span class="tk-badge">VIVT3</span></td>
               <td class="col-name">Vivo</td>
-              <td class="col-price">34.73</td>
+              <td class="col-price">34.75</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="49">49</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="60">60</span></td>
-              <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 41.13 | Date: 23/02/2026">-15.6%</span></td>
+              <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 41.13 | Date: 23/02/2026">-15.5%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
             <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="bbdc4" data-name="bradesco">
               <td class="col-tk"><span class="tk-badge">BBDC4</span></td>
               <td class="col-name">Bradesco</td>
-              <td class="col-price">18.30</td>
+              <td class="col-price">18.26</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="50">50</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="59">59</span></td>
-              <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 21.32 | Date: 16/02/2026">-14.2%</span></td>
+              <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 21.32 | Date: 16/02/2026">-14.3%</span></td>
+              <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
+            </tr>
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="alup11" data-name="alupar">
+              <td class="col-tk"><span class="tk-badge">ALUP11</span></td>
+              <td class="col-name">Alupar</td>
+              <td class="col-price">33.04</td>
+              <td class="col-rsi"><span class="rsi-pill" data-rsi="50">50</span></td>
+              <td class="col-rsi"><span class="rsi-pill" data-rsi="60">60</span></td>
+              <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 36.43 | Date: 06/04/2026">-9.3%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
             <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="eqtl3" data-name="equatorial">
               <td class="col-tk"><span class="tk-badge">EQTL3</span></td>
               <td class="col-name">Equatorial</td>
-              <td class="col-price">39.54</td>
+              <td class="col-price">39.44</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="50">50</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="60">60</span></td>
-              <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 45.19 | Date: 13/04/2026">-12.5%</span></td>
+              <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 45.19 | Date: 13/04/2026">-12.7%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
             <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="cmig4" data-name="cemig">
               <td class="col-tk"><span class="tk-badge">CMIG4</span></td>
               <td class="col-name">Cemig</td>
-              <td class="col-price">11.05</td>
+              <td class="col-price">11.03</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="50">50</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="63">63</span></td>
-              <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 13.28 | Date: 06/04/2026">-16.8%</span></td>
+              <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 13.28 | Date: 06/04/2026">-16.9%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
             <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="isae4" data-name="isa energia brasil pfd">
               <td class="col-tk"><span class="tk-badge">ISAE4</span></td>
               <td class="col-name">ISA Energia Brasil PFD</td>
-              <td class="col-price">27.64</td>
+              <td class="col-price">27.65</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="51">51</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="64">64</span></td>
               <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 30.89 | Date: 13/04/2026">-10.5%</span></td>
@@ -1902,7 +2220,7 @@ body.research-v2.profile-field-v2::after{
             <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="vale3" data-name="vale">
               <td class="col-tk"><span class="tk-badge">VALE3</span></td>
               <td class="col-name">Vale</td>
-              <td class="col-price">78.83</td>
+              <td class="col-price">78.84</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="51">51</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="65">65</span></td>
               <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 89.75 | Date: 13/04/2026">-12.2%</span></td>
@@ -1911,37 +2229,37 @@ body.research-v2.profile-field-v2::after{
             <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="wege3" data-name="weg">
               <td class="col-tk"><span class="tk-badge">WEGE3</span></td>
               <td class="col-name">WEG</td>
-              <td class="col-price">46.53</td>
+              <td class="col-price">46.48</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="52">52</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="55">55</span></td>
-              <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 54.62 | Date: 20/01/2025">-14.8%</span></td>
+              <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 54.62 | Date: 20/01/2025">-14.9%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
             <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="cpfe3" data-name="cpfl energia">
               <td class="col-tk"><span class="tk-badge">CPFE3</span></td>
               <td class="col-name">CPFL Energia</td>
-              <td class="col-price">45.65</td>
+              <td class="col-price">45.69</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="52">52</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="62">62</span></td>
-              <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 51.09 | Date: 19/01/2026">-10.7%</span></td>
+              <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 51.09 | Date: 19/01/2026">-10.6%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
             <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="bpac11" data-name="btg pactual">
               <td class="col-tk"><span class="tk-badge">BPAC11</span></td>
               <td class="col-name">BTG Pactual</td>
-              <td class="col-price">55.73</td>
+              <td class="col-price">55.84</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="53">53</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="64">64</span></td>
-              <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 63.60 | Date: 13/04/2026">-12.4%</span></td>
+              <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 63.60 | Date: 13/04/2026">-12.2%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
             <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="taee11" data-name="taesa">
               <td class="col-tk"><span class="tk-badge">TAEE11</span></td>
               <td class="col-name">Taesa</td>
-              <td class="col-price">41.13</td>
+              <td class="col-price">41.07</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="55">55</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="65">65</span></td>
-              <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 43.66 | Date: 06/04/2026">-5.8%</span></td>
+              <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 43.66 | Date: 06/04/2026">-5.9%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
             <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="itub4" data-name="itaú">
@@ -1956,73 +2274,73 @@ body.research-v2.profile-field-v2::after{
             <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="sbsp3" data-name="sabesp">
               <td class="col-tk"><span class="tk-badge">SBSP3</span></td>
               <td class="col-name">Sabesp</td>
-              <td class="col-price">30.43</td>
+              <td class="col-price">30.37</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="56">56</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="69">69</span></td>
-              <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 34.46 | Date: 20/04/2026">-11.7%</span></td>
+              <td class="col-dd"><span class="dd-pill dd-mild" title="Top close: 34.46 | Date: 20/04/2026">-11.9%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
             <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="abev3" data-name="ambev">
               <td class="col-tk"><span class="tk-badge">ABEV3</span></td>
               <td class="col-name">Ambev</td>
-              <td class="col-price">16.26</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="57">57</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="66">66</span></td>
-              <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 16.73 | Date: 22/06/2026">-2.8%</span></td>
-              <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
-            </tr>
-            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="itsa4" data-name="itaúsa">
-              <td class="col-tk"><span class="tk-badge">ITSA4</span></td>
-              <td class="col-name">Itaúsa</td>
-              <td class="col-price">13.56</td>
+              <td class="col-price">16.29</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="58">58</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="73">73</span></td>
-              <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 14.73 | Date: 16/02/2026">-7.9%</span></td>
+              <td class="col-rsi"><span class="rsi-pill" data-rsi="66">66</span></td>
+              <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 16.73 | Date: 22/06/2026">-2.6%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
             <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="cple3" data-name="copel">
               <td class="col-tk"><span class="tk-badge">CPLE3</span></td>
               <td class="col-name">Copel</td>
-              <td class="col-price">15.08</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="59">59</span></td>
+              <td class="col-price">15.06</td>
+              <td class="col-rsi"><span class="rsi-pill" data-rsi="58">58</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="74">74</span></td>
-              <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 16.41 | Date: 06/04/2026">-8.1%</span></td>
+              <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 16.41 | Date: 06/04/2026">-8.2%</span></td>
+              <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
+            </tr>
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="itsa4" data-name="itaúsa">
+              <td class="col-tk"><span class="tk-badge">ITSA4</span></td>
+              <td class="col-name">Itaúsa</td>
+              <td class="col-price">13.60</td>
+              <td class="col-rsi"><span class="rsi-pill" data-rsi="59">59</span></td>
+              <td class="col-rsi"><span class="rsi-pill" data-rsi="73">73</span></td>
+              <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 14.73 | Date: 16/02/2026">-7.7%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
             <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="pssa3" data-name="porto seguro">
               <td class="col-tk"><span class="tk-badge">PSSA3</span></td>
               <td class="col-name">Porto Seguro</td>
-              <td class="col-price">54.08</td>
+              <td class="col-price">54.19</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="62">62</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="73">73</span></td>
-              <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 54.08 | Date: 29/06/2026">0.0%</span></td>
+              <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 54.19 | Date: 29/06/2026">0.0%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
             <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="bbse3" data-name="bb seguridade">
               <td class="col-tk"><span class="tk-badge">BBSE3</span></td>
               <td class="col-name">BB Seguridade</td>
-              <td class="col-price">38.62</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="68">68</span></td>
+              <td class="col-price">38.65</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="69">69</span></td>
-              <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 39.17 | Date: 22/06/2026">-1.4%</span></td>
+              <td class="col-rsi"><span class="rsi-pill" data-rsi="70">70</span></td>
+              <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 39.17 | Date: 22/06/2026">-1.3%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
             <tr class="asset-row" data-signal="Sell" data-market="brasil" data-ticker="cxse3" data-name="caixa seguros">
               <td class="col-tk"><span class="tk-badge">CXSE3</span></td>
               <td class="col-name">Caixa Seguros</td>
-              <td class="col-price">20.54</td>
+              <td class="col-price">20.53</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="74">74</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="81">81</span></td>
-              <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 20.54 | Date: 29/06/2026">0.0%</span></td>
+              <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 20.53 | Date: 29/06/2026">0.0%</span></td>
               <td class="col-sig"><span class="signal-badge sig-sell">SELL</span></td>
             </tr>
             <tr class="asset-row" data-signal="Sell" data-market="brasil" data-ticker="csmg3" data-name="copasa">
               <td class="col-tk"><span class="tk-badge">CSMG3</span></td>
               <td class="col-name">Copasa</td>
-              <td class="col-price">62.10</td>
+              <td class="col-price">62.11</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="72">72</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="82">82</span></td>
-              <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 62.10 | Date: 29/06/2026">0.0%</span></td>
+              <td class="col-dd"><span class="dd-pill dd-flat" title="Top close: 62.11 | Date: 29/06/2026">0.0%</span></td>
               <td class="col-sig"><span class="signal-badge sig-sell">SELL</span></td>
             </tr>
             </tbody>
@@ -2067,7 +2385,7 @@ body.research-v2.profile-field-v2::after{
 </div>
 
 <div class="footer">
-  Financial Monitor Research · Updated <a>03/07/2026 16:49 BRT</a> · Data: Yahoo Finance + CoinMetrics · Static research dashboard
+  Financial Monitor Research · Updated <a>03/07/2026 17:54 BRT</a> · Data: Yahoo Finance + CoinMetrics · Static research dashboard
 </div>
 
 <script>
