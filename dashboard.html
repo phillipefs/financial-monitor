@@ -79,6 +79,13 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
 .zone-warn{background:rgba(251,191,36,.1);color:var(--yellow);border:1px solid rgba(251,191,36,.3)}
 .zone-danger{background:rgba(248,113,113,.1);color:var(--red);border:1px solid rgba(248,113,113,.35)}
 
+/* FEAR & GREED BADGES */
+.fg-extreme-fear{background:rgba(248,113,113,.12);color:var(--red);border:1px solid rgba(248,113,113,.35)}
+.fg-fear{background:rgba(255,95,70,.12);color:var(--orange);border:1px solid rgba(255,95,70,.35)}
+.fg-neutral{background:rgba(96,165,250,.1);color:var(--blue);border:1px solid rgba(96,165,250,.3)}
+.fg-greed{background:rgba(52,211,153,.1);color:var(--green);border:1px solid rgba(52,211,153,.3)}
+.fg-extreme-greed{background:rgba(52,211,153,.16);color:var(--green);border:1px solid rgba(52,211,153,.45);box-shadow:0 0 8px rgba(52,211,153,.15)}
+
 /* ===== SECTOR TABS ===== */
 .sector-nav{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;margin-bottom:20px;border-bottom:1px solid var(--line)}
 .sector-tab{background:none;border:none;color:var(--muted);padding:10px 16px;font-size:.82rem;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;transition:.25s;white-space:nowrap;display:flex;align-items:center;gap:6px}
@@ -446,7 +453,7 @@ body.research-v2{
 }
 
 .research-v2 .oc-grid{
-  grid-template-columns:repeat(2,minmax(0,1fr));
+  grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
   gap:16px;
   margin-bottom:34px;
 }
@@ -1150,7 +1157,7 @@ body.research-v2.profile-field-v2::after{
   </div>
   <div class="topbar-meta">
     <span>Research snapshot</span>
-    <time>03/07/2026 17:54 BRT</time>
+    <time>03/07/2026 19:08 BRT</time>
   </div>
 </header>
 
@@ -1436,6 +1443,31 @@ body.research-v2.profile-field-v2::after{
         <span class="oc-risk-pill">Risk: MEDIUM</span>
       </div>
     </div>
+    
+    <div class="oc-card">
+      <div class="oc-card-head">
+        <span class="oc-icon">&#9878;</span>
+        <span class="oc-title">Fear &amp; Greed</span>
+        <span class="badge-zone fg-extreme-fear">EXTREME FEAR</span>
+      </div>
+      <div class="oc-body">
+        <div class="oc-gauge"><svg viewBox="0 0 120 70" class="gauge-svg">
+      <path d="M 10 60 A 50 50 0 0 1 110 60" fill="none" stroke="#2c3650" stroke-width="8" stroke-linecap="round"/>
+      <path d="M 10.0 60.0 A 50 50 0 0 1 20.5 29.4" fill="none" stroke="#f87171" stroke-width="8" stroke-linecap="round"/>
+      <text x="60" y="58" text-anchor="middle" fill="#f87171" font-size="14" font-weight="800" font-family="monospace">21</text>
+    </svg></div>
+        <div class="oc-metrics">
+          <div class="oc-row"><span class="oc-k">Index</span><span class="oc-v oc-highlight">21 / 100</span></div>
+          <div class="oc-row"><span class="oc-k">Classification</span><span class="oc-v">Extreme Fear</span></div>
+          <div class="oc-row"><span class="oc-k">7D Avg</span><span class="oc-v">16</span></div>
+          <div class="oc-row"><span class="oc-k">Trend</span><span class="oc-v pos">&#9650; +8 vs last week</span></div>
+        </div>
+      </div>
+      <div class="oc-footer">
+        <span class="oc-action-label">Signal:</span>
+        <span class="oc-action-val">Contrarian accumulation zone</span>
+      </div>
+    </div>
   </div>
 
   <!-- RSI MONITOR -->
@@ -1551,28 +1583,28 @@ body.research-v2.profile-field-v2::after{
             <tr class="asset-row" data-signal="Neutral" data-market="cripto" data-ticker="eth" data-name="ethereum">
               <td class="col-tk"><span class="tk-badge">ETH</span></td>
               <td class="col-name">Ethereum</td>
-              <td class="col-price">1,767</td>
+              <td class="col-price">1,757</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="37">37</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="42">42</span></td>
-              <td class="col-dd"><span class="dd-pill dd-stress" title="Top close: 4,780 | Date: 18/08/2025">-63.0%</span></td>
+              <td class="col-dd"><span class="dd-pill dd-stress" title="Top close: 4,780 | Date: 18/08/2025">-63.2%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
             <tr class="asset-row" data-signal="Neutral" data-market="cripto" data-ticker="btc" data-name="bitcoin">
               <td class="col-tk"><span class="tk-badge">BTC</span></td>
               <td class="col-name">Bitcoin</td>
-              <td class="col-price">62,756</td>
+              <td class="col-price">62,563</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="37">37</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="43">43</span></td>
-              <td class="col-dd"><span class="dd-pill dd-deep" title="Top close: 123,513 | Date: 29/09/2025">-49.2%</span></td>
+              <td class="col-dd"><span class="dd-pill dd-deep" title="Top close: 123,513 | Date: 29/09/2025">-49.4%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
             <tr class="asset-row" data-signal="Neutral" data-market="cripto" data-ticker="sol" data-name="solana">
               <td class="col-tk"><span class="tk-badge">SOL</span></td>
               <td class="col-name">Solana</td>
-              <td class="col-price">82.73</td>
+              <td class="col-price">82.37</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="43">43</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="42">42</span></td>
-              <td class="col-dd"><span class="dd-pill dd-stress" title="Top close: 252.92 | Date: 18/11/2024">-67.3%</span></td>
+              <td class="col-dd"><span class="dd-pill dd-stress" title="Top close: 252.92 | Date: 18/11/2024">-67.4%</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
             </tbody>
@@ -2385,7 +2417,7 @@ body.research-v2.profile-field-v2::after{
 </div>
 
 <div class="footer">
-  Financial Monitor Research · Updated <a>03/07/2026 17:54 BRT</a> · Data: Yahoo Finance + CoinMetrics · Static research dashboard
+  Financial Monitor Research · Updated <a>03/07/2026 19:08 BRT</a> · Data: Yahoo Finance + CoinMetrics · Static research dashboard
 </div>
 
 <script>

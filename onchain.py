@@ -7,6 +7,7 @@ from typing import Optional, Tuple, Dict, Callable
 import requests
 
 CM_BASE = "https://community-api.coinmetrics.io/v4"
+FNG_URL = "https://api.alternative.me/fng/"
 UA = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
     "AppleWebKit/537.36 (KHTML, like Gecko) "
@@ -94,6 +95,72 @@ def coinmetrics_price_realized_mvrv(
                 ) from last_exc
 
     raise RuntimeError(f"Falhou CoinMetrics ({asset}): {last_exc}")
+
+
+# ==========================================================
+# FEAR & GREED INDEX (alternative.me)
+# ==========================================================
+def fear_greed_index(
+    limit: int = 8,
+    retries: int = 2,
+    wait_sec: int = 5,
+    timeout: int = 20,
+    verify_ssl: bool = True,
+) -> Optional[Dict[str, object]]:
+    """
+    Busca o Crypto Fear & Greed Index (alternative.me).
+
+    Retorna dict com value (0-100), classification, avg_7d e delta_7d,
+    ou None caso a API falhe (o chamador trata como indisponível).
+    """
+    params = {"limit": limit, "format": "json"}
+
+    last_exc: Optional[Exception] = None
+    for attempt in range(1, retries + 1):
+        try:
+            r = requests.get(
+                FNG_URL,
+                params=params,
+                headers={"User-Agent": UA, "Accept": "application/json"},
+                timeout=timeout,
+                verify=verify_ssl,
+            )
+            if r.status_code != 200:
+                raise RuntimeError(f"F&G HTTP {r.status_code}: {r.text[:200]}")
+
+            rows = r.json().get("data", [])
+            if not rows:
+                raise RuntimeError("F&G retornou data vazio.")
+
+            values = [
+                int(x["value"])
+                for x in rows
+                if str(x.get("value", "")).strip() not in ("", "None", "NaN")
+            ]
+            if not values:
+                raise RuntimeError("F&G sem valores numéricos válidos.")
+
+            current = values[0]
+            classification = str(rows[0].get("value_classification", "")).strip()
+            window = values[:7]
+            avg_7d = round(sum(window) / len(window))
+            week_ago = values[7] if len(values) > 7 else values[-1]
+            delta_7d = current - week_ago
+
+            return {
+                "value": current,
+                "classification": classification,
+                "avg_7d": avg_7d,
+                "delta_7d": delta_7d,
+            }
+
+        except Exception as e:
+            last_exc = e
+            if attempt < retries:
+                time.sleep(wait_sec)
+
+    print(f"[WARN] Fear & Greed indisponível: {last_exc}")
+    return None
 
 
 # ==========================================================

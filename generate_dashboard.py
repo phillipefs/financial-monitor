@@ -26,6 +26,7 @@ from onchain import (
     classify_mvrv_btc,
     classify_mvrv_eth,
     coinmetrics_price_realized_mvrv,
+    fear_greed_index,
 )
 
 OUTPUT_FILE = Path(__file__).parent / "dashboard.html"
@@ -328,7 +329,7 @@ body.research-v2{
 }
 
 .research-v2 .oc-grid{
-  grid-template-columns:repeat(2,minmax(0,1fr));
+  grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
   gap:16px;
   margin-bottom:34px;
 }
@@ -1223,6 +1224,9 @@ def fetch_onchain_data() -> Dict:
             print(f"  [WARN] On-chain {coin}: {e}")
             data[coin] = None
 
+    # Fear & Greed Index (não bloqueia caso a API falhe → None).
+    data["FNG"] = fear_greed_index(verify_ssl=False)
+
     return data
 
 
@@ -1354,6 +1358,151 @@ def _build_onchain_card(coin: str, data: Dict) -> str:
         <span class="oc-action-label">Action:</span>
         <span class="oc-action-val">{escape(data["action"])}</span>
         <span class="oc-risk-pill">Risk: {escape(data["risk"])}</span>
+      </div>
+    </div>'''
+
+
+def _fng_gauge_svg(value) -> str:
+    """SVG semicircular gauge for the Fear & Greed Index (0-100)."""
+    import math
+
+    cx, cy, r = 60, 60, 50
+    track = ('<path d="M 10 60 A 50 50 0 0 1 110 60" fill="none" '
+             'stroke="#2c3650" stroke-width="8" stroke-linecap="round"/>')
+
+    if value is None:
+        return f'''<svg viewBox="0 0 120 70" class="gauge-svg">
+      {track}
+      <text x="60" y="58" text-anchor="middle" fill="#64748b" font-size="14" font-weight="800" font-family="monospace">-</text>
+    </svg>'''
+
+    v = max(0, min(100, int(value)))
+    if v < 25:
+        color = "#f87171"
+    elif v < 46:
+        color = "#ff5f46"
+    elif v < 55:
+        color = "#ffc94d"
+    elif v < 76:
+        color = "#34d399"
+    else:
+        color = "#4ade80"
+
+    angle = 180 * (v / 100)
+    start_angle = math.radians(180)
+    end_angle = math.radians(180 + angle)
+    x1 = cx + r * math.cos(start_angle)
+    y1 = cy + r * math.sin(start_angle)
+    x2 = cx + r * math.cos(end_angle)
+    y2 = cy + r * math.sin(end_angle)
+    large_arc = 1 if angle > 180 else 0
+
+    return f'''<svg viewBox="0 0 120 70" class="gauge-svg">
+      {track}
+      <path d="M {x1:.1f} {y1:.1f} A 50 50 0 {large_arc} 1 {x2:.1f} {y2:.1f}" fill="none" stroke="{color}" stroke-width="8" stroke-linecap="round"/>
+      <text x="60" y="58" text-anchor="middle" fill="{color}" font-size="14" font-weight="800" font-family="monospace">{v}</text>
+    </svg>'''
+
+
+def _fng_class(value, classification: str) -> str:
+    c = (classification or "").lower()
+    if "extreme fear" in c:
+        return "fg-extreme-fear"
+    if "extreme greed" in c:
+        return "fg-extreme-greed"
+    if "fear" in c:
+        return "fg-fear"
+    if "greed" in c:
+        return "fg-greed"
+    if "neutral" in c:
+        return "fg-neutral"
+    # Fallback por valor caso a classificação venha vazia.
+    if value is None:
+        return "fg-neutral"
+    v = int(value)
+    if v < 25:
+        return "fg-extreme-fear"
+    if v < 46:
+        return "fg-fear"
+    if v < 55:
+        return "fg-neutral"
+    if v < 76:
+        return "fg-greed"
+    return "fg-extreme-greed"
+
+
+def _fng_signal(value) -> str:
+    if value is None:
+        return "-"
+    v = int(value)
+    if v < 25:
+        return "Contrarian accumulation zone"
+    if v < 46:
+        return "Cautious accumulation"
+    if v < 55:
+        return "Balanced sentiment"
+    if v < 76:
+        return "Momentum — stay alert"
+    return "Distribution / take profit"
+
+
+def _build_fng_card(data) -> str:
+    """Fear & Greed card. Falls back to '-' placeholders when unavailable."""
+    if not data:
+        return f'''
+    <div class="oc-card">
+      <div class="oc-card-head">
+        <span class="oc-icon">&#9878;</span>
+        <span class="oc-title">Fear &amp; Greed</span>
+        <span class="badge-zone fg-neutral">-</span>
+      </div>
+      <div class="oc-body">
+        <div class="oc-gauge">{_fng_gauge_svg(None)}</div>
+        <div class="oc-metrics">
+          <div class="oc-row"><span class="oc-k">Index</span><span class="oc-v oc-highlight">-</span></div>
+          <div class="oc-row"><span class="oc-k">Classification</span><span class="oc-v">-</span></div>
+          <div class="oc-row"><span class="oc-k">7D Avg</span><span class="oc-v">-</span></div>
+          <div class="oc-row"><span class="oc-k">Trend</span><span class="oc-v">-</span></div>
+        </div>
+      </div>
+      <div class="oc-footer">
+        <span class="oc-action-label">Signal:</span>
+        <span class="oc-action-val">-</span>
+      </div>
+    </div>'''
+
+    value = int(data["value"])
+    classification = str(data.get("classification", ""))
+    avg_7d = data.get("avg_7d", "-")
+    delta = int(data.get("delta_7d", 0))
+    fg_cls = _fng_class(value, classification)
+
+    if delta > 0:
+        trend_html = f'<span class="oc-v pos">&#9650; +{delta} vs last week</span>'
+    elif delta < 0:
+        trend_html = f'<span class="oc-v neg">&#9660; {delta} vs last week</span>'
+    else:
+        trend_html = '<span class="oc-v">&#8594; flat vs last week</span>'
+
+    return f'''
+    <div class="oc-card">
+      <div class="oc-card-head">
+        <span class="oc-icon">&#9878;</span>
+        <span class="oc-title">Fear &amp; Greed</span>
+        <span class="badge-zone {fg_cls}">{escape(classification.upper()) if classification else "-"}</span>
+      </div>
+      <div class="oc-body">
+        <div class="oc-gauge">{_fng_gauge_svg(value)}</div>
+        <div class="oc-metrics">
+          <div class="oc-row"><span class="oc-k">Index</span><span class="oc-v oc-highlight">{value} / 100</span></div>
+          <div class="oc-row"><span class="oc-k">Classification</span><span class="oc-v">{escape(classification) if classification else "-"}</span></div>
+          <div class="oc-row"><span class="oc-k">7D Avg</span><span class="oc-v">{avg_7d}</span></div>
+          <div class="oc-row"><span class="oc-k">Trend</span>{trend_html}</div>
+        </div>
+      </div>
+      <div class="oc-footer">
+        <span class="oc-action-label">Signal:</span>
+        <span class="oc-action-val">{escape(_fng_signal(value))}</span>
       </div>
     </div>'''
 
@@ -1492,6 +1641,7 @@ def generate_html(df: pd.DataFrame, onchain: Dict) -> str:
     # Build on-chain section
     btc_card = _build_onchain_card("BTC", onchain.get("BTC")) if onchain else ""
     eth_card = _build_onchain_card("ETH", onchain.get("ETH")) if onchain else ""
+    fng_card = _build_fng_card(onchain.get("FNG") if onchain else None)
     executive_rankings = _build_executive_rankings(df)
 
     # Build market filter buttons + table content
@@ -1617,6 +1767,13 @@ body{{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:
 .zone-neutral{{background:rgba(96,165,250,.1);color:var(--blue);border:1px solid rgba(96,165,250,.3)}}
 .zone-warn{{background:rgba(251,191,36,.1);color:var(--yellow);border:1px solid rgba(251,191,36,.3)}}
 .zone-danger{{background:rgba(248,113,113,.1);color:var(--red);border:1px solid rgba(248,113,113,.35)}}
+
+/* FEAR & GREED BADGES */
+.fg-extreme-fear{{background:rgba(248,113,113,.12);color:var(--red);border:1px solid rgba(248,113,113,.35)}}
+.fg-fear{{background:rgba(255,95,70,.12);color:var(--orange);border:1px solid rgba(255,95,70,.35)}}
+.fg-neutral{{background:rgba(96,165,250,.1);color:var(--blue);border:1px solid rgba(96,165,250,.3)}}
+.fg-greed{{background:rgba(52,211,153,.1);color:var(--green);border:1px solid rgba(52,211,153,.3)}}
+.fg-extreme-greed{{background:rgba(52,211,153,.16);color:var(--green);border:1px solid rgba(52,211,153,.45);box-shadow:0 0 8px rgba(52,211,153,.15)}}
 
 /* ===== SECTOR TABS ===== */
 .sector-nav{{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;margin-bottom:20px;border-bottom:1px solid var(--line)}}
@@ -1763,6 +1920,7 @@ body{{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:
   <div class="oc-grid">
     {btc_card}
     {eth_card}
+    {fng_card}
   </div>
 
   <!-- RSI MONITOR -->
