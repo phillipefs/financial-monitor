@@ -1423,7 +1423,6 @@ body{{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:
 @media(max-width:480px){{
   .kpi-strip{{flex-wrap:wrap}}
   .kpi-cell{{min-width:48%;flex:1 1 48%}}
-  .col-name{{display:none}}
 }}
 {RESEARCH_V2_CSS}
 </style>
