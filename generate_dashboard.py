@@ -705,6 +705,154 @@ body.research-v2{
     flex-basis:auto;
   }
 }
+
+/* ===== PROFILE-INSPIRED BACKGROUND ===== */
+body.research-v2.profile-field-v2{
+  position:relative;
+  isolation:isolate;
+  overflow-x:hidden;
+  background:
+    conic-gradient(from 218deg at 14% -12%, rgba(85,166,255,.36), transparent 22%, rgba(48,214,181,.16) 34%, transparent 50%),
+    conic-gradient(from 36deg at 92% 6%, rgba(255,104,72,.24), transparent 27%, rgba(85,166,255,.15) 46%, transparent 66%),
+    linear-gradient(132deg, rgba(85,166,255,.18), transparent 34rem),
+    linear-gradient(228deg, rgba(255,104,72,.15), transparent 36rem),
+    linear-gradient(180deg,#050607 0%,#081013 46%,#040506 100%);
+  background-attachment:fixed;
+  background-size:150% 150%,150% 150%,100% 100%,100% 100%,100% 100%;
+  animation:profileAmbientField 16s ease-in-out infinite alternate;
+}
+
+body.research-v2.profile-field-v2::before,
+body.research-v2.profile-field-v2::after{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:0;
+}
+
+body.research-v2.profile-field-v2::before{
+  background:
+    radial-gradient(circle, rgba(85,166,255,.34) 0 1.15px, transparent 1.55px),
+    radial-gradient(circle, rgba(48,214,181,.22) 0 1px, transparent 1.35px),
+    linear-gradient(rgba(255,255,255,.046) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px),
+    linear-gradient(rgba(85,166,255,.09) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,104,72,.07) 1px, transparent 1px);
+  background-size:42px 42px,84px 84px,126px 126px,126px 126px,28px 28px,28px 28px;
+  -webkit-mask-image:linear-gradient(180deg, rgba(0,0,0,.76), rgba(0,0,0,.48) 58%, transparent 96%);
+  mask-image:linear-gradient(180deg, rgba(0,0,0,.76), rgba(0,0,0,.48) 58%, transparent 96%);
+  mix-blend-mode:screen;
+  opacity:.58;
+  animation:profileDataGrid 13s linear infinite;
+}
+
+body.research-v2.profile-field-v2::after{
+  background:
+    repeating-linear-gradient(116deg, transparent 0 4.2rem, rgba(85,166,255,.13) 4.2rem 4.28rem, transparent 4.28rem 8.4rem),
+    repeating-linear-gradient(64deg, transparent 0 5.8rem, rgba(48,214,181,.09) 5.8rem 5.88rem, transparent 5.88rem 10.8rem),
+    repeating-linear-gradient(180deg, transparent 0 8.75rem, rgba(255,255,255,.045) 8.75rem 8.82rem, transparent 8.82rem 11.5rem),
+    linear-gradient(116deg, transparent 0 11%, rgba(85,166,255,.2) 11% 11.18%, transparent 11.18% 46%, rgba(255,104,72,.16) 46% 46.16%, transparent 46.16% 100%),
+    linear-gradient(244deg, transparent 0 58%, rgba(48,214,181,.13) 58% 58.16%, transparent 58.16% 100%);
+  background-size:220px 220px,300px 300px,100% 18rem,100% 100%,100% 100%;
+  -webkit-mask-image:linear-gradient(180deg, rgba(0,0,0,.68), rgba(0,0,0,.42) 54%, transparent 94%);
+  mask-image:linear-gradient(180deg, rgba(0,0,0,.68), rgba(0,0,0,.42) 54%, transparent 94%);
+  mix-blend-mode:screen;
+  opacity:.64;
+  animation:profileDataStream 10s ease-in-out infinite alternate;
+}
+
+.research-v2.profile-field-v2 .topbar{
+  z-index:100;
+  background:
+    linear-gradient(90deg, rgba(85,166,255,.1), transparent 28%, rgba(255,104,72,.07) 78%, transparent),
+    rgba(5,8,12,.82);
+  border-bottom-color:rgba(125,177,255,.22);
+  box-shadow:0 18px 58px rgba(0,0,0,.36);
+}
+
+.research-v2.profile-field-v2 .executive-board,
+.research-v2.profile-field-v2 .kpi-strip,
+.research-v2.profile-field-v2 .main,
+.research-v2.profile-field-v2 .footer{
+  position:relative;
+  z-index:1;
+}
+
+.research-v2.profile-field-v2 .brief-copy,
+.research-v2.profile-field-v2 .market-read,
+.research-v2.profile-field-v2 .kpi-cell,
+.research-v2.profile-field-v2 .oc-card,
+.research-v2.profile-field-v2 .filter-strip,
+.research-v2.profile-field-v2 .table-wrap,
+.research-v2.profile-field-v2 .global-empty-state{
+  border-color:rgba(125,177,255,.22);
+  background:
+    linear-gradient(145deg, rgba(85,166,255,.08), transparent 38%, rgba(255,104,72,.055)),
+    rgba(9,15,23,.82);
+  box-shadow:0 22px 54px rgba(0,0,0,.32);
+  backdrop-filter:blur(18px) saturate(1.14);
+}
+
+.research-v2.profile-field-v2 .brief-copy{
+  background:
+    linear-gradient(125deg, rgba(85,166,255,.16), transparent 36%, rgba(255,104,72,.09)),
+    rgba(9,15,23,.78);
+}
+
+.research-v2.profile-field-v2 .market-read h2,
+.research-v2.profile-field-v2 .eyebrow,
+.research-v2.profile-field-v2 .section-title::before{
+  filter:drop-shadow(0 0 14px rgba(85,166,255,.28));
+}
+
+.research-v2.profile-field-v2 .filter-strip{
+  background:
+    linear-gradient(90deg, rgba(85,166,255,.07), transparent 38%, rgba(255,104,72,.045)),
+    rgba(6,10,15,.86);
+}
+
+.research-v2.profile-field-v2 .t-assets thead,
+.research-v2.profile-field-v2 .t-assets th{
+  background:rgba(6,10,15,.92);
+}
+
+.research-v2.profile-field-v2 .t-assets td{
+  background:rgba(9,15,23,.28);
+}
+
+.research-v2.profile-field-v2 .t-assets tbody tr:hover td{
+  background:rgba(85,166,255,.075);
+}
+
+.research-v2.profile-field-v2 .footer{
+  background:linear-gradient(90deg, transparent, rgba(85,166,255,.05), rgba(255,104,72,.035), transparent);
+}
+
+@keyframes profileAmbientField{
+  from{background-position:0 0,100% 0,0 0,0 0,0 0}
+  to{background-position:16% 7%,84% 10%,0 0,0 0,0 0}
+}
+
+@keyframes profileDataGrid{
+  to{background-position:84px 42px,-84px 84px,126px 126px,126px 126px,28px 28px,28px 28px}
+}
+
+@keyframes profileDataStream{
+  from{background-position:0 0,0 0,0 0,0 0,0 0;opacity:.52}
+  to{background-position:120px -72px,-96px 84px,0 9rem,0 0,0 0;opacity:.72}
+}
+
+@media(prefers-reduced-motion:reduce){
+  body.research-v2.profile-field-v2,
+  body.research-v2.profile-field-v2::before,
+  body.research-v2.profile-field-v2::after,
+  body.research-v2.profile-field-v2 *{
+    animation:none!important;
+    transition:none!important;
+    scroll-behavior:auto!important;
+  }
+}
 """
 
 RESEARCH_V2_SCRIPT = r"""
@@ -1280,7 +1428,7 @@ body{{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:
 {RESEARCH_V2_CSS}
 </style>
 </head>
-<body class="research-v2">
+<body class="research-v2 profile-field-v2">
 
 <!-- TOPBAR -->
 <header class="topbar">
