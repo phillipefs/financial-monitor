@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Financial Monitor — Pro Dashboard</title>
+<title>Financial Monitor Research — Dashboard</title>
 <style>
 /* ===== DESIGN TOKENS ===== */
 :root{
@@ -26,7 +26,6 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
 .brand-dot{width:10px;height:10px;border-radius:50%;background:var(--teal);animation:blink 2s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
 .brand-name{font-size:1.05rem;font-weight:800;letter-spacing:-.3px}
-.brand-tag{font-size:.65rem;background:var(--card2);border:1px solid var(--line);padding:2px 8px;border-radius:12px;color:var(--teal);font-weight:700;letter-spacing:.5px;text-transform:uppercase}
 .topbar-meta{margin-left:auto;display:flex;align-items:center;gap:14px;font-size:.78rem;color:var(--muted)}
 .topbar-meta time{color:var(--teal);font-weight:700;font-family:var(--mono)}
 
@@ -165,40 +164,710 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
   .kpi-cell{min-width:48%;flex:1 1 48%}
   .col-name{display:none}
 }
+
+/* ===== RESEARCH THEME OVERRIDES ===== */
+:root{
+  --rm-bg:#07090b;
+  --rm-bg-soft:#0d1116;
+  --rm-surface:#111820;
+  --rm-surface-2:#151e28;
+  --rm-surface-3:#1a2531;
+  --rm-line:#263241;
+  --rm-line-soft:rgba(145,163,182,.16);
+  --rm-text:#eef3f7;
+  --rm-muted:#9cabb9;
+  --rm-dim:#647181;
+  --rm-cyan:#43d7e8;
+  --rm-green:#35d08f;
+  --rm-yellow:#f1bc4b;
+  --rm-red:#f06f68;
+  --rm-blue:#6fa8ff;
+  --rm-shadow:0 24px 70px rgba(0,0,0,.35);
+  --radius:8px;
+  --radius-sm:6px;
+  --radius-xs:4px;
+}
+
+body.research-v2,
+.research-v2 *{
+  letter-spacing:0;
+}
+
+body.research-v2{
+  background:
+    linear-gradient(180deg,rgba(67,215,232,.06),transparent 260px),
+    linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px),
+    linear-gradient(180deg,rgba(255,255,255,.02) 1px,transparent 1px),
+    var(--rm-bg);
+  background-size:auto,48px 48px,48px 48px,auto;
+  color:var(--rm-text);
+  font-family:"Segoe UI",Inter,system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
+}
+
+.research-v2 .topbar{
+  min-height:72px;
+  padding:14px clamp(16px,3vw,34px);
+  background:rgba(7,9,11,.88);
+  border-bottom:1px solid var(--rm-line);
+  box-shadow:0 18px 50px rgba(0,0,0,.28);
+  backdrop-filter:blur(18px);
+}
+
+.research-v2 .topbar-brand{
+  min-width:260px;
+  gap:12px;
+}
+
+.research-v2 .brand-dot{
+  width:34px;
+  height:34px;
+  border-radius:8px;
+  background:
+    linear-gradient(135deg,rgba(67,215,232,.95),rgba(53,208,143,.78)),
+    var(--rm-cyan);
+  box-shadow:0 0 0 1px rgba(255,255,255,.14) inset,0 12px 28px rgba(67,215,232,.18);
+  animation:none;
+  position:relative;
+}
+
+.research-v2 .brand-dot::after{
+  content:"FM";
+  position:absolute;
+  inset:0;
+  display:grid;
+  place-items:center;
+  color:#051013;
+  font-size:.68rem;
+  font-weight:900;
+  font-family:var(--mono);
+}
+
+.research-v2 .brand-name{
+  display:block;
+  color:var(--rm-text);
+  font-size:1rem;
+  font-weight:800;
+}
+
+.research-v2 .search-wrap{
+  flex:1 1 340px;
+  max-width:520px;
+}
+
+.research-v2 .search-input{
+  height:42px;
+  border-radius:8px;
+  border-color:var(--rm-line);
+  background:rgba(17,24,32,.92);
+  color:var(--rm-text);
+  font-size:.9rem;
+  box-shadow:0 0 0 1px rgba(255,255,255,.02) inset;
+}
+
+.research-v2 .search-input::placeholder{color:var(--rm-dim)}
+.research-v2 .search-input:focus{
+  border-color:rgba(67,215,232,.7);
+  box-shadow:0 0 0 3px rgba(67,215,232,.12);
+}
+
+.research-v2 .search-icon{
+  color:var(--rm-cyan);
+  font-size:1rem;
+}
+
+.research-v2 .topbar-meta{
+  gap:8px;
+  padding:8px 12px;
+  margin-left:auto;
+  border:1px solid var(--rm-line);
+  border-radius:8px;
+  background:rgba(17,24,32,.7);
+  color:var(--rm-muted);
+}
+
+.research-v2 .topbar-meta time{
+  color:var(--rm-text);
+  font-size:.82rem;
+}
+
+.research-v2 .executive-board{
+  max-width:1440px;
+  margin:0 auto;
+  padding:34px clamp(16px,3vw,34px) 22px;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(300px,360px);
+  gap:22px;
+  align-items:stretch;
+}
+
+.research-v2 .brief-copy{
+  min-height:190px;
+  padding:28px 30px;
+  border:1px solid var(--rm-line);
+  border-radius:8px;
+  background:
+    linear-gradient(135deg,rgba(67,215,232,.13),transparent 36%),
+    linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.012)),
+    var(--rm-surface);
+  box-shadow:var(--rm-shadow);
+}
+
+.research-v2 .eyebrow{
+  color:var(--rm-cyan);
+  font-size:.78rem;
+  font-weight:800;
+  text-transform:uppercase;
+  margin-bottom:16px;
+}
+
+.research-v2 .brief-copy h1{
+  max-width:none;
+  margin:0 0 16px;
+  color:var(--rm-text);
+  font-size:clamp(1.2rem,1.5vw,1.55rem);
+  line-height:1.08;
+  font-weight:850;
+  white-space:nowrap;
+}
+
+.research-v2 .brief-copy p{
+  max-width:760px;
+  color:var(--rm-muted);
+  font-size:1.02rem;
+}
+
+.research-v2 .market-read{
+  height:100%;
+  padding:20px 22px;
+  border:1px solid var(--rm-line);
+  border-radius:8px;
+  background:rgba(17,24,32,.86);
+  box-shadow:var(--rm-shadow);
+}
+
+.research-v2 .market-read h2{
+  margin:0 0 18px;
+  color:var(--rm-cyan);
+  font-size:.78rem;
+  font-weight:800;
+  text-transform:uppercase;
+}
+
+.research-v2 .mix-row{
+  display:grid;
+  grid-template-columns:82px 38px 1fr;
+  align-items:center;
+  gap:10px;
+  min-height:34px;
+  color:var(--rm-muted);
+  font-size:.82rem;
+}
+
+.research-v2 .mix-row strong{
+  color:var(--rm-text);
+  font-family:var(--mono);
+  text-align:right;
+}
+
+.research-v2 .mix-bar{
+  height:8px;
+  overflow:hidden;
+  border-radius:999px;
+  background:rgba(255,255,255,.07);
+}
+
+.research-v2 .mix-bar span{
+  display:block;
+  width:var(--w);
+  height:100%;
+  border-radius:inherit;
+  background:var(--c);
+}
+
+.research-v2 .kpi-strip{
+  max-width:1440px;
+  margin:0 auto;
+  padding:0 clamp(16px,3vw,34px) 28px;
+  gap:12px;
+  background:transparent;
+  overflow:visible;
+}
+
+.research-v2 .kpi-cell{
+  min-width:150px;
+  padding:18px;
+  text-align:left;
+  border:1px solid var(--rm-line);
+  border-radius:8px;
+  background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.015)),var(--rm-surface);
+  transition:border-color .18s ease,transform .18s ease,background .18s ease;
+}
+
+.research-v2 .kpi-cell:hover{
+  border-color:rgba(67,215,232,.44);
+  background:var(--rm-surface-2);
+  transform:translateY(-2px);
+}
+
+.research-v2 .kpi-num{
+  font-size:1.9rem;
+  font-weight:850;
+}
+
+.research-v2 .kpi-label{
+  margin-top:8px;
+  color:var(--rm-muted);
+  font-size:.76rem;
+  text-transform:none;
+  font-weight:700;
+}
+
+.research-v2 .main{
+  max-width:1440px;
+  padding:0 clamp(16px,3vw,34px) 42px;
+}
+
+.research-v2 .section-title{
+  margin:12px 0 16px;
+  color:var(--rm-text);
+  font-size:1.08rem;
+  font-weight:850;
+}
+
+.research-v2 .section-title::before{
+  width:22px;
+  height:2px;
+  background:var(--rm-cyan);
+}
+
+.research-v2 .oc-grid{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:16px;
+  margin-bottom:34px;
+}
+
+.research-v2 .oc-card{
+  padding:22px;
+  border-color:var(--rm-line);
+  border-radius:8px;
+  background:
+    linear-gradient(120deg,rgba(67,215,232,.09),transparent 44%),
+    var(--rm-surface);
+  box-shadow:0 20px 45px rgba(0,0,0,.24);
+}
+
+.research-v2 .oc-card:hover{
+  border-color:rgba(67,215,232,.48);
+  box-shadow:0 24px 70px rgba(0,0,0,.36);
+}
+
+.research-v2 .oc-card-head{margin-bottom:18px}
+.research-v2 .oc-icon{
+  width:42px;
+  height:42px;
+  display:grid;
+  place-items:center;
+  border:1px solid var(--rm-line);
+  border-radius:8px;
+  background:rgba(7,9,11,.36);
+  font-size:1.28rem;
+}
+
+.research-v2 .oc-title{font-size:1.24rem}
+.research-v2 .badge-zone,
+.research-v2 .signal-badge,
+.research-v2 .oc-risk-pill,
+.research-v2 .ps-item{border-radius:999px}
+
+.research-v2 .oc-body{gap:24px}
+.research-v2 .oc-gauge{flex-basis:150px}
+.research-v2 .gauge-svg{filter:drop-shadow(0 16px 24px rgba(0,0,0,.26))}
+.research-v2 .oc-row{padding:7px 0;border-color:var(--rm-line-soft)}
+.research-v2 .oc-k{color:var(--rm-muted);font-size:.74rem;text-transform:none}
+.research-v2 .oc-v{color:var(--rm-text)}
+.research-v2 .oc-highlight{color:var(--rm-yellow)}
+.research-v2 .pos{color:var(--rm-green)}
+.research-v2 .neg{color:var(--rm-red)}
+
+.research-v2 .filter-strip{
+  position:sticky;
+  top:72px;
+  z-index:40;
+  display:flex;
+  flex-direction:column;
+  padding:12px;
+  margin-bottom:14px;
+  border:1px solid var(--rm-line);
+  border-radius:8px;
+  background:rgba(13,17,22,.92);
+  backdrop-filter:blur(16px);
+  align-items:stretch;
+  gap:10px;
+}
+
+.research-v2 .filter-group{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+  width:100%;
+}
+
+.research-v2 .filter-group + .filter-group{
+  padding-top:10px;
+  border-top:1px solid var(--rm-line-soft);
+}
+
+.research-v2 .filter-group label{
+  flex:0 0 104px;
+  color:var(--rm-muted);
+  text-transform:none;
+  font-size:.78rem;
+  font-weight:800;
+}
+
+.research-v2 .fbtn{
+  min-height:34px;
+  border-radius:6px;
+  border-color:var(--rm-line);
+  background:rgba(255,255,255,.03);
+  color:var(--rm-muted);
+  font-size:.72rem;
+  font-weight:800;
+  text-transform:none;
+}
+
+.research-v2 .fbtn:hover{
+  color:var(--rm-text);
+  border-color:rgba(67,215,232,.4);
+}
+
+.research-v2 .fbtn.active{
+  box-shadow:0 0 0 2px rgba(255,255,255,.06) inset,0 0 0 1px currentColor;
+}
+
+.research-v2 .fbtn .fc{
+  color:inherit;
+  opacity:.78;
+}
+
+.research-v2 .fbtn[data-filter="UltraBuy"],
+.research-v2 .fbtn[data-filter="Buy"]{
+  color:var(--rm-green);
+  background:rgba(53,208,143,.11);
+  border-color:rgba(53,208,143,.38);
+}
+
+.research-v2 .fbtn[data-filter="Neutral"]{
+  color:var(--rm-blue);
+  background:rgba(111,168,255,.1);
+  border-color:rgba(111,168,255,.28);
+}
+
+.research-v2 .fbtn[data-filter="Sell"]{
+  color:var(--rm-red);
+  background:rgba(240,111,104,.12);
+  border-color:rgba(240,111,104,.34);
+}
+
+.research-v2 .fbtn[data-filter="all"],
+.research-v2 .fbtn[data-market]{
+  color:var(--rm-cyan);
+  background:rgba(67,215,232,.09);
+  border-color:rgba(67,215,232,.3);
+}
+
+.research-v2 .sector-nav{
+  gap:8px;
+  margin-bottom:14px;
+  padding:0;
+  border:0;
+}
+
+.research-v2 .sector-tab{
+  min-height:38px;
+  padding:8px 12px;
+  border:1px solid var(--rm-line);
+  border-radius:6px;
+  background:rgba(17,24,32,.72);
+  color:var(--rm-muted);
+}
+
+.research-v2 .sector-tab:hover{
+  color:var(--rm-text);
+  background:var(--rm-surface-2);
+}
+
+.research-v2 .sector-tab.active{
+  color:var(--rm-text);
+  border-color:rgba(67,215,232,.52);
+  background:rgba(67,215,232,.11);
+}
+
+.research-v2 .tab-count{
+  border-radius:999px;
+  border-color:var(--rm-line);
+  background:rgba(7,9,11,.36);
+  color:var(--rm-text);
+}
+
+.research-v2 .panel-summary{gap:8px;margin-bottom:12px}
+.research-v2 .ps-item{
+  border-color:var(--rm-line);
+  background:rgba(17,24,32,.74);
+}
+.research-v2 .ps-green{color:var(--rm-green)}
+.research-v2 .ps-blue{color:var(--rm-blue)}
+.research-v2 .ps-red{color:var(--rm-red)}
+
+.research-v2 .table-wrap{
+  border-color:var(--rm-line);
+  border-radius:8px;
+  overflow:auto;
+  background:var(--rm-surface);
+  box-shadow:0 18px 44px rgba(0,0,0,.22);
+}
+
+.research-v2 .t-assets{
+  min-width:720px;
+  font-size:.84rem;
+}
+
+.research-v2 .t-assets thead{background:#0b0f14}
+.research-v2 .t-assets th{
+  position:sticky;
+  top:0;
+  z-index:2;
+  padding:12px 14px;
+  border-color:var(--rm-line);
+  background:#0b0f14;
+  color:var(--rm-muted);
+  font-size:.72rem;
+  text-transform:none;
+}
+
+.research-v2 .th-sort::after{content:"↕";color:var(--rm-dim)}
+.research-v2 .th-sort.asc::after{content:"↑";color:var(--rm-cyan)}
+.research-v2 .th-sort.desc::after{content:"↓";color:var(--rm-cyan)}
+.research-v2 .t-assets td{padding:11px 14px;border-color:var(--rm-line-soft)}
+.research-v2 .t-assets tbody tr:hover td{background:rgba(67,215,232,.055)}
+.research-v2 .tk-badge{
+  border-color:var(--rm-line);
+  border-radius:5px;
+  background:#080b0f;
+  color:var(--rm-text);
+}
+.research-v2 .col-name{color:var(--rm-muted)}
+.research-v2 .th-r,
+.research-v2 .t-assets th:nth-child(6),
+.research-v2 .col-price,
+.research-v2 .col-rsi,
+.research-v2 .col-sig{
+  text-align:center;
+}
+.research-v2 .t-assets th:nth-child(3),
+.research-v2 .t-assets th:nth-child(4),
+.research-v2 .t-assets th:nth-child(5),
+.research-v2 .t-assets th:nth-child(6),
+.research-v2 .col-price,
+.research-v2 .col-rsi,
+.research-v2 .col-sig{
+  width:14%;
+}
+.research-v2 .col-price{
+  color:var(--rm-text);
+  font-variant-numeric:tabular-nums;
+}
+.research-v2 .col-rsi .rsi-pill,
+.research-v2 .col-sig .signal-badge{
+  margin-inline:auto;
+}
+
+.research-v2 .rsi-pill{
+  border-radius:5px;
+  color:var(--rm-muted);
+  background:#080b0f;
+  border:1px solid var(--rm-line);
+}
+
+.research-v2 .rsi-pill[data-zone="deep"],
+.research-v2 .rsi-pill[data-zone="value"]{
+  color:var(--rm-green);
+  background:rgba(53,208,143,.12);
+  border-color:rgba(53,208,143,.34);
+}
+
+.research-v2 .rsi-pill[data-zone="watch"]{
+  color:var(--rm-cyan);
+  background:rgba(67,215,232,.1);
+  border-color:rgba(67,215,232,.28);
+}
+
+.research-v2 .rsi-pill[data-zone="warm"]{
+  color:var(--rm-yellow);
+  background:rgba(241,188,75,.12);
+  border-color:rgba(241,188,75,.3);
+}
+
+.research-v2 .rsi-pill[data-zone="hot"]{
+  color:var(--rm-red);
+  background:rgba(240,111,104,.12);
+  border-color:rgba(240,111,104,.34);
+}
+
+.research-v2 .sig-ultrabuy,
+.research-v2 .sig-buy{
+  color:var(--rm-green);
+  background:rgba(53,208,143,.11);
+  border-color:rgba(53,208,143,.38);
+}
+
+.research-v2 .sig-neutral{
+  color:var(--rm-blue);
+  background:rgba(111,168,255,.1);
+  border-color:rgba(111,168,255,.28);
+}
+
+.research-v2 .sig-sell{
+  color:var(--rm-red);
+  background:rgba(240,111,104,.12);
+  border-color:rgba(240,111,104,.34);
+}
+
+.research-v2 .empty-state{
+  display:none;
+  padding:26px;
+  border-top:1px solid var(--rm-line);
+  color:var(--rm-muted);
+  background:rgba(7,9,11,.2);
+  font-size:.88rem;
+}
+
+.research-v2 .empty-state.is-visible{display:block}
+.research-v2 .global-empty-state{
+  display:none;
+  margin-top:14px;
+  padding:26px;
+  border:1px solid var(--rm-line);
+  border-radius:8px;
+  color:var(--rm-muted);
+  background:rgba(17,24,32,.74);
+  font-size:.88rem;
+}
+.research-v2 .global-empty-state.is-visible{display:block}
+.research-v2 .footer{
+  max-width:1440px;
+  margin:20px auto 0;
+  padding:24px clamp(16px,3vw,34px) 36px;
+  border-color:var(--rm-line);
+  color:var(--rm-dim);
+  text-align:left;
+}
+.research-v2 .footer a{color:var(--rm-cyan)}
+
+@media(max-width:1100px){
+  .research-v2 .brief-copy h1{
+    white-space:normal;
+    font-size:clamp(1.45rem,3vw,2.15rem);
+  }
+}
+
+@media(max-width:980px){
+  .research-v2 .executive-board{grid-template-columns:1fr}
+  .research-v2 .oc-grid{grid-template-columns:1fr}
+  .research-v2 .topbar-brand{min-width:auto}
+}
+
+@media(max-width:720px){
+  .research-v2 .topbar{min-height:auto}
+  .research-v2 .search-wrap{
+    flex-basis:100%;
+    max-width:none;
+    order:3;
+  }
+  .research-v2 .topbar-meta{
+    width:100%;
+    justify-content:space-between;
+  }
+  .research-v2 .brief-copy{
+    min-height:auto;
+    padding:22px;
+  }
+  .research-v2 .filter-group label{
+    flex-basis:100%;
+  }
+  .research-v2 .kpi-strip{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .research-v2 .kpi-cell{min-width:0}
+  .research-v2 .filter-strip{position:static}
+}
+
+@media(max-width:480px){
+  .research-v2 .executive-board,
+  .research-v2 .main,
+  .research-v2 .kpi-strip{
+    padding-left:12px;
+    padding-right:12px;
+  }
+  .research-v2 .kpi-strip{grid-template-columns:1fr}
+  .research-v2 .oc-body{flex-direction:column}
+  .research-v2 .oc-gauge{
+    width:150px;
+    flex-basis:auto;
+  }
+}
+
 </style>
 </head>
-<body>
+<body class="research-v2">
 
 <!-- TOPBAR -->
-<div class="topbar">
+<header class="topbar">
   <div class="topbar-brand">
-    <span class="brand-dot"></span>
-    <span class="brand-name">Financial Monitor</span>
-    <span class="brand-tag">Pro v2</span>
+    <span class="brand-dot" aria-hidden="true"></span>
+    <span class="brand-name">Financial Monitor Research</span>
   </div>
-  <div class="search-wrap">
-    <span class="search-icon">&#128269;</span>
-    <input type="text" class="search-input" id="globalSearch" placeholder="Buscar ativo... (ticker ou nome)" autocomplete="off"/>
+  <div class="search-wrap" role="search">
+    <span class="search-icon">&#8981;</span>
+    <input type="text" class="search-input" id="globalSearch" placeholder="Search ticker, asset, or name" autocomplete="off"/>
   </div>
   <div class="topbar-meta">
-    <span>Atualizado</span>
-    <time>03/07/2026 12:01</time>
+    <span>Research snapshot</span>
+    <time>03/07/2026 15:11</time>
   </div>
-</div>
+</header>
+
+<!-- EXECUTIVE BRIEF -->
+<section class="executive-board" aria-label="Executive summary">
+  <div class="brief-copy">
+    <div class="eyebrow">Multi-asset research desk</div>
+    <h1>Institutional dashboard for momentum, on-chain value, and risk zones.</h1>
+    <p>Consolidated view of crypto, global indices, global equities, Brazilian equities, and currency markets focused on weekly RSI, monthly RSI, and MVRV.</p>
+  </div>
+  <aside class="market-read" aria-label="Signal distribution">
+    <h2>Signal Allocation</h2>
+    <div class="mix-row"><span>Ultra Buy</span><strong>1</strong><div class="mix-bar"><span style="--w:1.1%;--c:var(--rm-green)"></span></div></div>
+    <div class="mix-row"><span>Buy</span><strong>0</strong><div class="mix-bar"><span style="--w:0.0%;--c:var(--rm-green)"></span></div></div>
+    <div class="mix-row"><span>Neutral</span><strong>81</strong><div class="mix-bar"><span style="--w:91.0%;--c:var(--rm-blue)"></span></div></div>
+    <div class="mix-row"><span>Sell</span><strong>7</strong><div class="mix-bar"><span style="--w:7.9%;--c:var(--rm-red)"></span></div></div>
+  </aside>
+</section>
 
 <!-- KPI STRIP -->
-<div class="kpi-strip">
-  <div class="kpi-cell"><div class="kpi-num" style="color:var(--teal)">89</div><div class="kpi-label">Ativos</div></div>
-  <div class="kpi-cell"><div class="kpi-num" style="color:var(--green)">1</div><div class="kpi-label">Ultra Buy</div></div>
-  <div class="kpi-cell"><div class="kpi-num" style="color:var(--green)">0</div><div class="kpi-label">Buy</div></div>
-  <div class="kpi-cell"><div class="kpi-num" style="color:var(--blue)">81</div><div class="kpi-label">Neutral</div></div>
-  <div class="kpi-cell"><div class="kpi-num" style="color:var(--red)">7</div><div class="kpi-label">Sell</div></div>
+<div class="kpi-strip" aria-label="Key indicators">
+  <div class="kpi-cell"><div class="kpi-num" style="color:var(--rm-cyan)">89</div><div class="kpi-label">Assets in coverage</div></div>
+  <div class="kpi-cell"><div class="kpi-num" style="color:var(--rm-green)">1</div><div class="kpi-label">Extreme asymmetry</div></div>
+  <div class="kpi-cell"><div class="kpi-num" style="color:var(--rm-green)">0</div><div class="kpi-label">Buy zone</div></div>
+  <div class="kpi-cell"><div class="kpi-num" style="color:var(--rm-blue)">81</div><div class="kpi-label">Neutral</div></div>
+  <div class="kpi-cell"><div class="kpi-num" style="color:var(--rm-red)">7</div><div class="kpi-label">Overbought</div></div>
 </div>
 
 <div class="main">
 
   <!-- ON-CHAIN -->
-  <h2 class="section-title">On-Chain Analytics</h2>
+  <h2 class="section-title">On-Chain Valuation Desk</h2>
   <div class="oc-grid">
     
     <div class="oc-card">
@@ -221,7 +890,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
         </div>
       </div>
       <div class="oc-footer">
-        <span class="oc-action-label">Ação:</span>
+        <span class="oc-action-label">Action:</span>
         <span class="oc-action-val">ACCUMULATE / DCA</span>
         <span class="oc-risk-pill">Risk: MEDIUM</span>
       </div>
@@ -247,7 +916,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
         </div>
       </div>
       <div class="oc-footer">
-        <span class="oc-action-label">Ação:</span>
+        <span class="oc-action-label">Action:</span>
         <span class="oc-action-val">ACCUMULATE</span>
         <span class="oc-risk-pill">Risk: MEDIUM</span>
       </div>
@@ -255,59 +924,62 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
   </div>
 
   <!-- RSI MONITOR -->
-  <h2 class="section-title">RSI Monitor</h2>
+  <h2 class="section-title">RSI Opportunity Matrix</h2>
 
   <!-- Filter -->
   <div class="filter-strip">
-    <label>Sinal:</label>
-    <button class="fbtn active" data-filter="all">Todos <span class="fc">89</span></button>
-    <button class="fbtn" data-filter="UltraBuy">Ultra Buy <span class="fc">1</span></button>
-    <button class="fbtn" data-filter="Buy">Buy <span class="fc">0</span></button>
-    <button class="fbtn" data-filter="Neutral">Neutral <span class="fc">81</span></button>
-    <button class="fbtn" data-filter="Sell">Sell <span class="fc">7</span></button>
+    <div class="filter-group">
+      <label>Filter Signal</label>
+      <button class="fbtn active" data-filter="all">All <span class="fc">89</span></button>
+      <button class="fbtn" data-filter="UltraBuy">Ultra Buy <span class="fc">1</span></button>
+      <button class="fbtn" data-filter="Buy">Buy <span class="fc">0</span></button>
+      <button class="fbtn" data-filter="Neutral">Neutral <span class="fc">81</span></button>
+      <button class="fbtn" data-filter="Sell">Sell <span class="fc">7</span></button>
+    </div>
+    <div class="filter-group">
+      <label>Filter Market</label>
+      <button class="fbtn active" data-market="all">All</button><button class="fbtn" data-market="indices">Global Indices <span class="fc">5</span></button><button class="fbtn" data-market="cripto">Crypto Assets <span class="fc">3</span></button><button class="fbtn" data-market="eua">U.S. Market <span class="fc">42</span></button><button class="fbtn" data-market="brasil">Brazilian Market <span class="fc">38</span></button><button class="fbtn" data-market="moeda">Currency <span class="fc">1</span></button>
+    </div>
   </div>
-
-  <!-- Sector Tabs -->
-  <div class="sector-nav"><button class="sector-tab active" data-panel="indices">📌 Índices Globais <span class="tab-count">5</span><span class="tab-dot dot-red"></span></button><button class="sector-tab " data-panel="cripto">🪙 Criptomoedas <span class="tab-count">3</span></button><button class="sector-tab " data-panel="eua">🇺🇸 Mercado Americano <span class="tab-count">42</span><span class="tab-dot dot-red"></span></button><button class="sector-tab " data-panel="brasil">🇧🇷 Mercado Brasileiro <span class="tab-count">38</span><span class="tab-dot dot-green"></span><span class="tab-dot dot-red"></span></button><button class="sector-tab " data-panel="moeda">💱 Câmbio <span class="tab-count">1</span></button></div>
 
   <!-- Panels -->
   
       <div class="sector-panel active" id="panel-indices">
         <div class="panel-summary">
-          <span class="ps-item ps-green">0 oportunidades</span>
-          <span class="ps-item ps-blue">4 neutros</span>
-          <span class="ps-item ps-red">1 sobrecomprados</span>
+          <span class="ps-item ps-green">0 opportunities</span>
+          <span class="ps-item ps-blue">4 neutral</span>
+          <span class="ps-item ps-red">1 overbought</span>
         </div>
         <div class="table-wrap">
           <table class="t-assets">
             <thead>
               <tr>
                 <th class="th-sort" data-col="0">Ticker</th>
-                <th class="th-sort" data-col="1">Nome</th>
-                <th class="th-sort th-r" data-col="2">Preço</th>
+                <th class="th-sort" data-col="1">Name</th>
+                <th class="th-sort th-r" data-col="2">Price</th>
                 <th class="th-sort th-r" data-col="3">RSI W</th>
                 <th class="th-sort th-r" data-col="4">RSI M</th>
-                <th>Sinal</th>
+                <th>Signal</th>
               </tr>
             </thead>
             <tbody>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="bvsp" data-name="ibovespa">
+            <tr class="asset-row" data-signal="Neutral" data-market="indices" data-ticker="bvsp" data-name="ibovespa">
               <td class="col-tk"><span class="tk-badge">BVSP</span></td>
               <td class="col-name">Ibovespa</td>
-              <td class="col-price">174,143</td>
+              <td class="col-price">174,432</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="50">50</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="66">66</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="gdaxi" data-name="dax">
+            <tr class="asset-row" data-signal="Neutral" data-market="indices" data-ticker="gdaxi" data-name="dax">
               <td class="col-tk"><span class="tk-badge">GDAXI</span></td>
               <td class="col-name">DAX</td>
-              <td class="col-price">25,773</td>
+              <td class="col-price">25,779</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="61">61</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="69">69</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="ndx" data-name="nasdaq 100">
+            <tr class="asset-row" data-signal="Neutral" data-market="indices" data-ticker="ndx" data-name="nasdaq 100">
               <td class="col-tk"><span class="tk-badge">NDX</span></td>
               <td class="col-name">Nasdaq 100</td>
               <td class="col-price">29,329</td>
@@ -315,7 +987,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
               <td class="col-rsi"><span class="rsi-pill" data-rsi="72">72</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="gspc" data-name="s&amp;p 500">
+            <tr class="asset-row" data-signal="Neutral" data-market="indices" data-ticker="gspc" data-name="s&amp;p 500">
               <td class="col-tk"><span class="tk-badge">GSPC</span></td>
               <td class="col-name">S&amp;P 500</td>
               <td class="col-price">7,483</td>
@@ -323,7 +995,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
               <td class="col-rsi"><span class="rsi-pill" data-rsi="73">73</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Sell" data-ticker="dji" data-name="dow jones">
+            <tr class="asset-row" data-signal="Sell" data-market="indices" data-ticker="dji" data-name="dow jones">
               <td class="col-tk"><span class="tk-badge">DJI</span></td>
               <td class="col-name">Dow Jones</td>
               <td class="col-price">52,900</td>
@@ -337,43 +1009,43 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
       </div>
       <div class="sector-panel " id="panel-cripto">
         <div class="panel-summary">
-          <span class="ps-item ps-green">0 oportunidades</span>
-          <span class="ps-item ps-blue">3 neutros</span>
-          <span class="ps-item ps-red">0 sobrecomprados</span>
+          <span class="ps-item ps-green">0 opportunities</span>
+          <span class="ps-item ps-blue">3 neutral</span>
+          <span class="ps-item ps-red">0 overbought</span>
         </div>
         <div class="table-wrap">
           <table class="t-assets">
             <thead>
               <tr>
                 <th class="th-sort" data-col="0">Ticker</th>
-                <th class="th-sort" data-col="1">Nome</th>
-                <th class="th-sort th-r" data-col="2">Preço</th>
+                <th class="th-sort" data-col="1">Name</th>
+                <th class="th-sort th-r" data-col="2">Price</th>
                 <th class="th-sort th-r" data-col="3">RSI W</th>
                 <th class="th-sort th-r" data-col="4">RSI M</th>
-                <th>Sinal</th>
+                <th>Signal</th>
               </tr>
             </thead>
             <tbody>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="eth" data-name="ethereum">
+            <tr class="asset-row" data-signal="Neutral" data-market="cripto" data-ticker="eth" data-name="ethereum">
               <td class="col-tk"><span class="tk-badge">ETH</span></td>
               <td class="col-name">Ethereum</td>
-              <td class="col-price">1,736</td>
+              <td class="col-price">1,735</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="36">36</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="42">42</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="btc" data-name="bitcoin">
+            <tr class="asset-row" data-signal="Neutral" data-market="cripto" data-ticker="btc" data-name="bitcoin">
               <td class="col-tk"><span class="tk-badge">BTC</span></td>
               <td class="col-name">Bitcoin</td>
-              <td class="col-price">62,111</td>
+              <td class="col-price">62,077</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="36">36</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="43">43</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="sol" data-name="solana">
+            <tr class="asset-row" data-signal="Neutral" data-market="cripto" data-ticker="sol" data-name="solana">
               <td class="col-tk"><span class="tk-badge">SOL</span></td>
               <td class="col-name">Solana</td>
-              <td class="col-price">81.67</td>
+              <td class="col-price">81.58</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="42">42</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="42">42</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
@@ -384,24 +1056,24 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
       </div>
       <div class="sector-panel " id="panel-eua">
         <div class="panel-summary">
-          <span class="ps-item ps-green">0 oportunidades</span>
-          <span class="ps-item ps-blue">38 neutros</span>
-          <span class="ps-item ps-red">4 sobrecomprados</span>
+          <span class="ps-item ps-green">0 opportunities</span>
+          <span class="ps-item ps-blue">38 neutral</span>
+          <span class="ps-item ps-red">4 overbought</span>
         </div>
         <div class="table-wrap">
           <table class="t-assets">
             <thead>
               <tr>
                 <th class="th-sort" data-col="0">Ticker</th>
-                <th class="th-sort" data-col="1">Nome</th>
-                <th class="th-sort th-r" data-col="2">Preço</th>
+                <th class="th-sort" data-col="1">Name</th>
+                <th class="th-sort th-r" data-col="2">Price</th>
                 <th class="th-sort th-r" data-col="3">RSI W</th>
                 <th class="th-sort th-r" data-col="4">RSI M</th>
-                <th>Sinal</th>
+                <th>Signal</th>
               </tr>
             </thead>
             <tbody>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="mstr" data-name="strategy">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="mstr" data-name="strategy">
               <td class="col-tk"><span class="tk-badge">MSTR</span></td>
               <td class="col-name">Strategy</td>
               <td class="col-price">100.77</td>
@@ -409,7 +1081,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
               <td class="col-rsi"><span class="rsi-pill" data-rsi="40">40</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="tm" data-name="toyota">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="tm" data-name="toyota">
               <td class="col-tk"><span class="tk-badge">TM</span></td>
               <td class="col-name">Toyota</td>
               <td class="col-price">174.59</td>
@@ -417,7 +1089,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
               <td class="col-rsi"><span class="rsi-pill" data-rsi="45">45</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="nflx" data-name="netflix">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="nflx" data-name="netflix">
               <td class="col-tk"><span class="tk-badge">NFLX</span></td>
               <td class="col-name">Netflix</td>
               <td class="col-price">77.65</td>
@@ -425,7 +1097,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
               <td class="col-rsi"><span class="rsi-pill" data-rsi="45">45</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="orcl" data-name="oracle">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="orcl" data-name="oracle">
               <td class="col-tk"><span class="tk-badge">ORCL</span></td>
               <td class="col-name">Oracle</td>
               <td class="col-price">140.27</td>
@@ -433,7 +1105,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
               <td class="col-rsi"><span class="rsi-pill" data-rsi="46">46</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="wmt" data-name="walmart">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="wmt" data-name="walmart">
               <td class="col-tk"><span class="tk-badge">WMT</span></td>
               <td class="col-name">Walmart</td>
               <td class="col-price">111.84</td>
@@ -441,7 +1113,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
               <td class="col-rsi"><span class="rsi-pill" data-rsi="60">60</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="msft" data-name="microsoft">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="msft" data-name="microsoft">
               <td class="col-tk"><span class="tk-badge">MSFT</span></td>
               <td class="col-name">Microsoft</td>
               <td class="col-price">390.49</td>
@@ -449,7 +1121,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
               <td class="col-rsi"><span class="rsi-pill" data-rsi="46">46</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="meta" data-name="meta">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="meta" data-name="meta">
               <td class="col-tk"><span class="tk-badge">META</span></td>
               <td class="col-name">Meta</td>
               <td class="col-price">582.90</td>
@@ -457,7 +1129,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
               <td class="col-rsi"><span class="rsi-pill" data-rsi="50">50</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="pltr" data-name="palantir">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="pltr" data-name="palantir">
               <td class="col-tk"><span class="tk-badge">PLTR</span></td>
               <td class="col-name">Palantir</td>
               <td class="col-price">129.30</td>
@@ -465,7 +1137,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
               <td class="col-rsi"><span class="rsi-pill" data-rsi="54">54</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="now" data-name="servicenow">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="now" data-name="servicenow">
               <td class="col-tk"><span class="tk-badge">NOW</span></td>
               <td class="col-name">ServiceNow</td>
               <td class="col-price">106.32</td>
@@ -473,7 +1145,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
               <td class="col-rsi"><span class="rsi-pill" data-rsi="40">40</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="blk" data-name="blackrock">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="blk" data-name="blackrock">
               <td class="col-tk"><span class="tk-badge">BLK</span></td>
               <td class="col-name">BlackRock</td>
               <td class="col-price">995.73</td>
@@ -481,7 +1153,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
               <td class="col-rsi"><span class="rsi-pill" data-rsi="52">52</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="cost" data-name="costco">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="cost" data-name="costco">
               <td class="col-tk"><span class="tk-badge">COST</span></td>
               <td class="col-name">Costco</td>
               <td class="col-price">951.67</td>
@@ -489,7 +1161,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
               <td class="col-rsi"><span class="rsi-pill" data-rsi="56">56</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="xom" data-name="exxon">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="xom" data-name="exxon">
               <td class="col-tk"><span class="tk-badge">XOM</span></td>
               <td class="col-name">Exxon</td>
               <td class="col-price">137.09</td>
@@ -497,7 +1169,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
               <td class="col-rsi"><span class="rsi-pill" data-rsi="59">59</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="nu" data-name="nubank">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="nu" data-name="nubank">
               <td class="col-tk"><span class="tk-badge">NU</span></td>
               <td class="col-name">Nubank</td>
               <td class="col-price">13.61</td>
@@ -505,7 +1177,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
               <td class="col-rsi"><span class="rsi-pill" data-rsi="51">51</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="tsla" data-name="tesla">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="tsla" data-name="tesla">
               <td class="col-tk"><span class="tk-badge">TSLA</span></td>
               <td class="col-name">Tesla</td>
               <td class="col-price">393.45</td>
@@ -513,7 +1185,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
               <td class="col-rsi"><span class="rsi-pill" data-rsi="55">55</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="avgo" data-name="broadcom">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="avgo" data-name="broadcom">
               <td class="col-tk"><span class="tk-badge">AVGO</span></td>
               <td class="col-name">Broadcom</td>
               <td class="col-price">360.45</td>
@@ -521,7 +1193,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
               <td class="col-rsi"><span class="rsi-pill" data-rsi="60">60</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="qcom" data-name="qualcomm">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="qcom" data-name="qualcomm">
               <td class="col-tk"><span class="tk-badge">QCOM</span></td>
               <td class="col-name">Qualcomm</td>
               <td class="col-price">176.25</td>
@@ -529,7 +1201,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
               <td class="col-rsi"><span class="rsi-pill" data-rsi="53">53</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="nvda" data-name="nvidia">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="nvda" data-name="nvidia">
               <td class="col-tk"><span class="tk-badge">NVDA</span></td>
               <td class="col-name">Nvidia</td>
               <td class="col-price">194.83</td>
@@ -537,7 +1209,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
               <td class="col-rsi"><span class="rsi-pill" data-rsi="64">64</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="amzn" data-name="amazon">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="amzn" data-name="amazon">
               <td class="col-tk"><span class="tk-badge">AMZN</span></td>
               <td class="col-name">Amazon</td>
               <td class="col-price">242.67</td>
@@ -545,7 +1217,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
               <td class="col-rsi"><span class="rsi-pill" data-rsi="57">57</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="app" data-name="applovin">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="app" data-name="applovin">
               <td class="col-tk"><span class="tk-badge">APP</span></td>
               <td class="col-name">AppLovin</td>
               <td class="col-price">527.06</td>
@@ -553,7 +1225,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
               <td class="col-rsi"><span class="rsi-pill" data-rsi="58">58</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="spgi" data-name="s&amp;p global">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="spgi" data-name="s&amp;p global">
               <td class="col-tk"><span class="tk-badge">SPGI</span></td>
               <td class="col-name">S&amp;P Global</td>
               <td class="col-price">439.89</td>
@@ -561,7 +1233,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
               <td class="col-rsi"><span class="rsi-pill" data-rsi="50">50</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="anet" data-name="arista">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="anet" data-name="arista">
               <td class="col-tk"><span class="tk-badge">ANET</span></td>
               <td class="col-name">Arista</td>
               <td class="col-price">159.99</td>
@@ -569,7 +1241,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
               <td class="col-rsi"><span class="rsi-pill" data-rsi="63">63</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="googl" data-name="google">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="googl" data-name="google">
               <td class="col-tk"><span class="tk-badge">GOOGL</span></td>
               <td class="col-name">Google</td>
               <td class="col-price">359.91</td>
@@ -577,7 +1249,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
               <td class="col-rsi"><span class="rsi-pill" data-rsi="69">69</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="ma" data-name="mastercard">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="ma" data-name="mastercard">
               <td class="col-tk"><span class="tk-badge">MA</span></td>
               <td class="col-name">Mastercard</td>
               <td class="col-price">539.39</td>
@@ -585,7 +1257,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
               <td class="col-rsi"><span class="rsi-pill" data-rsi="56">56</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="mco" data-name="moody&#x27;s">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="mco" data-name="moody&#x27;s">
               <td class="col-tk"><span class="tk-badge">MCO</span></td>
               <td class="col-name">Moody&#x27;s</td>
               <td class="col-price">490.51</td>
@@ -593,7 +1265,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
               <td class="col-rsi"><span class="rsi-pill" data-rsi="56">56</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="brk-b" data-name="berkshire">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="brk-b" data-name="berkshire">
               <td class="col-tk"><span class="tk-badge">BRK-B</span></td>
               <td class="col-name">Berkshire</td>
               <td class="col-price">507.78</td>
@@ -601,7 +1273,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
               <td class="col-rsi"><span class="rsi-pill" data-rsi="58">58</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="aapl" data-name="apple">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="aapl" data-name="apple">
               <td class="col-tk"><span class="tk-badge">AAPL</span></td>
               <td class="col-name">Apple</td>
               <td class="col-price">308.63</td>
@@ -609,7 +1281,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
               <td class="col-rsi"><span class="rsi-pill" data-rsi="67">67</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="jpm" data-name="jp morgan">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="jpm" data-name="jp morgan">
               <td class="col-tk"><span class="tk-badge">JPM</span></td>
               <td class="col-name">JP Morgan</td>
               <td class="col-price">334.47</td>
@@ -617,7 +1289,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
               <td class="col-rsi"><span class="rsi-pill" data-rsi="71">71</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="asml" data-name="asml">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="asml" data-name="asml">
               <td class="col-tk"><span class="tk-badge">ASML</span></td>
               <td class="col-name">ASML</td>
               <td class="col-price">1,769</td>
@@ -625,7 +1297,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
               <td class="col-rsi"><span class="rsi-pill" data-rsi="71">71</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="intc" data-name="intel">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="intc" data-name="intel">
               <td class="col-tk"><span class="tk-badge">INTC</span></td>
               <td class="col-name">Intel</td>
               <td class="col-price">120.35</td>
@@ -633,7 +1305,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
               <td class="col-rsi"><span class="rsi-pill" data-rsi="76">76</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="smh" data-name="semis etf">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="smh" data-name="semis etf">
               <td class="col-tk"><span class="tk-badge">SMH</span></td>
               <td class="col-name">Semis ETF</td>
               <td class="col-price">592.29</td>
@@ -641,7 +1313,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
               <td class="col-rsi"><span class="rsi-pill" data-rsi="77">77</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="v" data-name="visa">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="v" data-name="visa">
               <td class="col-tk"><span class="tk-badge">V</span></td>
               <td class="col-name">Visa</td>
               <td class="col-price">362.13</td>
@@ -649,7 +1321,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
               <td class="col-rsi"><span class="rsi-pill" data-rsi="63">63</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="lin" data-name="linde">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="lin" data-name="linde">
               <td class="col-tk"><span class="tk-badge">LIN</span></td>
               <td class="col-name">Linde</td>
               <td class="col-price">546.64</td>
@@ -657,7 +1329,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
               <td class="col-rsi"><span class="rsi-pill" data-rsi="69">69</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="tsm" data-name="tsmc">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="tsm" data-name="tsmc">
               <td class="col-tk"><span class="tk-badge">TSM</span></td>
               <td class="col-name">TSMC</td>
               <td class="col-price">434.16</td>
@@ -665,7 +1337,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
               <td class="col-rsi"><span class="rsi-pill" data-rsi="73">73</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="lrcx" data-name="lam research">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="lrcx" data-name="lam research">
               <td class="col-tk"><span class="tk-badge">LRCX</span></td>
               <td class="col-name">Lam Research</td>
               <td class="col-price">351.41</td>
@@ -673,7 +1345,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
               <td class="col-rsi"><span class="rsi-pill" data-rsi="73">73</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="klac" data-name="kla">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="klac" data-name="kla">
               <td class="col-tk"><span class="tk-badge">KLAC</span></td>
               <td class="col-name">KLA</td>
               <td class="col-price">235.55</td>
@@ -681,7 +1353,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
               <td class="col-rsi"><span class="rsi-pill" data-rsi="71">71</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="lly" data-name="eli lilly">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="lly" data-name="eli lilly">
               <td class="col-tk"><span class="tk-badge">LLY</span></td>
               <td class="col-name">Eli Lilly</td>
               <td class="col-price">1,214</td>
@@ -689,7 +1361,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
               <td class="col-rsi"><span class="rsi-pill" data-rsi="69">69</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="mu" data-name="micron">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="mu" data-name="micron">
               <td class="col-tk"><span class="tk-badge">MU</span></td>
               <td class="col-name">Micron</td>
               <td class="col-price">975.56</td>
@@ -697,7 +1369,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
               <td class="col-rsi"><span class="rsi-pill" data-rsi="78">78</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="unh" data-name="unitedhealth">
+            <tr class="asset-row" data-signal="Neutral" data-market="eua" data-ticker="unh" data-name="unitedhealth">
               <td class="col-tk"><span class="tk-badge">UNH</span></td>
               <td class="col-name">UnitedHealth</td>
               <td class="col-price">425.36</td>
@@ -705,7 +1377,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
               <td class="col-rsi"><span class="rsi-pill" data-rsi="54">54</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Sell" data-ticker="panw" data-name="palo alto">
+            <tr class="asset-row" data-signal="Sell" data-market="eua" data-ticker="panw" data-name="palo alto">
               <td class="col-tk"><span class="tk-badge">PANW</span></td>
               <td class="col-name">Palo Alto</td>
               <td class="col-price">348.06</td>
@@ -713,7 +1385,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
               <td class="col-rsi"><span class="rsi-pill" data-rsi="76">76</span></td>
               <td class="col-sig"><span class="signal-badge sig-sell">SELL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Sell" data-ticker="amat" data-name="applied mat">
+            <tr class="asset-row" data-signal="Sell" data-market="eua" data-ticker="amat" data-name="applied mat">
               <td class="col-tk"><span class="tk-badge">AMAT</span></td>
               <td class="col-name">Applied Mat</td>
               <td class="col-price">603.04</td>
@@ -721,7 +1393,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
               <td class="col-rsi"><span class="rsi-pill" data-rsi="73">73</span></td>
               <td class="col-sig"><span class="signal-badge sig-sell">SELL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Sell" data-ticker="cat" data-name="caterpillar">
+            <tr class="asset-row" data-signal="Sell" data-market="eua" data-ticker="cat" data-name="caterpillar">
               <td class="col-tk"><span class="tk-badge">CAT</span></td>
               <td class="col-name">Caterpillar</td>
               <td class="col-price">963.53</td>
@@ -729,7 +1401,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
               <td class="col-rsi"><span class="rsi-pill" data-rsi="76">76</span></td>
               <td class="col-sig"><span class="signal-badge sig-sell">SELL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Sell" data-ticker="amd" data-name="amd">
+            <tr class="asset-row" data-signal="Sell" data-market="eua" data-ticker="amd" data-name="amd">
               <td class="col-tk"><span class="tk-badge">AMD</span></td>
               <td class="col-name">AMD</td>
               <td class="col-price">517.82</td>
@@ -743,64 +1415,64 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
       </div>
       <div class="sector-panel " id="panel-brasil">
         <div class="panel-summary">
-          <span class="ps-item ps-green">1 oportunidades</span>
-          <span class="ps-item ps-blue">35 neutros</span>
-          <span class="ps-item ps-red">2 sobrecomprados</span>
+          <span class="ps-item ps-green">1 opportunities</span>
+          <span class="ps-item ps-blue">35 neutral</span>
+          <span class="ps-item ps-red">2 overbought</span>
         </div>
         <div class="table-wrap">
           <table class="t-assets">
             <thead>
               <tr>
                 <th class="th-sort" data-col="0">Ticker</th>
-                <th class="th-sort" data-col="1">Nome</th>
-                <th class="th-sort th-r" data-col="2">Preço</th>
+                <th class="th-sort" data-col="1">Name</th>
+                <th class="th-sort th-r" data-col="2">Price</th>
                 <th class="th-sort th-r" data-col="3">RSI W</th>
                 <th class="th-sort th-r" data-col="4">RSI M</th>
-                <th>Sinal</th>
+                <th>Signal</th>
               </tr>
             </thead>
             <tbody>
-            <tr class="asset-row" data-signal="UltraBuy" data-ticker="inbr32" data-name="banco inter">
+            <tr class="asset-row" data-signal="UltraBuy" data-market="brasil" data-ticker="inbr32" data-name="banco inter">
               <td class="col-tk"><span class="tk-badge">INBR32</span></td>
               <td class="col-name">Banco Inter</td>
-              <td class="col-price">28.39</td>
+              <td class="col-price">28.42</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="28">28</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="41">41</span></td>
               <td class="col-sig"><span class="signal-badge sig-ultrabuy">ULTRA BUY</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="soja3" data-name="boa safra">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="soja3" data-name="boa safra">
               <td class="col-tk"><span class="tk-badge">SOJA3</span></td>
               <td class="col-name">Boa Safra</td>
-              <td class="col-price">6.17</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="32">32</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="32">32</span></td>
+              <td class="col-price">6.12</td>
+              <td class="col-rsi"><span class="rsi-pill" data-rsi="31">31</span></td>
+              <td class="col-rsi"><span class="rsi-pill" data-rsi="31">31</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="suzb3" data-name="suzano">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="suzb3" data-name="suzano">
               <td class="col-tk"><span class="tk-badge">SUZB3</span></td>
               <td class="col-name">Suzano</td>
-              <td class="col-price">40.78</td>
+              <td class="col-price">40.74</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="35">35</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="40">40</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="radl3" data-name="droga raia">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="radl3" data-name="droga raia">
               <td class="col-tk"><span class="tk-badge">RADL3</span></td>
               <td class="col-name">Droga Raia</td>
-              <td class="col-price">17.17</td>
+              <td class="col-price">17.16</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="36">36</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="42">42</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="tots3" data-name="totvs">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="tots3" data-name="totvs">
               <td class="col-tk"><span class="tk-badge">TOTS3</span></td>
               <td class="col-name">Totvs</td>
-              <td class="col-price">29.62</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="40">40</span></td>
+              <td class="col-price">30.07</td>
+              <td class="col-rsi"><span class="rsi-pill" data-rsi="41">41</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="42">42</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="sanb11" data-name="santander">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="sanb11" data-name="santander">
               <td class="col-tk"><span class="tk-badge">SANB11</span></td>
               <td class="col-name">Santander</td>
               <td class="col-price">27.01</td>
@@ -808,47 +1480,23 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
               <td class="col-rsi"><span class="rsi-pill" data-rsi="48">48</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="bbas3" data-name="banco do brasil">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="bbas3" data-name="banco do brasil">
               <td class="col-tk"><span class="tk-badge">BBAS3</span></td>
               <td class="col-name">Banco do Brasil</td>
-              <td class="col-price">20.10</td>
+              <td class="col-price">20.09</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="42">42</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="44">44</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="isae3" data-name="isa energia brasil on">
-              <td class="col-tk"><span class="tk-badge">ISAE3</span></td>
-              <td class="col-name">ISA Energia Brasil ON</td>
-              <td class="col-price">31.50</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="43">43</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="54">54</span></td>
-              <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
-            </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="b3sa3" data-name="b3">
-              <td class="col-tk"><span class="tk-badge">B3SA3</span></td>
-              <td class="col-name">B3</td>
-              <td class="col-price">14.86</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="43">43</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="55">55</span></td>
-              <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
-            </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="prio3" data-name="prio">
-              <td class="col-tk"><span class="tk-badge">PRIO3</span></td>
-              <td class="col-name">Prio</td>
-              <td class="col-price">52.64</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="43">43</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="56">56</span></td>
-              <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
-            </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="brsr6" data-name="banrisul">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="brsr6" data-name="banrisul">
               <td class="col-tk"><span class="tk-badge">BRSR6</span></td>
               <td class="col-name">Banrisul</td>
-              <td class="col-price">14.01</td>
+              <td class="col-price">13.98</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="43">43</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="57">57</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="klbn4" data-name="klabin">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="klbn4" data-name="klabin">
               <td class="col-tk"><span class="tk-badge">KLBN4</span></td>
               <td class="col-name">Klabin</td>
               <td class="col-price">3.43</td>
@@ -856,210 +1504,234 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
               <td class="col-rsi"><span class="rsi-pill" data-rsi="47">47</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="rani3" data-name="irani">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="rani3" data-name="irani">
               <td class="col-tk"><span class="tk-badge">RANI3</span></td>
               <td class="col-name">Irani</td>
-              <td class="col-price">7.96</td>
+              <td class="col-price">7.95</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="44">44</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="52">52</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="petr4" data-name="petrobras">
-              <td class="col-tk"><span class="tk-badge">PETR4</span></td>
-              <td class="col-name">Petrobras</td>
-              <td class="col-price">38.14</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="45">45</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="58">58</span></td>
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="b3sa3" data-name="b3">
+              <td class="col-tk"><span class="tk-badge">B3SA3</span></td>
+              <td class="col-name">B3</td>
+              <td class="col-price">14.89</td>
+              <td class="col-rsi"><span class="rsi-pill" data-rsi="44">44</span></td>
+              <td class="col-rsi"><span class="rsi-pill" data-rsi="55">55</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="sapr11" data-name="sanepar">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="prio3" data-name="prio">
+              <td class="col-tk"><span class="tk-badge">PRIO3</span></td>
+              <td class="col-name">Prio</td>
+              <td class="col-price">52.70</td>
+              <td class="col-rsi"><span class="rsi-pill" data-rsi="44">44</span></td>
+              <td class="col-rsi"><span class="rsi-pill" data-rsi="56">56</span></td>
+              <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
+            </tr>
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="sapr11" data-name="sanepar">
               <td class="col-tk"><span class="tk-badge">SAPR11</span></td>
               <td class="col-name">Sanepar</td>
-              <td class="col-price">37.63</td>
+              <td class="col-price">37.42</td>
+              <td class="col-rsi"><span class="rsi-pill" data-rsi="44">44</span></td>
+              <td class="col-rsi"><span class="rsi-pill" data-rsi="57">57</span></td>
+              <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
+            </tr>
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="petr4" data-name="petrobras">
+              <td class="col-tk"><span class="tk-badge">PETR4</span></td>
+              <td class="col-name">Petrobras</td>
+              <td class="col-price">38.20</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="45">45</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="58">58</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="pine4" data-name="banco pine">
-              <td class="col-tk"><span class="tk-badge">PINE4</span></td>
-              <td class="col-name">Banco Pine</td>
-              <td class="col-price">11.88</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="45">45</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="69">69</span></td>
-              <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
-            </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="rent3" data-name="localiza">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="rent3" data-name="localiza">
               <td class="col-tk"><span class="tk-badge">RENT3</span></td>
               <td class="col-name">Localiza</td>
-              <td class="col-price">41.77</td>
+              <td class="col-price">41.52</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="47">47</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="50">50</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="egie3" data-name="engie brasil">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="isae3" data-name="isa energia brasil on">
+              <td class="col-tk"><span class="tk-badge">ISAE3</span></td>
+              <td class="col-name">ISA Energia Brasil ON</td>
+              <td class="col-price">32.44</td>
+              <td class="col-rsi"><span class="rsi-pill" data-rsi="47">47</span></td>
+              <td class="col-rsi"><span class="rsi-pill" data-rsi="58">58</span></td>
+              <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
+            </tr>
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="pine4" data-name="banco pine">
+              <td class="col-tk"><span class="tk-badge">PINE4</span></td>
+              <td class="col-name">Banco Pine</td>
+              <td class="col-price">12.10</td>
+              <td class="col-rsi"><span class="rsi-pill" data-rsi="47">47</span></td>
+              <td class="col-rsi"><span class="rsi-pill" data-rsi="70">70</span></td>
+              <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
+            </tr>
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="egie3" data-name="engie brasil">
               <td class="col-tk"><span class="tk-badge">EGIE3</span></td>
               <td class="col-name">Engie Brasil</td>
-              <td class="col-price">32.54</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="49">49</span></td>
+              <td class="col-price">32.33</td>
+              <td class="col-rsi"><span class="rsi-pill" data-rsi="48">48</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="57">57</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="alup11" data-name="alupar">
-              <td class="col-tk"><span class="tk-badge">ALUP11</span></td>
-              <td class="col-name">Alupar</td>
-              <td class="col-price">32.77</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="49">49</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="60">60</span></td>
-              <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
-            </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="bbdc4" data-name="bradesco">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="bbdc4" data-name="bradesco">
               <td class="col-tk"><span class="tk-badge">BBDC4</span></td>
               <td class="col-name">Bradesco</td>
-              <td class="col-price">18.27</td>
+              <td class="col-price">18.34</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="50">50</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="59">59</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="eqtl3" data-name="equatorial">
-              <td class="col-tk"><span class="tk-badge">EQTL3</span></td>
-              <td class="col-name">Equatorial</td>
-              <td class="col-price">39.53</td>
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="alup11" data-name="alupar">
+              <td class="col-tk"><span class="tk-badge">ALUP11</span></td>
+              <td class="col-name">Alupar</td>
+              <td class="col-price">33.06</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="50">50</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="60">60</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="cmig4" data-name="cemig">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="eqtl3" data-name="equatorial">
+              <td class="col-tk"><span class="tk-badge">EQTL3</span></td>
+              <td class="col-name">Equatorial</td>
+              <td class="col-price">39.57</td>
+              <td class="col-rsi"><span class="rsi-pill" data-rsi="50">50</span></td>
+              <td class="col-rsi"><span class="rsi-pill" data-rsi="60">60</span></td>
+              <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
+            </tr>
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="vivt3" data-name="vivo">
+              <td class="col-tk"><span class="tk-badge">VIVT3</span></td>
+              <td class="col-name">Vivo</td>
+              <td class="col-price">35.05</td>
+              <td class="col-rsi"><span class="rsi-pill" data-rsi="50">50</span></td>
+              <td class="col-rsi"><span class="rsi-pill" data-rsi="61">61</span></td>
+              <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
+            </tr>
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="cmig4" data-name="cemig">
               <td class="col-tk"><span class="tk-badge">CMIG4</span></td>
               <td class="col-name">Cemig</td>
-              <td class="col-price">11.02</td>
+              <td class="col-price">11.03</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="50">50</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="63">63</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="vale3" data-name="vale">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="vale3" data-name="vale">
               <td class="col-tk"><span class="tk-badge">VALE3</span></td>
               <td class="col-name">Vale</td>
-              <td class="col-price">78.45</td>
+              <td class="col-price">78.70</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="50">50</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="64">64</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="vivt3" data-name="vivo">
-              <td class="col-tk"><span class="tk-badge">VIVT3</span></td>
-              <td class="col-name">Vivo</td>
-              <td class="col-price">35.18</td>
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="isae4" data-name="isa energia brasil pfd">
+              <td class="col-tk"><span class="tk-badge">ISAE4</span></td>
+              <td class="col-name">ISA Energia Brasil PFD</td>
+              <td class="col-price">27.80</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="51">51</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="61">61</span></td>
+              <td class="col-rsi"><span class="rsi-pill" data-rsi="65">65</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="cpfe3" data-name="cpfl energia">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="cpfe3" data-name="cpfl energia">
               <td class="col-tk"><span class="tk-badge">CPFE3</span></td>
               <td class="col-name">CPFL Energia</td>
-              <td class="col-price">45.54</td>
+              <td class="col-price">45.73</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="52">52</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="62">62</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="bpac11" data-name="btg pactual">
-              <td class="col-tk"><span class="tk-badge">BPAC11</span></td>
-              <td class="col-name">BTG Pactual</td>
-              <td class="col-price">55.43</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="52">52</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="64">64</span></td>
-              <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
-            </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="wege3" data-name="weg">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="wege3" data-name="weg">
               <td class="col-tk"><span class="tk-badge">WEGE3</span></td>
               <td class="col-name">WEG</td>
-              <td class="col-price">46.70</td>
+              <td class="col-price">46.73</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="53">53</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="55">55</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="isae4" data-name="isa energia brasil pfd">
-              <td class="col-tk"><span class="tk-badge">ISAE4</span></td>
-              <td class="col-name">ISA Energia Brasil PFD</td>
-              <td class="col-price">27.98</td>
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="bpac11" data-name="btg pactual">
+              <td class="col-tk"><span class="tk-badge">BPAC11</span></td>
+              <td class="col-name">BTG Pactual</td>
+              <td class="col-price">55.99</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="53">53</span></td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="66">66</span></td>
-              <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
-            </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="taee11" data-name="taesa">
-              <td class="col-tk"><span class="tk-badge">TAEE11</span></td>
-              <td class="col-name">Taesa</td>
-              <td class="col-price">41.25</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="55">55</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="65">65</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="itub4" data-name="itaú">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="taee11" data-name="taesa">
+              <td class="col-tk"><span class="tk-badge">TAEE11</span></td>
+              <td class="col-name">Taesa</td>
+              <td class="col-price">41.39</td>
+              <td class="col-rsi"><span class="rsi-pill" data-rsi="56">56</span></td>
+              <td class="col-rsi"><span class="rsi-pill" data-rsi="66">66</span></td>
+              <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
+            </tr>
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="itub4" data-name="itaú">
               <td class="col-tk"><span class="tk-badge">ITUB4</span></td>
               <td class="col-name">Itaú</td>
-              <td class="col-price">42.77</td>
+              <td class="col-price">42.76</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="56">56</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="68">68</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="sbsp3" data-name="sabesp">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="sbsp3" data-name="sabesp">
               <td class="col-tk"><span class="tk-badge">SBSP3</span></td>
               <td class="col-name">Sabesp</td>
-              <td class="col-price">30.45</td>
+              <td class="col-price">30.53</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="56">56</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="69">69</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="abev3" data-name="ambev">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="abev3" data-name="ambev">
               <td class="col-tk"><span class="tk-badge">ABEV3</span></td>
               <td class="col-name">Ambev</td>
-              <td class="col-price">16.25</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="57">57</span></td>
+              <td class="col-price">16.29</td>
+              <td class="col-rsi"><span class="rsi-pill" data-rsi="58">58</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="66">66</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="itsa4" data-name="itaúsa">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="itsa4" data-name="itaúsa">
               <td class="col-tk"><span class="tk-badge">ITSA4</span></td>
               <td class="col-name">Itaúsa</td>
-              <td class="col-price">13.54</td>
+              <td class="col-price">13.52</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="58">58</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="73">73</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="cple3" data-name="copel">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="cple3" data-name="copel">
               <td class="col-tk"><span class="tk-badge">CPLE3</span></td>
               <td class="col-name">Copel</td>
-              <td class="col-price">15.17</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="60">60</span></td>
+              <td class="col-price">15.15</td>
+              <td class="col-rsi"><span class="rsi-pill" data-rsi="59">59</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="74">74</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="pssa3" data-name="porto seguro">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="pssa3" data-name="porto seguro">
               <td class="col-tk"><span class="tk-badge">PSSA3</span></td>
               <td class="col-name">Porto Seguro</td>
-              <td class="col-price">53.78</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="61">61</span></td>
+              <td class="col-price">54.15</td>
+              <td class="col-rsi"><span class="rsi-pill" data-rsi="62">62</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="73">73</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="bbse3" data-name="bb seguridade">
+            <tr class="asset-row" data-signal="Neutral" data-market="brasil" data-ticker="bbse3" data-name="bb seguridade">
               <td class="col-tk"><span class="tk-badge">BBSE3</span></td>
               <td class="col-name">BB Seguridade</td>
-              <td class="col-price">38.66</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="69">69</span></td>
+              <td class="col-price">38.79</td>
+              <td class="col-rsi"><span class="rsi-pill" data-rsi="70">70</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="70">70</span></td>
               <td class="col-sig"><span class="signal-badge sig-neutral">NEUTRAL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Sell" data-ticker="cxse3" data-name="caixa seguros">
+            <tr class="asset-row" data-signal="Sell" data-market="brasil" data-ticker="cxse3" data-name="caixa seguros">
               <td class="col-tk"><span class="tk-badge">CXSE3</span></td>
               <td class="col-name">Caixa Seguros</td>
-              <td class="col-price">20.38</td>
-              <td class="col-rsi"><span class="rsi-pill" data-rsi="73">73</span></td>
+              <td class="col-price">20.56</td>
+              <td class="col-rsi"><span class="rsi-pill" data-rsi="74">74</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="81">81</span></td>
               <td class="col-sig"><span class="signal-badge sig-sell">SELL</span></td>
             </tr>
-            <tr class="asset-row" data-signal="Sell" data-ticker="csmg3" data-name="copasa">
+            <tr class="asset-row" data-signal="Sell" data-market="brasil" data-ticker="csmg3" data-name="copasa">
               <td class="col-tk"><span class="tk-badge">CSMG3</span></td>
               <td class="col-name">Copasa</td>
-              <td class="col-price">62.34</td>
+              <td class="col-price">62.22</td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="72">72</span></td>
               <td class="col-rsi"><span class="rsi-pill" data-rsi="82">82</span></td>
               <td class="col-sig"><span class="signal-badge sig-sell">SELL</span></td>
@@ -1070,24 +1742,24 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
       </div>
       <div class="sector-panel " id="panel-moeda">
         <div class="panel-summary">
-          <span class="ps-item ps-green">0 oportunidades</span>
-          <span class="ps-item ps-blue">1 neutros</span>
-          <span class="ps-item ps-red">0 sobrecomprados</span>
+          <span class="ps-item ps-green">0 opportunities</span>
+          <span class="ps-item ps-blue">1 neutral</span>
+          <span class="ps-item ps-red">0 overbought</span>
         </div>
         <div class="table-wrap">
           <table class="t-assets">
             <thead>
               <tr>
                 <th class="th-sort" data-col="0">Ticker</th>
-                <th class="th-sort" data-col="1">Nome</th>
-                <th class="th-sort th-r" data-col="2">Preço</th>
+                <th class="th-sort" data-col="1">Name</th>
+                <th class="th-sort th-r" data-col="2">Price</th>
                 <th class="th-sort th-r" data-col="3">RSI W</th>
                 <th class="th-sort th-r" data-col="4">RSI M</th>
-                <th>Sinal</th>
+                <th>Signal</th>
               </tr>
             </thead>
             <tbody>
-            <tr class="asset-row" data-signal="Neutral" data-ticker="brl=x" data-name="dolar">
+            <tr class="asset-row" data-signal="Neutral" data-market="moeda" data-ticker="brl=x" data-name="dolar">
               <td class="col-tk"><span class="tk-badge">BRL=X</span></td>
               <td class="col-name">Dolar</td>
               <td class="col-price">5.17</td>
@@ -1099,79 +1771,138 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
           </table>
         </div>
       </div>
+  <div class="global-empty-state" id="globalEmpty">No assets match the current filters.</div>
 
 </div>
 
 <div class="footer">
-  Financial Monitor Pro v2.0 · Gerado em <a>03/07/2026 12:01</a> · Dados: Yahoo Finance + CoinMetrics · Self-hosted
+  Financial Monitor Research · Updated <a>03/07/2026 15:11</a> · Data: Yahoo Finance + CoinMetrics · Static research dashboard
 </div>
 
 <script>
+
 (function(){
   "use strict";
 
-  // === SECTOR TABS ===
-  const tabs = document.querySelectorAll('.sector-tab');
   const panels = document.querySelectorAll('.sector-panel');
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      tabs.forEach(t => t.classList.remove('active'));
-      panels.forEach(p => p.classList.remove('active'));
-      tab.classList.add('active');
-      const panel = document.getElementById('panel-' + tab.dataset.panel);
-      if(panel) panel.classList.add('active');
-    });
-  });
-
-  // === SIGNAL FILTER ===
-  const fbtns = document.querySelectorAll('.fbtn[data-filter]');
-  fbtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      fbtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      const f = btn.dataset.filter;
-      document.querySelectorAll('.asset-row').forEach(row => {
-        row.style.display = (f === 'all' || row.dataset.signal === f) ? '' : 'none';
-      });
-    });
-  });
-
-  // === GLOBAL SEARCH ===
+  const rows = document.querySelectorAll('.asset-row');
+  const signalBtns = document.querySelectorAll('.fbtn[data-filter]');
+  const marketBtns = document.querySelectorAll('.fbtn[data-market]');
   const searchInput = document.getElementById('globalSearch');
-  searchInput.addEventListener('input', () => {
-    const q = searchInput.value.toLowerCase().trim();
-    document.querySelectorAll('.asset-row').forEach(row => {
-      if(!q) { row.style.display = ''; return; }
-      const match = row.dataset.ticker.includes(q) || row.dataset.name.includes(q);
-      row.style.display = match ? '' : 'none';
-    });
-    // Show all panels during search
-    if(q) {
-      panels.forEach(p => p.classList.add('active'));
-      tabs.forEach(t => t.classList.add('active'));
-    } else {
-      // Restore tab state
-      panels.forEach(p => p.classList.remove('active'));
-      tabs.forEach(t => t.classList.remove('active'));
-      const firstTab = tabs[0];
-      if(firstTab) {
-        firstTab.classList.add('active');
-        const fp = document.getElementById('panel-' + firstTab.dataset.panel);
-        if(fp) fp.classList.add('active');
-      }
+  const globalEmpty = document.getElementById('globalEmpty');
+
+  const state = {
+    signal: 'all',
+    market: 'all',
+    query: ''
+  };
+
+  panels.forEach(panel => {
+    if(!panel.querySelector('.empty-state')) {
+      const empty = document.createElement('div');
+      empty.className = 'empty-state';
+      empty.textContent = 'No assets match the current filters.';
+      panel.appendChild(empty);
     }
   });
 
-  // === TABLE SORT ===
+  function normalize(value) {
+    return (value || '').toLowerCase().trim();
+  }
+
+  function rowMatches(row) {
+    const signalMatch = state.signal === 'all' || row.dataset.signal === state.signal;
+    const marketMatch = state.market === 'all' || row.dataset.market === state.market;
+    const textMatch = !state.query ||
+      normalize(row.dataset.ticker).includes(state.query) ||
+      normalize(row.dataset.name).includes(state.query);
+    return signalMatch && marketMatch && textMatch;
+  }
+
+  function setSummary(item, count, singular, plural) {
+    if(!item) return;
+    item.textContent = `${count} ${count === 1 ? singular : plural}`;
+    item.hidden = state.signal !== 'all' && count === 0;
+  }
+
+  function updatePanelSummary(panel, counts) {
+    setSummary(panel.querySelector('.ps-green'), counts.opportunities, 'opportunity', 'opportunities');
+    setSummary(panel.querySelector('.ps-blue'), counts.neutral, 'neutral', 'neutral');
+    setSummary(panel.querySelector('.ps-red'), counts.overbought, 'overbought', 'overbought');
+  }
+
+  function syncPanels() {
+    let totalVisible = 0;
+
+    panels.forEach(panel => {
+      const panelName = panel.id.replace('panel-', '');
+      const visibleCounts = {
+        opportunities: 0,
+        neutral: 0,
+        overbought: 0
+      };
+
+      let visibleRows = 0;
+      panel.querySelectorAll('.asset-row').forEach(row => {
+        const isVisible = rowMatches(row);
+        row.hidden = !isVisible;
+        if(isVisible) {
+          visibleRows += 1;
+          if(row.dataset.signal === 'UltraBuy' || row.dataset.signal === 'Buy') visibleCounts.opportunities += 1;
+          else if(row.dataset.signal === 'Neutral') visibleCounts.neutral += 1;
+          else if(row.dataset.signal === 'Sell') visibleCounts.overbought += 1;
+        }
+      });
+
+      totalVisible += visibleRows;
+      const shouldShowPanel = state.market === 'all' ? visibleRows > 0 : panelName === state.market;
+      panel.classList.toggle('active', shouldShowPanel);
+      updatePanelSummary(panel, visibleCounts);
+
+      const empty = panel.querySelector('.empty-state');
+      if(empty) empty.classList.toggle('is-visible', shouldShowPanel && visibleRows === 0);
+    });
+
+    if(globalEmpty) globalEmpty.classList.toggle('is-visible', totalVisible === 0);
+  }
+
+  function applyViewState() {
+    syncPanels();
+  }
+
+  signalBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      signalBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.signal = btn.dataset.filter;
+      applyViewState();
+    });
+  });
+
+  marketBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      marketBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.market = btn.dataset.market;
+      applyViewState();
+    });
+  });
+
+  if(searchInput) {
+    searchInput.addEventListener('input', () => {
+      state.query = normalize(searchInput.value);
+      applyViewState();
+    });
+  }
+
   document.querySelectorAll('.th-sort').forEach(th => {
     th.addEventListener('click', () => {
       const table = th.closest('table');
       const tbody = table.querySelector('tbody');
       const col = parseInt(th.dataset.col);
-      const rows = Array.from(tbody.querySelectorAll('tr'));
+      const tableRows = Array.from(tbody.querySelectorAll('tr'));
       const isAsc = th.classList.contains('asc');
 
-      // Reset all sort indicators in this table
       th.closest('thead').querySelectorAll('.th-sort').forEach(h => {
         h.classList.remove('asc','desc');
       });
@@ -1179,43 +1910,46 @@ body{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:1
       th.classList.add(isAsc ? 'desc' : 'asc');
       const dir = isAsc ? -1 : 1;
 
-      rows.sort((a, b) => {
+      tableRows.sort((a, b) => {
         let va = a.children[col]?.textContent.trim() || '';
         let vb = b.children[col]?.textContent.trim() || '';
         const na = parseFloat(va.replace(/[^0-9.\-]/g, ''));
         const nb = parseFloat(vb.replace(/[^0-9.\-]/g, ''));
         if(!isNaN(na) && !isNaN(nb)) return (na - nb) * dir;
-        return va.localeCompare(vb) * dir;
+        return va.localeCompare(vb, 'pt-BR') * dir;
       });
 
-      rows.forEach(r => tbody.appendChild(r));
+      tableRows.forEach(r => tbody.appendChild(r));
     });
   });
 
-  // === RSI PILL COLORING ===
   document.querySelectorAll('.rsi-pill').forEach(pill => {
     const v = parseInt(pill.dataset.rsi);
-    if(v <= 30) { pill.style.background = 'rgba(52,211,153,.15)'; pill.style.color = '#34d399'; pill.style.border = '1px solid rgba(52,211,153,.3)'; }
-    else if(v <= 40) { pill.style.background = 'rgba(34,211,238,.1)'; pill.style.color = '#22d3ee'; pill.style.border = '1px solid rgba(34,211,238,.25)'; }
-    else if(v >= 70) { pill.style.background = 'rgba(248,113,113,.12)'; pill.style.color = '#f87171'; pill.style.border = '1px solid rgba(248,113,113,.3)'; }
-    else if(v >= 60) { pill.style.background = 'rgba(251,191,36,.1)'; pill.style.color = '#fbbf24'; pill.style.border = '1px solid rgba(251,191,36,.25)'; }
-    else { pill.style.background = 'var(--bg)'; pill.style.color = 'var(--muted)'; pill.style.border = '1px solid var(--line)'; }
+    if(v <= 30) pill.dataset.zone = 'deep';
+    else if(v <= 40) pill.dataset.zone = 'value';
+    else if(v <= 50) pill.dataset.zone = 'watch';
+    else if(v >= 70) pill.dataset.zone = 'hot';
+    else if(v >= 60) pill.dataset.zone = 'warm';
+    else pill.dataset.zone = 'neutral';
   });
 
-  // === KEYBOARD SHORTCUT (/ to focus search) ===
   document.addEventListener('keydown', (e) => {
-    if(e.key === '/' && document.activeElement !== searchInput) {
+    if(e.key === '/' && searchInput && document.activeElement !== searchInput) {
       e.preventDefault();
       searchInput.focus();
     }
-    if(e.key === 'Escape') {
+    if(e.key === 'Escape' && searchInput) {
       searchInput.value = '';
-      searchInput.dispatchEvent(new Event('input'));
+      state.query = '';
+      applyViewState();
       searchInput.blur();
     }
   });
 
+  rows.forEach(row => row.hidden = false);
+  applyViewState();
 })();
+
 </script>
 </body>
 </html>

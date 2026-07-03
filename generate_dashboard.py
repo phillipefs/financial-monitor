@@ -369,14 +369,16 @@ body.research-v2{
   position:sticky;
   top:72px;
   z-index:40;
+  display:flex;
+  flex-direction:column;
   padding:12px;
   margin-bottom:14px;
   border:1px solid var(--rm-line);
   border-radius:8px;
   background:rgba(13,17,22,.92);
   backdrop-filter:blur(16px);
-  align-items:flex-start;
-  gap:14px;
+  align-items:stretch;
+  gap:10px;
 }
 
 .research-v2 .filter-group{
@@ -384,9 +386,16 @@ body.research-v2{
   align-items:center;
   gap:8px;
   flex-wrap:wrap;
+  width:100%;
+}
+
+.research-v2 .filter-group + .filter-group{
+  padding-top:10px;
+  border-top:1px solid var(--rm-line-soft);
 }
 
 .research-v2 .filter-group label{
+  flex:0 0 104px;
   color:var(--rm-muted);
   text-transform:none;
   font-size:.78rem;
@@ -611,6 +620,17 @@ body.research-v2{
 }
 
 .research-v2 .empty-state.is-visible{display:block}
+.research-v2 .global-empty-state{
+  display:none;
+  margin-top:14px;
+  padding:26px;
+  border:1px solid var(--rm-line);
+  border-radius:8px;
+  color:var(--rm-muted);
+  background:rgba(17,24,32,.74);
+  font-size:.88rem;
+}
+.research-v2 .global-empty-state.is-visible{display:block}
 .research-v2 .footer{
   max-width:1440px;
   margin:20px auto 0;
@@ -649,6 +669,9 @@ body.research-v2{
     min-height:auto;
     padding:22px;
   }
+  .research-v2 .filter-group label{
+    flex-basis:100%;
+  }
   .research-v2 .kpi-strip{
     display:grid;
     grid-template-columns:repeat(2,minmax(0,1fr));
@@ -682,6 +705,7 @@ RESEARCH_V2_SCRIPT = r"""
   const signalBtns = document.querySelectorAll('.fbtn[data-filter]');
   const marketBtns = document.querySelectorAll('.fbtn[data-market]');
   const searchInput = document.getElementById('globalSearch');
+  const globalEmpty = document.getElementById('globalEmpty');
 
   const state = {
     signal: 'all',
@@ -711,21 +735,51 @@ RESEARCH_V2_SCRIPT = r"""
     return signalMatch && marketMatch && textMatch;
   }
 
+  function setSummary(item, count, singular, plural) {
+    if(!item) return;
+    item.textContent = `${count} ${count === 1 ? singular : plural}`;
+    item.hidden = state.signal !== 'all' && count === 0;
+  }
+
+  function updatePanelSummary(panel, counts) {
+    setSummary(panel.querySelector('.ps-green'), counts.opportunities, 'opportunity', 'opportunities');
+    setSummary(panel.querySelector('.ps-blue'), counts.neutral, 'neutral', 'neutral');
+    setSummary(panel.querySelector('.ps-red'), counts.overbought, 'overbought', 'overbought');
+  }
+
   function syncPanels() {
+    let totalVisible = 0;
+
     panels.forEach(panel => {
       const panelName = panel.id.replace('panel-', '');
-      panel.classList.toggle('active', state.market === 'all' || panelName === state.market);
+      const visibleCounts = {
+        opportunities: 0,
+        neutral: 0,
+        overbought: 0
+      };
 
       let visibleRows = 0;
       panel.querySelectorAll('.asset-row').forEach(row => {
         const isVisible = rowMatches(row);
         row.hidden = !isVisible;
-        if(isVisible) visibleRows += 1;
+        if(isVisible) {
+          visibleRows += 1;
+          if(row.dataset.signal === 'UltraBuy' || row.dataset.signal === 'Buy') visibleCounts.opportunities += 1;
+          else if(row.dataset.signal === 'Neutral') visibleCounts.neutral += 1;
+          else if(row.dataset.signal === 'Sell') visibleCounts.overbought += 1;
+        }
       });
 
+      totalVisible += visibleRows;
+      const shouldShowPanel = state.market === 'all' ? visibleRows > 0 : panelName === state.market;
+      panel.classList.toggle('active', shouldShowPanel);
+      updatePanelSummary(panel, visibleCounts);
+
       const empty = panel.querySelector('.empty-state');
-      if(empty) empty.classList.toggle('is-visible', visibleRows === 0);
+      if(empty) empty.classList.toggle('is-visible', shouldShowPanel && visibleRows === 0);
     });
+
+    if(globalEmpty) globalEmpty.classList.toggle('is-visible', totalVisible === 0);
   }
 
   function applyViewState() {
@@ -1005,7 +1059,7 @@ def generate_html(df: pd.DataFrame, onchain: Dict) -> str:
     eth_card = _build_onchain_card("ETH", onchain.get("ETH")) if onchain else ""
 
     # Build market filter buttons + table content
-    market_buttons = f'''<button class="fbtn active" data-market="all">All <span class="fc">{total}</span></button>'''
+    market_buttons = '''<button class="fbtn active" data-market="all">All</button>'''
     sector_panels = ""
     first = True
     for grupo in GROUP_ORDER:
@@ -1047,7 +1101,7 @@ def generate_html(df: pd.DataFrame, onchain: Dict) -> str:
 
     # Build full page
     return f'''<!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
@@ -1288,6 +1342,7 @@ body{{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:
 
   <!-- Panels -->
   {sector_panels}
+  <div class="global-empty-state" id="globalEmpty">No assets match the current filters.</div>
 
 </div>
 
