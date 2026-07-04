@@ -34,6 +34,23 @@ def round_half_up(n) -> int:
     return int(Decimal(str(n)).quantize(0, rounding=ROUND_HALF_UP))
 
 
+def round_rsi_or_nan(n) -> float:
+    """Round an RSI to an int, or return NaN when the series is too short.
+
+    Assets with < 15 bars for a given interval yield a NaN RSI (Wilder needs
+    window+1 points). Instead of crashing on ``int(NaN)``, we keep NaN so the
+    asset can still render the interval it *does* have (e.g. CRCL has a valid
+    weekly RSI but not enough months yet)."""
+    if n is None or pd.isna(n):
+        return float("nan")
+    return float(round_half_up(n))
+
+
+def _fmt_rsi(v) -> str:
+    """Console/text-table RSI: integer string, or 'n/a' when missing."""
+    return "n/a" if v is None or pd.isna(v) else str(int(v))
+
+
 def calculate_rsi(ticker_symbol: str, interval: str, window: int, period: str) -> pd.Series:
     df = yf.Ticker(ticker_symbol).history(interval=interval, period=period)
     df.dropna(inplace=True)
@@ -109,8 +126,8 @@ def _mk_table(df: pd.DataFrame) -> str:
         tick = str(r["Ticker"])[:8].ljust(8)
         name = str(r.get("Name", ""))[:12].ljust(12)
         close = f"{float(r['Weekly_Close']):.2f}".rjust(9)
-        rsiw = str(int(r["Weekly_RSI"])).rjust(5)
-        rsim = str(int(r["Monthly_RSI"])).rjust(5)
+        rsiw = _fmt_rsi(r["Weekly_RSI"]).rjust(5)
+        rsim = _fmt_rsi(r["Monthly_RSI"]).rjust(5)
         lines.append(f"{tick} {name} {close} {rsiw} {rsim}")
 
     return "```\n" + "\n".join(lines) + "\n```"
@@ -128,8 +145,8 @@ def _mk_table_compact(df: pd.DataFrame) -> str:
         close_txt = f"{float(r['Weekly_Close']):.2f}"
         close_txt = close_txt[:9].rjust(9)
 
-        rsiw = str(int(r["Weekly_RSI"])).rjust(5)
-        rsim = str(int(r["Monthly_RSI"])).rjust(5)
+        rsiw = _fmt_rsi(r["Weekly_RSI"]).rjust(5)
+        rsim = _fmt_rsi(r["Monthly_RSI"]).rjust(5)
 
         lines.append(f"{tick} {name} {close_txt} {rsiw} {rsim}")
 
@@ -153,8 +170,8 @@ def _mk_table_indices(df: pd.DataFrame) -> str:
         name = str(r.get("Name", ""))[:12].ljust(12)
 
         close = f"{float(r['Weekly_Close']):.0f}".rjust(8)
-        w = str(int(r["Weekly_RSI"])).rjust(3)
-        m = str(int(r["Monthly_RSI"])).rjust(3)
+        w = _fmt_rsi(r["Weekly_RSI"]).rjust(3)
+        m = _fmt_rsi(r["Monthly_RSI"]).rjust(3)
 
         sig = sig_map.get(str(r.get("Signal", "")), "      ")
         sig = sig[:6].ljust(6)
@@ -170,7 +187,7 @@ def _mk_table_indices(df: pd.DataFrame) -> str:
 INDEX_NAMES_ORDER = ["Ibovespa", "S&P 500", "Nasdaq 100", "Dow Jones", "DAX"]
 INDEX_NAME_SET = set(INDEX_NAMES_ORDER)
 
-GROUP_ORDER = ["Indices", "Cripto", "EUA", "ETF", "Brasil", "Moeda"]
+GROUP_ORDER = ["Indices", "Cripto", "EUA", "ETF", "Commodities", "Brasil", "Moeda"]
 
 
 # ==========================================================
@@ -290,111 +307,126 @@ assets = [
     {"ticker": "AAVE-USD", "name": "Aave", "buy": 30, "sell": 70, "ultra": 45, "setor": "Cripto"},
 
     # EUA
-    {"ticker": "AMZN", "name": "Amazon", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA"},
-    {"ticker": "GOOGL", "name": "Google", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA"},
-    {"ticker": "AAPL", "name": "Apple", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA"},
-    {"ticker": "MSFT", "name": "Microsoft", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA"},
-    {"ticker": "TSLA", "name": "Tesla", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA"},
-    {"ticker": "MSTR", "name": "Strategy", "buy": 25, "sell": 70, "ultra": 40, "setor": "EUA"},
-    {"ticker": "TM", "name": "Toyota", "buy": 25, "sell": 70, "ultra": 40, "setor": "EUA"},
-    {"ticker": "BLK", "name": "BlackRock", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA"},
-    {"ticker": "JPM", "name": "JP Morgan", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA"},
-    {"ticker": "CAT", "name": "Caterpillar", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA"},
-    {"ticker": "V", "name": "Visa", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA"},
-    {"ticker": "MA", "name": "Mastercard", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA"},
-    {"ticker": "SPGI", "name": "S&P Global", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA"},
-    {"ticker": "MCO", "name": "Moody's", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA"},
-    {"ticker": "LIN", "name": "Linde", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA"},
-    {"ticker": "UNH", "name": "UnitedHealth", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA"},
-    {"ticker": "NVDA", "name": "Nvidia", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA"},
-    {"ticker": "AVGO", "name": "Broadcom", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA"},
-    {"ticker": "META", "name": "Meta", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA"},
-    {"ticker": "BRK-B", "name": "Berkshire", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA"},
-    {"ticker": "COST", "name": "Costco", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA"},
-    {"ticker": "WMT", "name": "Walmart", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA"},
-    {"ticker": "LLY", "name": "Eli Lilly", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA"},
-    {"ticker": "XOM", "name": "Exxon", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA"},
-    {"ticker": "AMD", "name": "AMD", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA"},
-    {"ticker": "INTC", "name": "Intel", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA"},
-    {"ticker": "MU", "name": "Micron", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA"},
-    {"ticker": "ORCL", "name": "Oracle", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA"},
-    {"ticker": "NOW", "name": "ServiceNow", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA"},
-    {"ticker": "PANW", "name": "Palo Alto", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA"},
-    {"ticker": "AMAT", "name": "Applied Mat", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA"},
-    {"ticker": "TSM", "name": "TSMC", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA"},
-    {"ticker": "ASML", "name": "ASML", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA"},
-    {"ticker": "SMH", "name": "Semis ETF", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA"},
-    {"ticker": "PLTR", "name": "Palantir", "buy": 30, "sell": 75, "ultra": 40, "setor": "EUA"},
-    {"ticker": "APP", "name": "AppLovin", "buy": 30, "sell": 75, "ultra": 40, "setor": "EUA"},
-    {"ticker": "NFLX", "name": "Netflix", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA"},
-    {"ticker": "ANET", "name": "Arista", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA"},
-    {"ticker": "KLAC", "name": "KLA", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA"},
-    {"ticker": "LRCX", "name": "Lam Research", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA"},
-    {"ticker": "QCOM", "name": "Qualcomm", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA"},
-    {"ticker": "NU", "name": "Nubank", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA"},
-    {"ticker": "HD", "name": "Home Depot", "buy": 35, "sell": 70, "ultra": 45, "setor": "EUA"},
-    {"ticker": "JNJ", "name": "J&J", "buy": 35, "sell": 70, "ultra": 45, "setor": "EUA"},
-    {"ticker": "PG", "name": "P&G", "buy": 35, "sell": 70, "ultra": 45, "setor": "EUA"},
-    {"ticker": "ADBE", "name": "Adobe", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA"},
-    {"ticker": "UNP", "name": "Union Pacific", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA"},
-    {"ticker": "MELI", "name": "MercadoLibre", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA"},
+    {"ticker": "AMZN", "name": "Amazon", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Consumer"},
+    {"ticker": "GOOGL", "name": "Google", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Technology"},
+    {"ticker": "AAPL", "name": "Apple", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Technology"},
+    {"ticker": "MSFT", "name": "Microsoft", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Technology"},
+    {"ticker": "TSLA", "name": "Tesla", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Consumer"},
+    {"ticker": "MSTR", "name": "Strategy", "buy": 25, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Technology"},
+    {"ticker": "TM", "name": "Toyota", "buy": 25, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Consumer"},
+    {"ticker": "BLK", "name": "BlackRock", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Financials"},
+    {"ticker": "JPM", "name": "JP Morgan", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Financials"},
+    {"ticker": "CAT", "name": "Caterpillar", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Industrials"},
+    {"ticker": "V", "name": "Visa", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Financials"},
+    {"ticker": "MA", "name": "Mastercard", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Financials"},
+    {"ticker": "SPGI", "name": "S&P Global", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Financials"},
+    {"ticker": "MCO", "name": "Moody's", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Financials"},
+    {"ticker": "LIN", "name": "Linde", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Materials"},
+    {"ticker": "UNH", "name": "UnitedHealth", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Healthcare"},
+    {"ticker": "NVDA", "name": "Nvidia", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Semiconductors"},
+    {"ticker": "AVGO", "name": "Broadcom", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Semiconductors"},
+    {"ticker": "META", "name": "Meta", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Technology"},
+    {"ticker": "BRK-B", "name": "Berkshire", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Financials"},
+    {"ticker": "COST", "name": "Costco", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Consumer"},
+    {"ticker": "WMT", "name": "Walmart", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Consumer"},
+    {"ticker": "LLY", "name": "Eli Lilly", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Healthcare"},
+    {"ticker": "XOM", "name": "Exxon", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Energy"},
+    {"ticker": "AMD", "name": "AMD", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Semiconductors"},
+    {"ticker": "INTC", "name": "Intel", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Semiconductors"},
+    {"ticker": "MU", "name": "Micron", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Semiconductors"},
+    {"ticker": "ORCL", "name": "Oracle", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Technology"},
+    {"ticker": "NOW", "name": "ServiceNow", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Technology"},
+    {"ticker": "PANW", "name": "Palo Alto", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Technology"},
+    {"ticker": "AMAT", "name": "Applied Mat", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Semiconductors"},
+    {"ticker": "TSM", "name": "TSMC", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Semiconductors"},
+    {"ticker": "ASML", "name": "ASML", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Semiconductors"},
+    {"ticker": "SMH", "name": "Semis ETF", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Semiconductors"},
+    {"ticker": "PLTR", "name": "Palantir", "buy": 30, "sell": 75, "ultra": 40, "setor": "EUA", "industria": "Technology"},
+    {"ticker": "APP", "name": "AppLovin", "buy": 30, "sell": 75, "ultra": 40, "setor": "EUA", "industria": "Technology"},
+    {"ticker": "NFLX", "name": "Netflix", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Telecom & Media"},
+    {"ticker": "ANET", "name": "Arista", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Technology"},
+    {"ticker": "KLAC", "name": "KLA", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Semiconductors"},
+    {"ticker": "LRCX", "name": "Lam Research", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Semiconductors"},
+    {"ticker": "QCOM", "name": "Qualcomm", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Semiconductors"},
+    {"ticker": "NU", "name": "Nubank", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Financials"},
+    {"ticker": "HD", "name": "Home Depot", "buy": 35, "sell": 70, "ultra": 45, "setor": "EUA", "industria": "Consumer"},
+    {"ticker": "JNJ", "name": "J&J", "buy": 35, "sell": 70, "ultra": 45, "setor": "EUA", "industria": "Healthcare"},
+    {"ticker": "PG", "name": "P&G", "buy": 35, "sell": 70, "ultra": 45, "setor": "EUA", "industria": "Consumer"},
+    {"ticker": "ADBE", "name": "Adobe", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Technology"},
+    {"ticker": "UNP", "name": "Union Pacific", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Industrials"},
+    {"ticker": "MELI", "name": "MercadoLibre", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Consumer"},
+    {"ticker": "DDOG", "name": "Datadog", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Technology"},
+    {"ticker": "CRWV", "name": "CoreWeave", "buy": 30, "sell": 75, "ultra": 40, "setor": "EUA", "industria": "Technology"},
+    {"ticker": "GEV", "name": "GE Vernova", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Industrials"},
+    {"ticker": "VRT", "name": "Vertiv", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Industrials"},
+    {"ticker": "RKLB", "name": "Rocket Lab", "buy": 30, "sell": 75, "ultra": 40, "setor": "EUA", "industria": "Industrials"},
+    {"ticker": "ASTS", "name": "AST SpaceMobile", "buy": 30, "sell": 75, "ultra": 40, "setor": "EUA", "industria": "Telecom & Media"},
+    {"ticker": "HOOD", "name": "Robinhood", "buy": 30, "sell": 75, "ultra": 40, "setor": "EUA", "industria": "Financials"},
+    {"ticker": "COIN", "name": "Coinbase", "buy": 30, "sell": 75, "ultra": 40, "setor": "EUA", "industria": "Financials"},
+    {"ticker": "CRCL", "name": "Circle", "buy": 30, "sell": 75, "ultra": 40, "setor": "EUA", "industria": "Financials"},
+    {"ticker": "SPCX", "name": "SpaceX (proxy)", "buy": 30, "sell": 75, "ultra": 40, "setor": "EUA", "industria": "Industrials"},
 
 
     # ETFs
     {"ticker": "XBI", "name": "Biotech ETF", "buy": 32, "sell": 70, "ultra": 40, "setor": "ETF"},
     {"ticker": "SPY", "name": "S&P 500 ETF", "buy": 30, "sell": 70, "ultra": 40, "setor": "ETF"},
     {"ticker": "QQQ", "name": "Nasdaq 100 ETF", "buy": 30, "sell": 70, "ultra": 40, "setor": "ETF"},
-    {"ticker": "GLD", "name": "Gold ETF", "buy": 35, "sell": 70, "ultra": 45, "setor": "ETF"},
-    {"ticker": "SLV", "name": "Silver ETF", "buy": 32, "sell": 70, "ultra": 40, "setor": "ETF"},
+    # --- Commodities (metais, energia e agrícolas) ---
+    {"ticker": "GLD", "name": "Gold", "buy": 35, "sell": 70, "ultra": 45, "setor": "Commodities"},
+    {"ticker": "SLV", "name": "Silver", "buy": 32, "sell": 70, "ultra": 40, "setor": "Commodities"},
+    {"ticker": "CPER", "name": "Copper", "buy": 35, "sell": 70, "ultra": 45, "setor": "Commodities"},
+    {"ticker": "CL=F", "name": "WTI Oil", "buy": 32, "sell": 70, "ultra": 40, "setor": "Commodities"},
+    {"ticker": "WEAT", "name": "Wheat", "buy": 32, "sell": 70, "ultra": 40, "setor": "Commodities"},
+    {"ticker": "SOYB", "name": "Soybean", "buy": 32, "sell": 70, "ultra": 40, "setor": "Commodities"},
 
 
     # Moeda
     {"ticker": "BRL=X", "name": "Dolar", "buy": 32, "sell": 70, "ultra": 45, "setor": "Moeda"},
 
     # Brasil
-    {"ticker": "ABEV3.SA", "name": "Ambev", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil"},
-    {"ticker": "ALUP11.SA", "name": "Alupar", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil"},
-    {"ticker": "CMIG4.SA", "name": "Cemig", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil"},
-    {"ticker": "CPFE3.SA", "name": "CPFL Energia", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil"},
-    {"ticker": "EGIE3.SA", "name": "Engie Brasil", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil"},
-    {"ticker": "TAEE11.SA", "name": "Taesa", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil"},
-    {"ticker": "ISAE4.SA", "name": "ISA Energia Brasil PFD", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil"},
-    {"ticker": "ISAE3.SA", "name": "ISA Energia Brasil ON", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil"},
-    {"ticker": "CPLE3.SA", "name": "Copel", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil"},
-    {"ticker": "EQTL3.SA", "name": "Equatorial", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil"},
-    {"ticker": "INBR32.SA", "name": "Banco Inter", "buy": 30, "sell": 70, "ultra": 45, "setor": "Brasil"},
-    {"ticker": "BBAS3.SA", "name": "Banco do Brasil", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil"},
-    {"ticker": "BPAC11.SA", "name": "BTG Pactual", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil"},
-    {"ticker": "BRSR6.SA", "name": "Banrisul", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil"},
-    {"ticker": "BBDC4.SA", "name": "Bradesco", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil"},
-    {"ticker": "ITUB4.SA", "name": "Itaú", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil"},
-    {"ticker": "SANB11.SA", "name": "Santander", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil"},
-    {"ticker": "ITSA4.SA", "name": "Itaúsa", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil"},
-    {"ticker": "VALE3.SA", "name": "Vale", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil"},
-    {"ticker": "PETR4.SA", "name": "Petrobras", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil"},
-    {"ticker": "PRIO3.SA", "name": "Prio", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil"},
-    {"ticker": "PINE4.SA", "name": "Banco Pine", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil"},
-    {"ticker": "RANI3.SA", "name": "Irani", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil"},
-    {"ticker": "SUZB3.SA", "name": "Suzano", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil"},
-    {"ticker": "PSSA3.SA", "name": "Porto Seguro", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil"},
-    {"ticker": "BBSE3.SA", "name": "BB Seguridade", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil"},
-    {"ticker": "CXSE3.SA", "name": "Caixa Seguros", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil"},
-    {"ticker": "CSMG3.SA", "name": "Copasa", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil"},
-    {"ticker": "SAPR11.SA", "name": "Sanepar", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil"},
-    {"ticker": "SBSP3.SA", "name": "Sabesp", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil"},
-    {"ticker": "VIVT3.SA", "name": "Vivo", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil"},
-    {"ticker": "RADL3.SA", "name": "Droga Raia", "buy": 32, "sell": 70, "ultra": 40, "setor": "Brasil"},
-    {"ticker": "WEGE3.SA", "name": "WEG", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil"},
-    {"ticker": "TOTS3.SA", "name": "Totvs", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil"},
-    {"ticker": "B3SA3.SA", "name": "B3", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil"},
-    {"ticker": "RENT3.SA", "name": "Localiza", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil"},
-    {"ticker": "SOJA3.SA", "name": "Boa Safra", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil"},
-    {"ticker": "KLBN4.SA", "name": "Klabin", "buy": 35, "sell": 70, "ultra": 45, "setor": "Brasil"},
-    {"ticker": "GGBR4.SA", "name": "Gerdau", "buy": 32, "sell": 70, "ultra": 40, "setor": "Brasil"},
-    {"ticker": "MULT3.SA", "name": "Multiplan", "buy": 35, "sell": 70, "ultra": 45, "setor": "Brasil"},
-    {"ticker": "AGRO3.SA", "name": "BrasilAgro", "buy": 35, "sell": 70, "ultra": 40, "setor": "Brasil"},
-    {"ticker": "SLCE3.SA", "name": "SLC Agricola", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil"},
-    {"ticker": "FLRY3.SA", "name": "Fleury", "buy": 32, "sell": 70, "ultra": 40, "setor": "Brasil"},
+    {"ticker": "ABEV3.SA", "name": "Ambev", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Consumer"},
+    {"ticker": "ALUP11.SA", "name": "Alupar", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Utilities"},
+    {"ticker": "CMIG4.SA", "name": "Cemig", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Utilities"},
+    {"ticker": "CPFE3.SA", "name": "CPFL Energia", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Utilities"},
+    {"ticker": "EGIE3.SA", "name": "Engie Brasil", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Utilities"},
+    {"ticker": "TAEE11.SA", "name": "Taesa", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Utilities"},
+    {"ticker": "ISAE4.SA", "name": "ISA Energia Brasil PFD", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Utilities"},
+    {"ticker": "ISAE3.SA", "name": "ISA Energia Brasil ON", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Utilities"},
+    {"ticker": "CPLE3.SA", "name": "Copel", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Utilities"},
+    {"ticker": "EQTL3.SA", "name": "Equatorial", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Utilities"},
+    {"ticker": "INBR32.SA", "name": "Banco Inter", "buy": 30, "sell": 70, "ultra": 45, "setor": "Brasil", "industria": "Financials"},
+    {"ticker": "BBAS3.SA", "name": "Banco do Brasil", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Financials"},
+    {"ticker": "BPAC11.SA", "name": "BTG Pactual", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Financials"},
+    {"ticker": "BRSR6.SA", "name": "Banrisul", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Financials"},
+    {"ticker": "BBDC4.SA", "name": "Bradesco", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Financials"},
+    {"ticker": "ITUB4.SA", "name": "Itaú", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Financials"},
+    {"ticker": "SANB11.SA", "name": "Santander", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Financials"},
+    {"ticker": "ITSA4.SA", "name": "Itaúsa", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Financials"},
+    {"ticker": "VALE3.SA", "name": "Vale", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Materials"},
+    {"ticker": "PETR4.SA", "name": "Petrobras", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Energy"},
+    {"ticker": "PRIO3.SA", "name": "Prio", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Energy"},
+    {"ticker": "PINE4.SA", "name": "Banco Pine", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Financials"},
+    {"ticker": "RANI3.SA", "name": "Irani", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Materials"},
+    {"ticker": "SUZB3.SA", "name": "Suzano", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Materials"},
+    {"ticker": "PSSA3.SA", "name": "Porto Seguro", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Financials"},
+    {"ticker": "BBSE3.SA", "name": "BB Seguridade", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Financials"},
+    {"ticker": "CXSE3.SA", "name": "Caixa Seguros", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Financials"},
+    {"ticker": "CSMG3.SA", "name": "Copasa", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Utilities"},
+    {"ticker": "SAPR11.SA", "name": "Sanepar", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Utilities"},
+    {"ticker": "SBSP3.SA", "name": "Sabesp", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Utilities"},
+    {"ticker": "VIVT3.SA", "name": "Vivo", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Telecom & Media"},
+    {"ticker": "RADL3.SA", "name": "Droga Raia", "buy": 32, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Consumer"},
+    {"ticker": "WEGE3.SA", "name": "WEG", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Industrials"},
+    {"ticker": "TOTS3.SA", "name": "Totvs", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Technology"},
+    {"ticker": "B3SA3.SA", "name": "B3", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Financials"},
+    {"ticker": "RENT3.SA", "name": "Localiza", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Industrials"},
+    {"ticker": "SOJA3.SA", "name": "Boa Safra", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Agribusiness"},
+    {"ticker": "KLBN4.SA", "name": "Klabin", "buy": 35, "sell": 70, "ultra": 45, "setor": "Brasil", "industria": "Materials"},
+    {"ticker": "GGBR4.SA", "name": "Gerdau", "buy": 32, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Materials"},
+    {"ticker": "MULT3.SA", "name": "Multiplan", "buy": 35, "sell": 70, "ultra": 45, "setor": "Brasil", "industria": "Real Estate"},
+    {"ticker": "AGRO3.SA", "name": "BrasilAgro", "buy": 35, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Agribusiness"},
+    {"ticker": "SLCE3.SA", "name": "SLC Agricola", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Agribusiness"},
+    {"ticker": "FLRY3.SA", "name": "Fleury", "buy": 32, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Healthcare"},
 ]
 
 
@@ -413,9 +445,21 @@ def fetch_asset_rsi(asset: Dict[str, object], remove_crypto_suffix: bool = False
     weekly = calculate_rsi(ticker, interval="1wk", window=14, period="5y")
     monthly = calculate_rsi(ticker, interval="1mo", window=14, period="5y")
 
+    weekly_rsi = round_rsi_or_nan(weekly["RSI"])
+    monthly_rsi = round_rsi_or_nan(monthly["RSI"])
+
+    # The weekly RSI is the primary signal; without it there is nothing to show
+    # (e.g. a ticker with < 15 weeks of history). Skip such assets — they enter
+    # automatically once enough history accrues. A missing MONTHLY RSI, however,
+    # is tolerated: the asset still renders with its weekly reading.
+    if pd.isna(weekly_rsi):
+        raise ValueError("insufficient history for weekly RSI")
+
+    # get_signal handles a NaN monthly gracefully: NaN comparisons are False, so
+    # UltraBuy (which needs the monthly confirmation) simply can't trigger.
     signal = get_signal(
-        float(weekly["RSI"]),
-        float(monthly["RSI"]),
+        float(weekly_rsi),
+        float(monthly_rsi),
         int(asset["buy"]),
         int(asset["sell"]),
         int(asset["ultra"]),
@@ -431,12 +475,14 @@ def fetch_asset_rsi(asset: Dict[str, object], remove_crypto_suffix: bool = False
         vol_ratio = None  # sem volume confiável (ex.: câmbio) ou histórico curto
         vol_high = None
 
+    norm_ticker = _normalize_ticker(ticker, remove_crypto_suffix=remove_crypto_suffix)
+
     return {
-        "Ticker": _normalize_ticker(ticker, remove_crypto_suffix=remove_crypto_suffix),
+        "Ticker": norm_ticker,
         "Name": asset["name"],
         "Weekly_Close": float(round(weekly["Close"], 2)),
-        "Weekly_RSI": round_half_up(weekly["RSI"]),
-        "Monthly_RSI": round_half_up(monthly["RSI"]),
+        "Weekly_RSI": weekly_rsi,
+        "Monthly_RSI": monthly_rsi,
         "Drawdown_Pct": float(round(weekly["Drawdown_Pct"], 2)),
         "Peak_Close": float(round(weekly["Peak_Close"], 2)),
         "Peak_Date": weekly["Peak_Date"],
@@ -444,6 +490,7 @@ def fetch_asset_rsi(asset: Dict[str, object], remove_crypto_suffix: bool = False
         "Vol_Ratio": vol_ratio,
         "Vol_High": vol_high,
         "Setor": asset.get("setor", ""),
+        "Industria": str(asset.get("industria", "")),
     }
 
 

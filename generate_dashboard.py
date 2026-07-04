@@ -37,12 +37,13 @@ OUTPUT_FILE = Path(__file__).parent / "dashboard.html"
 SAO_PAULO_TZ = "America/Sao_Paulo"
 
 # Display order for coverage groups.
-GROUP_ORDER = ["Indices", "Cripto", "EUA", "ETF", "Brasil", "Moeda"]
+GROUP_ORDER = ["Indices", "Cripto", "EUA", "ETF", "Commodities", "Brasil", "Moeda"]
 GROUP_TITLES = {
     "Indices": "Global Indices",
     "Cripto": "Crypto Assets",
     "EUA": "U.S. Market",
     "ETF": "ETFs",
+    "Commodities": "Commodities",
     "Brasil": "Brazilian Market",
     "Moeda": "Currency",
 }
@@ -1031,12 +1032,15 @@ RESEARCH_V2_SCRIPT = r"""
   const rows = document.querySelectorAll('.asset-row');
   const signalBtns = document.querySelectorAll('.fbtn[data-filter]');
   const marketBtns = document.querySelectorAll('.fbtn[data-market]');
+  const sectorChips = document.querySelectorAll('.sec-chip');
+  const sectorCards = document.querySelectorAll('.sec-card');
   const searchInput = document.getElementById('globalSearch');
   const globalEmpty = document.getElementById('globalEmpty');
 
   const state = {
     signal: 'all',
     market: 'all',
+    sector: 'all',
     query: ''
   };
 
@@ -1056,10 +1060,19 @@ RESEARCH_V2_SCRIPT = r"""
   function rowMatches(row) {
     const signalMatch = state.signal === 'all' || row.dataset.signal === state.signal;
     const marketMatch = state.market === 'all' || row.dataset.market === state.market;
+    const sectorMatch = state.sector === 'all' || row.dataset.sector === state.sector;
     const textMatch = !state.query ||
       normalize(row.dataset.ticker).includes(state.query) ||
       normalize(row.dataset.name).includes(state.query);
-    return signalMatch && marketMatch && textMatch;
+    return signalMatch && marketMatch && sectorMatch && textMatch;
+  }
+
+  function syncSectorUI() {
+    sectorChips.forEach(c => c.classList.toggle('active', c.dataset.sector === state.sector));
+    sectorCards.forEach(c => {
+      c.classList.toggle('active', c.dataset.sectorCard === state.sector);
+      c.classList.toggle('dimmed', state.sector !== 'all' && c.dataset.sectorCard !== state.sector);
+    });
   }
 
   function setSummary(item, count, singular, plural) {
@@ -1128,6 +1141,27 @@ RESEARCH_V2_SCRIPT = r"""
       btn.classList.add('active');
       state.market = btn.dataset.market;
       applyViewState();
+    });
+  });
+
+  sectorChips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      state.sector = chip.dataset.sector;
+      syncSectorUI();
+      applyViewState();
+    });
+  });
+
+  sectorCards.forEach(card => {
+    const go = () => {
+      // Cards toggle: clicking the active sector again clears the filter.
+      state.sector = (state.sector === card.dataset.sectorCard) ? 'all' : card.dataset.sectorCard;
+      syncSectorUI();
+      applyViewState();
+    };
+    card.addEventListener('click', go);
+    card.addEventListener('keydown', e => {
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); go(); }
     });
   });
 
@@ -1223,6 +1257,8 @@ body.research-v2{font-family:Inter,"Segoe UI",system-ui,-apple-system,BlinkMacSy
 .research-v2 .rsi-meter[data-zone="watch"] .rsi-dot{background:var(--rm-cyan)}
 .research-v2 .rsi-meter[data-zone="warm"] .rsi-dot{background:var(--rm-yellow)}
 .research-v2 .rsi-meter[data-zone="hot"] .rsi-dot{background:var(--rm-red)}
+.research-v2 .rsi-meter[data-zone="na"] .rsi-pill{color:var(--rm-muted);font-style:italic;opacity:.7}
+.research-v2 .rsi-meter[data-zone="na"] .rsi-track{opacity:.4}
 
 /* Gauges */
 .research-v2 .gauge-svg{overflow:visible}
@@ -1488,6 +1524,48 @@ svg.dd-chart{display:block;width:100%;height:auto;overflow:visible}
   font-family:"Segoe UI",Inter,system-ui,sans-serif}
 .dd-tip .td{color:var(--rm-dim);font-size:.62rem} .dd-tip b{font-variant-numeric:tabular-nums}
 @keyframes ddDraw{to{stroke-dashoffset:0}}
+
+/* ===== SECTOR PULSE + SECTOR FILTER ===== */
+.research-v2 .section-title .sp-hint{font-size:.68rem;font-weight:600;color:var(--rm-dim);
+  text-transform:none;letter-spacing:0;margin-left:2px}
+.research-v2 .sector-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));
+  gap:13px;margin-bottom:34px}
+.research-v2 .sec-card{position:relative;overflow:hidden;cursor:pointer;padding:13px 15px;
+  border:1px solid var(--rm-line);border-radius:11px;background:var(--rm-surface);transition:.16s}
+.research-v2 .sec-card::before{content:"";position:absolute;inset:0 auto 0 0;width:3px;background:var(--sc)}
+.research-v2 .sec-card:hover{transform:translateY(-2px);border-color:var(--sc);box-shadow:var(--rm-shadow)}
+.research-v2 .sec-card.active{border-color:var(--sc);
+  background:color-mix(in srgb,var(--sc) 10%,var(--rm-surface))}
+.research-v2 .sec-card.dimmed{opacity:.38}
+.research-v2 .sc-head{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+.research-v2 .sc-ico{font-size:1.02rem}
+.research-v2 .sc-name{font-weight:800;font-size:.88rem}
+.research-v2 .sc-n{margin-left:auto;font-family:var(--mono);font-size:.76rem;font-weight:800;
+  color:var(--sc);border:1px solid var(--rm-line);border-radius:6px;padding:1px 8px}
+.research-v2 .sc-bar{display:flex;height:6px;gap:2px;border-radius:4px;overflow:hidden;
+  margin-bottom:9px;background:rgba(148,171,182,.08)}
+.research-v2 .seg-g{background:var(--rm-green)}
+.research-v2 .seg-b{background:#3f5b82}
+.research-v2 .seg-r{background:var(--rm-red)}
+.research-v2 .sc-stats{display:flex;justify-content:space-between;font-size:.7rem;
+  color:var(--rm-muted);margin-bottom:8px}
+.research-v2 .sc-stats b{font-family:var(--mono);font-size:.82rem}
+.research-v2 .sc-foot{display:flex;justify-content:space-between;font-size:.68rem;color:var(--rm-dim);
+  border-top:1px solid var(--rm-line);padding-top:8px}
+.research-v2 .sc-best b{color:var(--rm-text);font-family:var(--mono)}
+.research-v2 .sc-best i{font-style:normal;font-family:var(--mono);font-weight:800}
+.research-v2 .rz-green{color:var(--rm-green)} .research-v2 .rz-teal{color:var(--rm-cyan)}
+.research-v2 .rz-blue{color:var(--rm-blue)} .research-v2 .rz-yellow{color:var(--rm-yellow)}
+.research-v2 .rz-red{color:var(--rm-red)}
+/* sector filter chips (extend .fbtn accent) */
+.research-v2 .sec-chip.active{color:var(--rm-text);border-color:var(--sc);
+  background:color-mix(in srgb,var(--sc) 14%,transparent)}
+.research-v2 .sec-chip.active .fc{color:var(--sc)}
+/* inline sector tag in the Name cell */
+.research-v2 .sec-tag{display:inline-flex;align-items:center;gap:4px;margin-left:8px;
+  font-size:.62rem;font-weight:700;padding:2px 7px;border-radius:999px;white-space:nowrap;
+  color:var(--sc);border:1px solid color-mix(in srgb,var(--sc) 34%,transparent);
+  background:color-mix(in srgb,var(--sc) 9%,transparent)}
 """
 
 
@@ -2090,7 +2168,7 @@ def _opportunity_rank(row: pd.Series) -> tuple:
     return (
         signal_rank.get(str(row.get("Signal", "")), 9),
         float(row.get("Weekly_RSI", 100)),
-        float(row.get("Monthly_RSI", 100)),
+        100.0 if pd.isna(row.get("Monthly_RSI")) else float(row.get("Monthly_RSI", 100)),
         float(row.get("Drawdown_Pct", 0.0)),
     )
 
@@ -2100,7 +2178,7 @@ def _risk_rank(row: pd.Series) -> tuple:
     return (
         signal_rank.get(str(row.get("Signal", "")), 9),
         -float(row.get("Weekly_RSI", 0)),
-        -float(row.get("Monthly_RSI", 0)),
+        -(0.0 if pd.isna(row.get("Monthly_RSI")) else float(row.get("Monthly_RSI", 0))),
         -float(row.get("Drawdown_Pct", -100.0)),
     )
 
@@ -2121,7 +2199,7 @@ def _build_highlight_rows(df_ranked: pd.DataFrame) -> str:
           <div class="highlight-meta">
             <span class="highlight-chip">{escape(_market_title(r.get("Setor", "")))}</span>
             <span class="highlight-chip">RSI W {int(r["Weekly_RSI"])}</span>
-            <span class="highlight-chip">RSI M {int(r["Monthly_RSI"])}</span>
+            <span class="highlight-chip">RSI M {"n/a" if pd.isna(r["Monthly_RSI"]) else int(r["Monthly_RSI"])}</span>
             <span class="highlight-chip">DD {_format_percent(float(r.get("Drawdown_Pct", 0.0)))}</span>
           </div>
         </div>
@@ -2177,8 +2255,19 @@ def _rsi_zone(v: int) -> str:
     return "neutral"
 
 
-def _rsi_meter(v: int) -> str:
-    """RSI value + a 0-100 position track with 30/70 markers and a zone-colored dot."""
+def _rsi_meter(v) -> str:
+    """RSI value + a 0-100 position track with 30/70 markers and a zone-colored dot.
+
+    Renders a neutral 'n/a' pill when the RSI is missing (NaN) — e.g. a recently
+    listed asset without enough months yet for the monthly reading."""
+    if v is None or pd.isna(v):
+        return (
+            '<span class="rsi-meter" data-zone="na">'
+            '<span class="rsi-pill" data-zone="na" title="Not enough history">n/a</span>'
+            '<span class="rsi-track"><span class="rsi-tick" style="left:30%"></span>'
+            '<span class="rsi-tick" style="left:70%"></span></span></span>'
+        )
+    v = int(v)
     zone = _rsi_zone(v)
     pos = max(3, min(97, v))
     return (
@@ -2243,7 +2332,109 @@ def _volume_badge(vol_high: object, vol_ratio: object) -> str:
     return f'<span class="vol-badge vol-low">▼ Low <small>{ratio_txt}</small></span>'
 
 
-def _build_sector_rows(df_sector: pd.DataFrame, market_key: str, dd_keys: set | None = None) -> str:
+# Industry-sector presentation metadata: icon + accent color per sector.
+SECTOR_META = {
+    "Technology":      ("💻", "#43d7e8"),
+    "Semiconductors":  ("🔬", "#6fa8ff"),
+    "Financials":      ("🏦", "#35d08f"),
+    "Healthcare":      ("🩺", "#f472b6"),
+    "Consumer":        ("🛒", "#f1bc4b"),
+    "Industrials":     ("⚙️", "#a78bfa"),
+    "Energy":          ("🛢️", "#ff8a5c"),
+    "Utilities":       ("⚡", "#facc15"),
+    "Materials":       ("🪨", "#94a3b8"),
+    "Telecom & Media": ("📡", "#22d3ee"),
+    "Agribusiness":    ("🌾", "#84cc16"),
+    "Real Estate":     ("🏢", "#e879a0"),
+}
+
+
+def _sector_badge(industria: str) -> str:
+    """Compact inline sector pill for the Name cell (equities only)."""
+    if not industria:
+        return ""
+    icon, color = SECTOR_META.get(industria, ("📦", "#94a3b8"))
+    return (f'<span class="sec-tag" style="--sc:{color}">{icon} '
+            f'{escape(industria)}</span>')
+
+
+def _rsi_zone_cls(v: int) -> str:
+    if v <= 30:
+        return "rz-green"
+    if v <= 45:
+        return "rz-teal"
+    if v < 65:
+        return "rz-blue"
+    if v < 70:
+        return "rz-yellow"
+    return "rz-red"
+
+
+def _build_sector_pulse(df: pd.DataFrame) -> tuple:
+    """Build the Sector Pulse card grid + sector filter chips for BR/US equities.
+
+    Returns (pulse_section_html, sector_filter_html). Empty strings if there are
+    no equities with sector metadata.
+    """
+    eq = df[df["Setor"].isin(["Brasil", "EUA"]) & (df.get("Industria", "") != "")].copy()
+    if eq.empty:
+        return "", ""
+
+    order = eq.groupby("Industria").size().sort_values(ascending=False).index.tolist()
+
+    cards = ""
+    for sec in order:
+        sub = eq[eq["Industria"] == sec]
+        icon, color = SECTOR_META.get(sec, ("📦", "#94a3b8"))
+        n = len(sub)
+        counts = sub["Signal"].value_counts().to_dict()
+        ops = counts.get("UltraBuy", 0) + counts.get("Buy", 0)
+        neu = counts.get("Neutral", 0)
+        sell = counts.get("Sell", 0)
+        avg_rsi = int(round(sub["Weekly_RSI"].mean()))
+        best = sub.sort_values("Weekly_RSI").iloc[0]
+        n_br = int((sub["Setor"] == "Brasil").sum())
+        n_us = n - n_br
+        seg = ""
+        for cnt, cls in ((ops, "seg-g"), (neu, "seg-b"), (sell, "seg-r")):
+            if cnt:
+                seg += f'<span class="{cls}" style="flex:{cnt}"></span>'
+        mkt = ""
+        if n_br:
+            mkt += f'🇧🇷 {n_br} '
+        if n_us:
+            mkt += f'🇺🇸 {n_us}'
+        cards += f'''
+        <div class="sec-card" data-sector-card="{escape(sec)}" role="button" tabindex="0" style="--sc:{color}">
+          <div class="sc-head"><span class="sc-ico">{icon}</span><span class="sc-name">{escape(sec)}</span><span class="sc-n">{n}</span></div>
+          <div class="sc-bar">{seg}</div>
+          <div class="sc-stats">
+            <span><b class="{_rsi_zone_cls(avg_rsi)}">{avg_rsi}</b> avg RSI W</span>
+            <span><b>{ops}</b> buy · <b>{sell}</b> sell</span>
+          </div>
+          <div class="sc-foot">
+            <span class="sc-mkt">{mkt.strip()}</span>
+            <span class="sc-best">Lowest <b>{escape(str(best["Ticker"]))}</b> <i class="{_rsi_zone_cls(int(best["Weekly_RSI"]))}">{int(best["Weekly_RSI"])}</i></span>
+          </div>
+        </div>'''
+
+    pulse = f'''
+  <h2 class="section-title">Sector Pulse <span class="sp-hint">equities · click to filter</span></h2>
+  <div class="sector-grid">{cards}</div>'''
+
+    chips = ('<div class="filter-group"><label>Filter Sector</label>'
+             '<button class="fbtn sec-chip active" data-sector="all">All Sectors</button>')
+    for sec in order:
+        icon, color = SECTOR_META.get(sec, ("📦", "#94a3b8"))
+        chips += (f'<button class="fbtn sec-chip" data-sector="{escape(sec)}" style="--sc:{color}">'
+                  f'{icon} {escape(sec)} <span class="fc">{len(eq[eq["Industria"]==sec])}</span></button>')
+    chips += "</div>"
+
+    return pulse, chips
+
+
+def _build_sector_rows(df_sector: pd.DataFrame, market_key: str, dd_keys: set | None = None,
+                       show_sector: bool = False) -> str:
     dd_keys = dd_keys or set()
     rows_html = ""
     for sig in SIGNAL_ORDER:
@@ -2260,8 +2451,8 @@ def _build_sector_rows(df_sector: pd.DataFrame, market_key: str, dd_keys: set | 
         for _, r in sub.iterrows():
             sig_cls = _signal_class(r["Signal"])
             sig_lbl = _signal_label(r["Signal"])
-            rsi_w = int(r["Weekly_RSI"])
-            rsi_m = int(r["Monthly_RSI"])
+            rsi_w = r["Weekly_RSI"]
+            rsi_m = r["Monthly_RSI"]
             drawdown = float(r.get("Drawdown_Pct", 0.0))
             dd_cls = _drawdown_class(drawdown)
             peak_date = _format_peak_date(r.get("Peak_Date"))
@@ -2279,10 +2470,14 @@ def _build_sector_rows(df_sector: pd.DataFrame, market_key: str, dd_keys: set | 
                 )
             else:
                 chart_cell = '<span class="dd-na">—</span>'
+            industria = str(r.get("Industria", "")) if show_sector else ""
+            sector_attr = f' data-sector="{escape(industria, quote=True)}"' if show_sector else ""
+            name_inner = f'<span class="cn-txt">{escape(str(r["Name"]))}</span>' + (
+                _sector_badge(industria) if show_sector else "")
             rows_html += f'''
-            <tr class="asset-row" data-signal="{r['Signal']}" data-market="{escape(market_key)}" data-ticker="{escape(str(r['Ticker']).lower())}" data-name="{escape(str(r['Name']).lower())}" data-peak-close="{escape(peak_close, quote=True)}" data-peak-date="{escape(peak_date, quote=True)}" data-dd="{escape(_format_percent(drawdown), quote=True)}" data-yahoo="{escape(yahoo_url, quote=True)}" data-tv="{escape(tv_url or '', quote=True)}">
+            <tr class="asset-row" data-signal="{r['Signal']}" data-market="{escape(market_key)}"{sector_attr} data-ticker="{escape(str(r['Ticker']).lower())}" data-name="{escape(str(r['Name']).lower())}" data-peak-close="{escape(peak_close, quote=True)}" data-peak-date="{escape(peak_date, quote=True)}" data-dd="{escape(_format_percent(drawdown), quote=True)}" data-yahoo="{escape(yahoo_url, quote=True)}" data-tv="{escape(tv_url or '', quote=True)}">
               <td class="col-tk"><span class="tk-badge">{escape(str(r['Ticker']))}</span></td>
-              <td class="col-name"><span class="cn-txt">{escape(str(r['Name']))}</span></td>
+              <td class="col-name">{name_inner}</td>
               <td class="col-price">{_format_price(r['Weekly_Close'])}</td>
               <td class="col-rsi">{_rsi_meter(rsi_w)}</td>
               <td class="col-rsi">{_rsi_meter(rsi_m)}</td>
@@ -2373,10 +2568,12 @@ def _kpi_delta_html(key: str, deltas) -> str:
 
 
 def generate_html(df: pd.DataFrame, onchain: Dict, deltas: dict | None = None,
-                  dd_data: dict | None = None) -> str:
+                  dd_data: dict | None = None, with_sectors: bool = True) -> str:
     dd_data = dd_data or {}
     dd_keys = set(dd_data.keys())
     dd_data_json = json.dumps(dd_data, separators=(",", ":"), ensure_ascii=False)
+    sector_pulse_html, sector_filter_html = (
+        _build_sector_pulse(df) if with_sectors else ("", ""))
     now = sao_paulo_now().strftime("%d/%m/%Y %H:%M BRT")
     counts = df["Signal"].value_counts().to_dict()
     total = len(df)
@@ -2409,7 +2606,7 @@ def generate_html(df: pd.DataFrame, onchain: Dict, deltas: dict | None = None,
         s_counts = sub["Signal"].value_counts().to_dict()
         market_buttons += f'''<button class="fbtn" data-market="{grupo.lower()}">{title} <span class="fc">{cnt}</span></button>'''
 
-        rows = _build_sector_rows(sub, grupo.lower(), dd_keys)
+        rows = _build_sector_rows(sub, grupo.lower(), dd_keys, show_sector=with_sectors)
         sector_panels += f'''
       <div class="sector-panel {"active" if first else ""}" id="panel-{grupo.lower()}">
         <div class="panel-summary">
@@ -2681,6 +2878,8 @@ body{{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:
     {fng_card}
   </div>
 
+  {sector_pulse_html}
+
   <!-- RSI MONITOR -->
   <h2 class="section-title">RSI Opportunity Matrix</h2>
 
@@ -2698,6 +2897,7 @@ body{{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:
       <label>Filter Market</label>
       {market_buttons}
     </div>
+    {sector_filter_html}
   </div>
 
   <!-- Panels -->
