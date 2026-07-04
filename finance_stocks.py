@@ -52,7 +52,29 @@ def calculate_rsi(ticker_symbol: str, interval: str, window: int, period: str) -
     df["Peak_Date"] = peak_date
     df["Drawdown_Pct"] = drawdown_pct
 
-    return df[["Close", "RSI", "Peak_Close", "Peak_Date", "Drawdown_Pct"]].iloc[-1]
+    # Volume: última semana FECHADA vs média das 4 anteriores.
+    # A última barra (iloc[-1]) pode ser a semana em andamento (parcial). Ela só
+    # é considerada fechada a partir do sábado (>=5 dias após a segunda de
+    # início do bar). Durante seg-sex usamos iloc[-2] (última semana completa);
+    # no fim de semana usamos iloc[-1] (a semana que acabou de fechar), evitando
+    # tanto ler uma semana parcial quanto ficar 1 semana atrasado no fim de semana.
+    volume = df["Volume"] if "Volume" in df.columns else None
+    if volume is not None and len(volume) >= 6:
+        last_start = volume.index[-1].date()
+        days_since_start = (datetime.now().date() - last_start).days
+        idx = -1 if days_since_start >= 5 else -2
+        vol_last = float(volume.iloc[idx])
+        vol_prev4_mean = float(volume.iloc[idx - 4:idx].mean())
+    else:
+        vol_last = float("nan")
+        vol_prev4_mean = float("nan")
+    df["Vol_Last"] = vol_last
+    df["Vol_Prev4Mean"] = vol_prev4_mean
+
+    return df[[
+        "Close", "RSI", "Peak_Close", "Peak_Date", "Drawdown_Pct",
+        "Vol_Last", "Vol_Prev4Mean",
+    ]].iloc[-1]
 
 
 def get_signal(
@@ -399,6 +421,16 @@ def fetch_asset_rsi(asset: Dict[str, object], remove_crypto_suffix: bool = False
         int(asset["ultra"]),
     )
 
+    # Confirmação por volume: semana fechada vs média das 4 anteriores.
+    vol_last = float(weekly["Vol_Last"])
+    vol_prev4 = float(weekly["Vol_Prev4Mean"])
+    if vol_last > 0 and vol_prev4 > 0:
+        vol_ratio: Optional[float] = round(vol_last / vol_prev4, 2)
+        vol_high: Optional[bool] = bool(vol_ratio > 1.0)
+    else:
+        vol_ratio = None  # sem volume confiável (ex.: câmbio) ou histórico curto
+        vol_high = None
+
     return {
         "Ticker": _normalize_ticker(ticker, remove_crypto_suffix=remove_crypto_suffix),
         "Name": asset["name"],
@@ -409,6 +441,8 @@ def fetch_asset_rsi(asset: Dict[str, object], remove_crypto_suffix: bool = False
         "Peak_Close": float(round(weekly["Peak_Close"], 2)),
         "Peak_Date": weekly["Peak_Date"],
         "Signal": signal,
+        "Vol_Ratio": vol_ratio,
+        "Vol_High": vol_high,
         "Setor": asset.get("setor", ""),
     }
 

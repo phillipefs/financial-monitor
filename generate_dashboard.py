@@ -1431,6 +1431,14 @@ DRAWDOWN_CSS = """
 .research-v2 .th-c{text-align:center}
 .research-v2 .col-chart{text-align:center;white-space:nowrap}
 .research-v2 .dd-na{color:var(--rm-dim);opacity:.5}
+/* ===== WEEKLY VOLUME BADGE ===== */
+.research-v2 .col-vol{text-align:center;white-space:nowrap}
+.research-v2 .vol-badge{display:inline-flex;align-items:center;gap:5px;font-weight:800;font-size:.72rem;
+  font-variant-numeric:tabular-nums;padding:3px 9px;border-radius:5px;border:1px solid transparent}
+.research-v2 .vol-badge small{font-weight:600;font-size:.68rem;opacity:.9}
+.research-v2 .vol-high{color:var(--rm-cyan);background:rgba(67,215,232,.1);border-color:rgba(67,215,232,.28)}
+.research-v2 .vol-low{color:var(--rm-muted);background:rgba(148,171,182,.08);border-color:var(--rm-line)}
+.research-v2 .vol-na{color:var(--rm-dim);opacity:.5}
 .research-v2 .dd-ico{width:26px;height:26px;display:inline-grid;place-items:center;cursor:pointer;
   border:1px solid var(--rm-line);border-radius:7px;background:transparent;color:var(--rm-dim);padding:0;transition:.16s}
 .research-v2 .dd-ico:hover{color:#fff;border-color:var(--rm-red);
@@ -2225,6 +2233,16 @@ def _asset_links(ticker: str, setor: str) -> tuple:
     return yahoo, tv_url
 
 
+def _volume_badge(vol_high: object, vol_ratio: object) -> str:
+    """Weekly-volume confirmation badge: last closed week vs mean of prior 4 weeks."""
+    if vol_ratio is None or pd.isna(vol_ratio):
+        return '<span class="vol-na">—</span>'
+    ratio_txt = f"{float(vol_ratio):.1f}×"
+    if bool(vol_high):
+        return f'<span class="vol-badge vol-high">▲ High <small>{ratio_txt}</small></span>'
+    return f'<span class="vol-badge vol-low">▼ Low <small>{ratio_txt}</small></span>'
+
+
 def _build_sector_rows(df_sector: pd.DataFrame, market_key: str, dd_keys: set | None = None) -> str:
     dd_keys = dd_keys or set()
     rows_html = ""
@@ -2271,6 +2289,7 @@ def _build_sector_rows(df_sector: pd.DataFrame, market_key: str, dd_keys: set | 
               <td class="col-dd"><span class="dd-pill {dd_cls}" title="{escape(peak_meta, quote=True)}">{_format_percent(drawdown)}</span></td>
               <td class="col-chart">{chart_cell}</td>
               <td class="col-sig"><span class="signal-badge {sig_cls}">{sig_lbl}</span></td>
+              <td class="col-vol">{_volume_badge(r.get("Vol_High"), r.get("Vol_Ratio"))}</td>
             </tr>'''
     return rows_html
 
@@ -2410,6 +2429,7 @@ def generate_html(df: pd.DataFrame, onchain: Dict, deltas: dict | None = None,
                 <th class="th-sort th-r" data-col="5">DD %</th>
                 <th class="th-c">DD Chart</th>
                 <th>Signal</th>
+                <th class="th-c">Volume</th>
               </tr>
             </thead>
             <tbody>{rows}
