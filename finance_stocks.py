@@ -369,7 +369,7 @@ assets = [
     {"ticker": "GGBR4.SA", "name": "Gerdau", "buy": 32, "sell": 70, "ultra": 40, "setor": "Brasil"},
     {"ticker": "MULT3.SA", "name": "Multiplan", "buy": 35, "sell": 70, "ultra": 45, "setor": "Brasil"},
     {"ticker": "AGRO3.SA", "name": "BrasilAgro", "buy": 35, "sell": 70, "ultra": 40, "setor": "Brasil"},
-    {"ticker": "SLCE3.SA", "name": "SLC Agricola", "buy": 35, "sell": 70, "ultra": 40, "setor": "Brasil"},
+    {"ticker": "SLCE3.SA", "name": "SLC Agricola", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil"},
     {"ticker": "FLRY3.SA", "name": "Fleury", "buy": 32, "sell": 70, "ultra": 40, "setor": "Brasil"},
 ]
 

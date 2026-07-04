@@ -18,6 +18,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 import urllib3
 import pandas as pd
+import yfinance as yf
 
 # Disable SSL warnings for corporate proxies.
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -551,7 +552,7 @@ body.research-v2{
 }
 .research-v2 .col-name{color:var(--rm-muted)}
 .research-v2 .th-r,
-.research-v2 .t-assets th:nth-child(7),
+.research-v2 .t-assets th:nth-child(8),
 .research-v2 .col-price,
 .research-v2 .col-rsi,
 .research-v2 .col-dd,
@@ -562,7 +563,7 @@ body.research-v2{
 .research-v2 .t-assets th:nth-child(4),
 .research-v2 .t-assets th:nth-child(5),
 .research-v2 .t-assets th:nth-child(6),
-.research-v2 .t-assets th:nth-child(7),
+.research-v2 .t-assets th:nth-child(8),
 .research-v2 .col-price,
 .research-v2 .col-rsi,
 .research-v2 .col-dd,
@@ -1422,11 +1423,340 @@ RESEARCH_V3_SCRIPT = r"""
 
 
 # ==============================================================
+# DRAWDOWN MODAL — inline chart of historical drawdown per asset
+# ==============================================================
+DRAWDOWN_CSS = """
+/* ===== DRAWDOWN ICON + MODAL ===== */
+.research-v2 .cn-txt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.research-v2 .th-c{text-align:center}
+.research-v2 .col-chart{text-align:center;white-space:nowrap}
+.research-v2 .dd-na{color:var(--rm-dim);opacity:.5}
+.research-v2 .dd-ico{width:26px;height:26px;display:inline-grid;place-items:center;cursor:pointer;
+  border:1px solid var(--rm-line);border-radius:7px;background:transparent;color:var(--rm-dim);padding:0;transition:.16s}
+.research-v2 .dd-ico:hover{color:#fff;border-color:var(--rm-red);
+  background:linear-gradient(150deg,var(--rm-red),var(--rm-yellow));transform:translateY(-1px)}
+.research-v2.theme-light .dd-ico:hover{color:#fff}
+.research-v2 .dd-ico svg{width:14px;height:14px}
+
+.dd-modal{border:none;padding:0;background:transparent;max-width:min(940px,94vw);width:100%;color:var(--rm-text)}
+.dd-modal::backdrop{background:rgba(4,7,11,.66);backdrop-filter:blur(4px)}
+.dd-card{position:relative;border-radius:16px;overflow:hidden;background:var(--rm-surface);
+  border:1px solid var(--rm-line);box-shadow:var(--rm-shadow);
+  font-family:"Segoe UI",Inter,system-ui,-apple-system,sans-serif}
+.dd-card::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;
+  background:linear-gradient(90deg,var(--rm-red),var(--rm-yellow))}
+.dd-head{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:18px 22px 10px}
+.dd-title{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;min-width:0}
+.dd-title .nm{font-size:1.15rem;font-weight:800;letter-spacing:-.01em}
+.dd-title .tk{font-size:.7rem;font-weight:700;color:var(--rm-muted);border:1px solid var(--rm-line);border-radius:6px;padding:3px 7px}
+.dd-title .src{font-size:.7rem;color:var(--rm-dim)}
+.dd-x{flex:none;cursor:pointer;width:32px;height:32px;border-radius:8px;border:1px solid var(--rm-line);
+  background:transparent;color:var(--rm-muted);font-size:1.2rem;line-height:1;display:grid;place-items:center;transition:.15s}
+.dd-x:hover{color:var(--rm-text);border-color:var(--rm-red)}
+.dd-chips{display:flex;flex-wrap:wrap;gap:8px;padding:2px 22px 4px}
+.dd-chip{border:1px solid var(--rm-line);background:var(--rm-surface-2);border-radius:10px;padding:7px 11px;min-width:92px}
+.dd-chip .k{display:block;font-size:.6rem;text-transform:uppercase;letter-spacing:.05em;color:var(--rm-dim);margin-bottom:2px}
+.dd-chip .v{font-size:.95rem;font-weight:800;font-variant-numeric:tabular-nums}
+.dd-chip .v small{font-size:.68rem;font-weight:600;color:var(--rm-muted);margin-left:3px}
+.dd-chip .v.neg{color:var(--rm-red)} .dd-chip .v.pos{color:var(--rm-green)} .dd-chip .v.warn{color:var(--rm-yellow)}
+.dd-plot{padding:4px 12px 6px}
+.dd-plot h4{margin:12px 10px 0;font-size:.66rem;font-weight:700;color:var(--rm-muted);text-transform:uppercase;letter-spacing:.06em}
+svg.dd-chart{display:block;width:100%;height:auto;overflow:visible}
+.dd-gl{stroke:var(--rm-line-soft);stroke-width:1}
+.dd-ax{fill:var(--rm-dim);font-size:11px}
+.dd-ln{fill:none;stroke:var(--rm-red);stroke-width:2;stroke-linejoin:round}
+.dd-zero{stroke:var(--rm-muted);stroke-width:1;opacity:.5}
+.dd-pct{stroke-width:1;stroke-dasharray:5 4;opacity:.85}
+.dd-pctx{font-size:10.5px;font-weight:700}
+.dd-pl{fill:none;stroke:var(--rm-cyan);stroke-width:1.7}
+.dd-al{fill:none;stroke:var(--rm-dim);stroke-width:1;stroke-dasharray:4 3;opacity:.7}
+.dd-dot{stroke:#fff;stroke-width:1.4}
+.dd-mklbl{font-size:10.5px;font-weight:800}
+.dd-cross{stroke:var(--rm-muted);stroke-width:1;opacity:.55;stroke-dasharray:3 3}
+.dd-hov{fill:var(--rm-red);stroke:#fff;stroke-width:1.5}
+.dd-tip{position:fixed;pointer-events:none;z-index:99999;background:var(--rm-surface-3);color:var(--rm-text);
+  border:1px solid var(--rm-line);border-radius:8px;padding:6px 9px;font-size:.72rem;
+  box-shadow:var(--rm-shadow);opacity:0;transition:opacity .1s;white-space:nowrap;
+  font-family:"Segoe UI",Inter,system-ui,sans-serif}
+.dd-tip .td{color:var(--rm-dim);font-size:.62rem} .dd-tip b{font-variant-numeric:tabular-nums}
+@keyframes ddDraw{to{stroke-dashoffset:0}}
+"""
+
+
+DRAWDOWN_SCRIPT = r"""
+(function(){
+  "use strict";
+  const DATA = window.DD_DATA || {};
+  const fmtPct = (v,d)=> (d===undefined?(d=1):0, (v>0?"+":"")+Number(v).toFixed(d)+"%");
+  const fmtNum = v => Number(v).toLocaleString("en-US",{maximumFractionDigits:2});
+  const W=1000, PADL=52, PADR=58;
+  const xOf=(i,n)=> PADL + (n<2?0:i/(n-1))*(W-PADL-PADR);
+
+  function cummax(a){ let m=-Infinity, o=new Array(a.length); for(let i=0;i<a.length;i++){ if(a[i]>m)m=a[i]; o[i]=m; } return o; }
+  function dateAt(baseMs,i){ return new Date(baseMs + i*7*86400000); }
+  function yearTicks(baseMs,n){
+    const out=[]; let last=null;
+    for(let i=0;i<n;i++){ const y=dateAt(baseMs,i).getFullYear(); if(y!==last){ out.push({i,y}); last=y; } }
+    const step=Math.ceil(out.length/9);
+    return out.filter((_,k)=>k%step===0);
+  }
+
+  /* ---- lazy modal + tooltip ---- */
+  let modal, card, tip;
+  function ensureUI(){
+    if(modal) return;
+    modal=document.createElement("dialog"); modal.className="dd-modal";
+    card=document.createElement("div"); card.className="dd-card"; modal.appendChild(card);
+    document.body.appendChild(modal);
+    tip=document.createElement("div"); tip.className="dd-tip"; document.body.appendChild(tip);
+    modal.addEventListener("click",e=>{ if(e.target===modal) modal.close(); });
+    modal.addEventListener("close",()=>{ tip.style.opacity=0; });
+  }
+
+  function open(key){
+    const a=DATA[key]; if(!a) return;
+    ensureUI();
+    const p=a.p, n=p.length, ath=cummax(p);
+    const dd=p.map((v,i)=>(v/ath[i]-1)*100);
+    const s=a.st, moeda=a.moeda||"";
+    card.innerHTML =
+      '<div class="dd-head"><div class="dd-title">'+
+        '<span class="nm">'+a.name+'</span><span class="tk">'+a.tk+'</span>'+
+        '<span class="src">'+a.years+'y · source '+(a.fonte||"Yahoo")+'</span>'+
+      '</div><button class="dd-x" aria-label="Close">&times;</button></div>'+
+      '<div class="dd-chips">'+
+        chip("Current price", moeda+" "+fmtNum(s.pn), "")+
+        chip("Current drawdown", fmtPct(s.cd), s.cd<-15?"neg":"warn")+
+        chip("Worst drawdown", fmtPct(s.md)+'<small>'+s.mdd+'</small>', "neg")+
+        chip("P95", fmtPct(s.p95), "")+
+        chip("Underwater", Math.round(s.uw)+"%", "")+
+        chip("CAGR", fmtPct(s.cagr), s.cagr>=0?"pos":"neg")+
+      '</div>'+
+      '<div class="dd-plot">'+
+        '<h4>Price and all-time high (log scale)</h4><div id="ddSp"></div>'+
+        '<h4>Drawdown — decline from all-time high</h4><div id="ddMain"></div>'+
+      '</div>';
+    card.querySelector(".dd-x").onclick=()=>modal.close();
+    const baseMs=Date.parse(a.start+"T00:00:00");
+    drawSpark(card.querySelector("#ddSp"), p, ath, baseMs, n);
+    drawDD(card.querySelector("#ddMain"), a, dd, baseMs, n);
+    if(!modal.open) modal.showModal();
+  }
+  function chip(k,v,cls){ return '<div class="dd-chip"><span class="k">'+k+'</span><span class="v '+cls+'">'+v+'</span></div>'; }
+
+  /* ---- main underwater chart ---- */
+  function drawDD(host,a,dd,baseMs,n){
+    const s=a.st, H=330, PADT=14, PADB=26;
+    const minv=Math.min.apply(null,dd), dHi=Math.max(Math.max.apply(null,dd),0);
+    const domHi=dHi>0?dHi*1.15:0.6, domLo=minv*1.06;
+    const yOf=v=> PADT + (domHi-v)/(domHi-domLo)*(H-PADT-PADB);
+    const worst=dd.indexOf(minv), yZero=yOf(0).toFixed(2);
+    let grid="";
+    for(let g=0; g>=domLo; g-=20){ if(g>domHi) continue; const y=yOf(g).toFixed(1);
+      grid+='<line class="dd-gl" x1="'+PADL+'" x2="'+(W-PADR)+'" y1="'+y+'" y2="'+y+'"/>'+
+            '<text class="dd-ax" x="'+(PADL-8)+'" y="'+(+y+3.5)+'" text-anchor="end">'+g+'%</text>'; }
+    let xl=""; yearTicks(baseMs,n).forEach(t=>{ const x=xOf(t.i,n).toFixed(1);
+      xl+='<text class="dd-ax" x="'+x+'" y="'+(H-6)+'" text-anchor="middle">'+t.y+'</text>'; });
+    let line=""; for(let i=0;i<n;i++){ line+=(i?"L":"M")+xOf(i,n).toFixed(1)+" "+yOf(dd[i]).toFixed(2)+" "; }
+    const area="M"+PADL+" "+yZero+" "+dd.map((v,i)=>"L"+xOf(i,n).toFixed(1)+" "+yOf(v).toFixed(2)).join(" ")+" L"+(W-PADR)+" "+yZero+" Z";
+    let pct="";
+    [["P75","--rm-blue",s.p75],["P90","--rm-yellow",s.p90],["P95","--rm-red",s.p95]].forEach(x=>{
+      const val=x[2]; if(val<domLo||val>domHi) return; const y=yOf(val).toFixed(1);
+      pct+='<line class="dd-pct" x1="'+PADL+'" x2="'+(W-PADR)+'" y1="'+y+'" y2="'+y+'" stroke="var('+x[1]+')"/>'+
+           '<text class="dd-pctx" x="'+(W-PADR+4)+'" y="'+(+y+3.5)+'" fill="var('+x[1]+')">'+x[0]+" "+fmtPct(val)+'</text>'; });
+    const wx=xOf(worst,n).toFixed(1), wy=yOf(minv).toFixed(1);
+    const cx=xOf(n-1,n).toFixed(1), cy=yOf(dd[n-1]).toFixed(1), L=2800;
+    host.innerHTML=
+      '<svg class="dd-chart" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none">'+
+      '<defs><linearGradient id="ddg" x1="0" y1="'+yZero+'" x2="0" y2="'+yOf(domLo)+'" gradientUnits="userSpaceOnUse">'+
+        '<stop offset="0" stop-color="var(--rm-red)" stop-opacity="0.05"/>'+
+        '<stop offset="1" stop-color="var(--rm-red)" stop-opacity="0.45"/></linearGradient></defs>'+
+      grid+xl+
+      '<path d="'+area+'" fill="url(#ddg)"/>'+
+      '<line class="dd-zero" x1="'+PADL+'" x2="'+(W-PADR)+'" y1="'+yZero+'" y2="'+yZero+'"/>'+pct+
+      '<path class="dd-ln" d="'+line+'" style="stroke-dasharray:'+L+';stroke-dashoffset:'+L+';animation:ddDraw 1s ease-out forwards"/>'+
+      '<circle class="dd-dot" cx="'+wx+'" cy="'+wy+'" r="4.5" fill="var(--rm-red)"/>'+
+      '<text class="dd-mklbl" x="'+wx+'" y="'+(+wy+16)+'" fill="var(--rm-red)" text-anchor="'+(worst>n*0.7?"end":"middle")+'">Worst '+fmtPct(minv)+' · '+s.mdd+'</text>'+
+      '<circle class="dd-dot" cx="'+cx+'" cy="'+cy+'" r="4" fill="var(--rm-yellow)"/>'+
+      '<line class="dd-cross" id="ddC" y1="'+PADT+'" y2="'+(H-PADB)+'" style="opacity:0"/>'+
+      '<circle class="dd-hov" id="ddH" r="4.5" style="opacity:0"/>'+
+      '<rect id="ddHit" x="'+PADL+'" y="0" width="'+(W-PADL-PADR)+'" height="'+H+'" fill="transparent" style="cursor:crosshair"/>'+
+      '</svg>';
+    const svg=host.querySelector("svg"), hit=host.querySelector("#ddHit");
+    const cross=host.querySelector("#ddC"), hov=host.querySelector("#ddH");
+    hit.addEventListener("pointermove",ev=>{
+      const r=svg.getBoundingClientRect(); const vx=(ev.clientX-r.left)/r.width*W;
+      let i=Math.round((vx-PADL)/(W-PADL-PADR)*(n-1)); i=Math.max(0,Math.min(n-1,i));
+      const px=xOf(i,n), py=yOf(dd[i]);
+      cross.setAttribute("x1",px); cross.setAttribute("x2",px); cross.style.opacity=1;
+      hov.setAttribute("cx",px); hov.setAttribute("cy",py); hov.style.opacity=1;
+      const d=dateAt(baseMs,i);
+      tip.innerHTML='<span class="td">'+d.toLocaleDateString("en-GB")+'</span><br><b>'+fmtPct(dd[i])+'</b> from ATH';
+      tip.style.opacity=1; tip.style.left=(ev.clientX+14)+"px"; tip.style.top=(ev.clientY-10)+"px";
+      if(window._ddSync) window._ddSync(i);
+    });
+    hit.addEventListener("pointerleave",()=>{ cross.style.opacity=0; hov.style.opacity=0; tip.style.opacity=0;
+      if(window._ddSync) window._ddSync(-1); });
+  }
+
+  /* ---- price + ATH sparkline (log) ---- */
+  function drawSpark(host,p,ath,baseMs,n){
+    const H=124, PADT=10, PADB=18;
+    const lp=p.map(Math.log), la=ath.map(Math.log);
+    const lo=Math.min.apply(null,lp), hi=Math.max.apply(null,la), pad=(hi-lo)*0.06||0.1;
+    const yOf=v=> PADT + (hi+pad-Math.log(v))/((hi+pad)-(lo-pad))*(H-PADT-PADB);
+    const mk=arr=>arr.map((v,i)=>(i?"L":"M")+xOf(i,n).toFixed(1)+" "+yOf(v).toFixed(2)).join(" ");
+    let xl=""; yearTicks(baseMs,n).forEach(t=>{ const x=xOf(t.i,n).toFixed(1);
+      xl+='<text class="dd-ax" x="'+x+'" y="'+(H-4)+'" text-anchor="middle">'+t.y+'</text>'; });
+    const fill="M"+ath.map((v,i)=>xOf(i,n).toFixed(1)+" "+yOf(v).toFixed(2)).join(" L")+
+               " L"+p.map((v,i)=>xOf(i,n).toFixed(1)+" "+yOf(v).toFixed(2)).reverse().join(" L")+" Z";
+    host.innerHTML=
+      '<svg class="dd-chart" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none">'+
+      '<defs><linearGradient id="ddsp" x1="0" y1="0" x2="0" y2="1">'+
+        '<stop offset="0" stop-color="var(--rm-cyan)" stop-opacity=".14"/>'+
+        '<stop offset="1" stop-color="var(--rm-cyan)" stop-opacity="0"/></linearGradient></defs>'+
+      xl+'<path d="'+fill+'" fill="url(#ddsp)"/>'+
+      '<path class="dd-al" d="'+mk(ath)+'"/><path class="dd-pl" d="'+mk(p)+'"/>'+
+      '<line class="dd-cross" id="spC" y1="'+PADT+'" y2="'+(H-PADB)+'" style="opacity:0"/>'+
+      '<circle class="dd-hov" id="spH" r="3.6" fill="var(--rm-cyan)" style="opacity:0"/>'+
+      '</svg>';
+    const cross=host.querySelector("#spC"), hov=host.querySelector("#spH");
+    window._ddSync=i=>{ if(i<0){cross.style.opacity=0;hov.style.opacity=0;return;}
+      const px=xOf(i,n); cross.setAttribute("x1",px);cross.setAttribute("x2",px);cross.style.opacity=1;
+      hov.setAttribute("cx",px);hov.setAttribute("cy",yOf(p[i]));hov.style.opacity=1; };
+  }
+
+  /* ---- delegated icon click (capture: beat the row-expand handler) ---- */
+  document.addEventListener("click",function(e){
+    const b=e.target.closest && e.target.closest(".dd-ico");
+    if(!b) return;
+    e.stopPropagation(); e.preventDefault();
+    open(b.getAttribute("data-dd"));
+  }, true);
+  document.addEventListener("keydown",function(e){
+    if((e.key==="Enter"||e.key===" ") && document.activeElement && document.activeElement.classList.contains("dd-ico")){
+      e.preventDefault(); e.stopPropagation(); open(document.activeElement.getAttribute("data-dd"));
+    }
+  }, true);
+})();
+"""
+
+
+# ==============================================================
 # DATA FETCHING
 # ==============================================================
 def fetch_rsi_data() -> pd.DataFrame:
     """Fetch weekly/monthly RSI for all assets and return a DataFrame."""
     return collect_rsi_data(remove_crypto_suffix=True)
+
+
+# ==============================================================
+# DRAWDOWN HISTORY (per-asset) — powers the inline chart modal
+# ==============================================================
+_DD_ICON = (
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" '
+    'stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/>'
+    '<path d="M7 14l3.5-4.5 3 2.5L20 7"/></svg>'
+)
+_MONTH_ABBR = ["", "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+               "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
+
+def _yahoo_symbol(ticker: str, setor: str) -> str:
+    """Rebuild the raw Yahoo symbol from the normalized ticker + group.
+
+    Mirrors :func:`_asset_links`; the DataFrame ticker is normalized
+    (``.SA``/``^``/``-USD`` stripped), so the raw symbol is reconstructed here.
+    """
+    tk = str(ticker).upper()
+    if setor == "Indices":
+        return "^" + tk
+    if setor == "Cripto":
+        return tk + "-USD"
+    if setor == "Brasil":
+        return tk + ".SA"
+    return tk  # EUA, ETF, Moeda (BRL=X) e afins usam o símbolo direto
+
+
+def _dd_currency(setor: str) -> str:
+    if setor in ("Brasil", "Moeda"):
+        return "R$"
+    if setor == "Indices":
+        return "pts"
+    return "US$"
+
+
+def _round_px(v: float) -> float:
+    v = float(v)
+    a = abs(v)
+    if a >= 1000:
+        return round(v, 1)
+    if a >= 10:
+        return round(v, 2)
+    return round(v, 4)
+
+
+def build_drawdown_data(df: pd.DataFrame, anos: int = 20, min_points: int = 40) -> Dict[str, dict]:
+    """Download long weekly history per asset and build a compact drawdown payload.
+
+    Returns a dict keyed by the normalized ticker (matching ``df['Ticker']``).
+    Only the price series + precomputed stats are stored; the browser derives
+    the ATH (cummax) and the drawdown curve from the prices to keep the payload
+    small. Assets that fail to download (or lack history) are silently skipped
+    and simply won't get a chart icon.
+    """
+    data: Dict[str, dict] = {}
+    total = len(df)
+    for pos, (_, r) in enumerate(df.iterrows(), start=1):
+        key = str(r["Ticker"])
+        setor = str(r.get("Setor", ""))
+        sym = _yahoo_symbol(key, setor)
+        try:
+            hist = yf.Ticker(sym).history(period="max", interval="1wk")
+            close = hist["Close"].dropna()
+            close = close[close > 0]
+            if len(close) < min_points:
+                print(f"  [skip] {sym}: histórico curto ({len(close)})")
+                continue
+            # Limita à janela dos últimos `anos` (bounda o tamanho do payload).
+            cutoff = close.index[-1] - pd.DateOffset(years=anos)
+            trimmed = close[close.index >= cutoff]
+            if len(trimmed) >= min_points:
+                close = trimmed
+
+            ath = close.cummax()
+            dd = (close / ath - 1.0) * 100.0
+
+            max_dd = float(dd.min())
+            max_dd_ts = dd.idxmin()
+            cur_dd = float(dd.iloc[-1])
+            years = max((close.index[-1] - close.index[0]).days / 365.25, 0.01)
+            cagr = (float(close.iloc[-1]) / float(close.iloc[0])) ** (1.0 / years) - 1.0
+
+            data[key] = {
+                "name": str(r["Name"]),
+                "tk": key,
+                "moeda": _dd_currency(setor),
+                "fonte": "Yahoo",
+                "years": round(years, 1),
+                "start": close.index[0].strftime("%Y-%m-%d"),
+                "p": [_round_px(v) for v in close.values],
+                "st": {
+                    "pn": round(float(close.iloc[-1]), 2),
+                    "cd": round(cur_dd, 1),
+                    "md": round(max_dd, 1),
+                    "mdd": f"{_MONTH_ABBR[max_dd_ts.month]}/{max_dd_ts.year}",
+                    "p75": round(float(dd.quantile(0.25)), 1),
+                    "p90": round(float(dd.quantile(0.10)), 1),
+                    "p95": round(float(dd.quantile(0.05)), 1),
+                    "uw": round(float((dd < -0.1).mean() * 100), 0),
+                    "cagr": round(cagr * 100, 1),
+                },
+            }
+            print(f"  [ok] ({pos}/{total}) {sym}: {len(close)} pts")
+        except Exception as exc:
+            print(f"  [WARN] drawdown {sym}: {exc}")
+    return data
 
 
 def fetch_onchain_data() -> Dict:
@@ -1895,7 +2225,8 @@ def _asset_links(ticker: str, setor: str) -> tuple:
     return yahoo, tv_url
 
 
-def _build_sector_rows(df_sector: pd.DataFrame, market_key: str) -> str:
+def _build_sector_rows(df_sector: pd.DataFrame, market_key: str, dd_keys: set | None = None) -> str:
+    dd_keys = dd_keys or set()
     rows_html = ""
     for sig in SIGNAL_ORDER:
         sub = df_sector[df_sector["Signal"] == sig].copy()
@@ -1921,14 +2252,24 @@ def _build_sector_rows(df_sector: pd.DataFrame, market_key: str) -> str:
             if peak_date:
                 peak_meta += f" | Date: {peak_date}"
             yahoo_url, tv_url = _asset_links(r["Ticker"], str(r.get("Setor", "")))
+            tkey = str(r["Ticker"])
+            if tkey in dd_keys:
+                chart_cell = (
+                    f'<button class="dd-ico" type="button" data-dd="{escape(tkey, quote=True)}" '
+                    f'title="Historical drawdown" aria-label="Historical drawdown of {escape(str(r["Name"]), quote=True)}">'
+                    f'{_DD_ICON}</button>'
+                )
+            else:
+                chart_cell = '<span class="dd-na">—</span>'
             rows_html += f'''
             <tr class="asset-row" data-signal="{r['Signal']}" data-market="{escape(market_key)}" data-ticker="{escape(str(r['Ticker']).lower())}" data-name="{escape(str(r['Name']).lower())}" data-peak-close="{escape(peak_close, quote=True)}" data-peak-date="{escape(peak_date, quote=True)}" data-dd="{escape(_format_percent(drawdown), quote=True)}" data-yahoo="{escape(yahoo_url, quote=True)}" data-tv="{escape(tv_url or '', quote=True)}">
               <td class="col-tk"><span class="tk-badge">{escape(str(r['Ticker']))}</span></td>
-              <td class="col-name">{escape(str(r['Name']))}</td>
+              <td class="col-name"><span class="cn-txt">{escape(str(r['Name']))}</span></td>
               <td class="col-price">{_format_price(r['Weekly_Close'])}</td>
               <td class="col-rsi">{_rsi_meter(rsi_w)}</td>
               <td class="col-rsi">{_rsi_meter(rsi_m)}</td>
               <td class="col-dd"><span class="dd-pill {dd_cls}" title="{escape(peak_meta, quote=True)}">{_format_percent(drawdown)}</span></td>
+              <td class="col-chart">{chart_cell}</td>
               <td class="col-sig"><span class="signal-badge {sig_cls}">{sig_lbl}</span></td>
             </tr>'''
     return rows_html
@@ -2012,7 +2353,11 @@ def _kpi_delta_html(key: str, deltas) -> str:
             f'<span class="d-ctx">vs yesterday</span></div>')
 
 
-def generate_html(df: pd.DataFrame, onchain: Dict, deltas: dict | None = None) -> str:
+def generate_html(df: pd.DataFrame, onchain: Dict, deltas: dict | None = None,
+                  dd_data: dict | None = None) -> str:
+    dd_data = dd_data or {}
+    dd_keys = set(dd_data.keys())
+    dd_data_json = json.dumps(dd_data, separators=(",", ":"), ensure_ascii=False)
     now = sao_paulo_now().strftime("%d/%m/%Y %H:%M BRT")
     counts = df["Signal"].value_counts().to_dict()
     total = len(df)
@@ -2045,7 +2390,7 @@ def generate_html(df: pd.DataFrame, onchain: Dict, deltas: dict | None = None) -
         s_counts = sub["Signal"].value_counts().to_dict()
         market_buttons += f'''<button class="fbtn" data-market="{grupo.lower()}">{title} <span class="fc">{cnt}</span></button>'''
 
-        rows = _build_sector_rows(sub, grupo.lower())
+        rows = _build_sector_rows(sub, grupo.lower(), dd_keys)
         sector_panels += f'''
       <div class="sector-panel {"active" if first else ""}" id="panel-{grupo.lower()}">
         <div class="panel-summary">
@@ -2063,6 +2408,7 @@ def generate_html(df: pd.DataFrame, onchain: Dict, deltas: dict | None = None) -
                 <th class="th-sort th-r" data-col="3">RSI W</th>
                 <th class="th-sort th-r" data-col="4">RSI M</th>
                 <th class="th-sort th-r" data-col="5">DD %</th>
+                <th class="th-c">DD Chart</th>
                 <th>Signal</th>
               </tr>
             </thead>
@@ -2257,6 +2603,7 @@ body{{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:
 }}
 {RESEARCH_V2_CSS}
 {RESEARCH_V3_CSS}
+{DRAWDOWN_CSS}
 </style>
 </head>
 <body class="research-v2 profile-field-v2">
@@ -2343,11 +2690,15 @@ body{{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:
   Financial Monitor Research · Updated <a>{now}</a> · Data: Yahoo Finance + CoinMetrics · Static research dashboard
 </div>
 
+<script>window.DD_DATA={dd_data_json};</script>
 <script>
 {RESEARCH_V2_SCRIPT}
 </script>
 <script>
 {RESEARCH_V3_SCRIPT}
+</script>
+<script>
+{DRAWDOWN_SCRIPT}
 </script>
 </body>
 </html>'''
@@ -2361,10 +2712,10 @@ def main():
     print("  FINANCIAL MONITOR RESEARCH — Dashboard Generator")
     print("=" * 60)
 
-    print("\n[1/3] Fetching on-chain data (BTC + ETH)...")
+    print("\n[1/4] Fetching on-chain data (BTC + ETH)...")
     onchain = fetch_onchain_data()
 
-    print("[2/3] Fetching RSI for all assets...")
+    print("[2/4] Fetching RSI for all assets...")
     df = fetch_rsi_data()
 
     if df.empty:
@@ -2375,8 +2726,12 @@ def main():
 
     deltas = _update_snapshot(df)
 
-    print("[3/3] Generating dashboard HTML...")
-    html = generate_html(df, onchain, deltas)
+    print("[3/4] Building drawdown history (long weekly series)...")
+    dd_data = build_drawdown_data(df)
+    print(f"  [OK] drawdown ready for {len(dd_data)}/{len(df)} assets")
+
+    print("[4/4] Generating dashboard HTML...")
+    html = generate_html(df, onchain, deltas, dd_data)
     OUTPUT_FILE.write_text(html, encoding="utf-8")
     print(f"  [OK] Saved to: {OUTPUT_FILE}")
     print(f"\n  Open in browser: file:///{OUTPUT_FILE.as_posix()}")
