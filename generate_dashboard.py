@@ -12,7 +12,7 @@ import sys
 from datetime import datetime, timedelta, timezone
 from html import escape
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Optional
 from urllib.parse import quote
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
@@ -25,7 +25,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 os.environ.setdefault("CURL_CA_BUNDLE", "")
 
 # Reuse the existing data collection logic.
-from finance_stocks import collect_rsi_data
+from finance_stocks import collect_rsi_data, _download_batch
 from onchain import (
     classify_mvrv_btc,
     classify_mvrv_eth,
@@ -1782,66 +1782,96 @@ def _round_px(v: float) -> float:
     return round(v, 4)
 
 
+def _build_dd_entry(close: pd.Series, key: str, name: str, setor: str,
+                    anos: int, min_points: int) -> Optional[dict]:
+    """Build one drawdown payload entry from a raw weekly Close series.
+
+    Returns ``None`` when the history is too short. Pure computation — shared by
+    the batched and single-fetch paths so both yield identical entries."""
+    close = close.dropna()
+    close = close[close > 0]
+    if len(close) < min_points:
+        return None
+    # Limita à janela dos últimos `anos` (bounda o tamanho do payload).
+    cutoff = close.index[-1] - pd.DateOffset(years=anos)
+    trimmed = close[close.index >= cutoff]
+    if len(trimmed) >= min_points:
+        close = trimmed
+
+    ath = close.cummax()
+    dd = (close / ath - 1.0) * 100.0
+
+    max_dd = float(dd.min())
+    max_dd_ts = dd.idxmin()
+    cur_dd = float(dd.iloc[-1])
+    years = max((close.index[-1] - close.index[0]).days / 365.25, 0.01)
+    cagr = (float(close.iloc[-1]) / float(close.iloc[0])) ** (1.0 / years) - 1.0
+
+    return {
+        "name": name,
+        "tk": key,
+        "moeda": _dd_currency(setor),
+        "fonte": "Yahoo",
+        "years": round(years, 1),
+        "start": close.index[0].strftime("%Y-%m-%d"),
+        "p": [_round_px(v) for v in close.values],
+        "st": {
+            "pn": round(float(close.iloc[-1]), 2),
+            "cd": round(cur_dd, 1),
+            "md": round(max_dd, 1),
+            "mdd": f"{_MONTH_ABBR[max_dd_ts.month]}/{max_dd_ts.year}",
+            "p75": round(float(dd.quantile(0.25)), 1),
+            "p90": round(float(dd.quantile(0.10)), 1),
+            "p95": round(float(dd.quantile(0.05)), 1),
+            "uw": round(float((dd < -0.1).mean() * 100), 0),
+            "cagr": round(cagr * 100, 1),
+        },
+    }
+
+
 def build_drawdown_data(df: pd.DataFrame, anos: int = 20, min_points: int = 40) -> Dict[str, dict]:
-    """Download long weekly history per asset and build a compact drawdown payload.
+    """Bulk-download long weekly history for every asset and build the drawdown payload.
 
     Returns a dict keyed by the normalized ticker (matching ``df['Ticker']``).
-    Only the price series + precomputed stats are stored; the browser derives
-    the ATH (cummax) and the drawdown curve from the prices to keep the payload
-    small. Assets that fail to download (or lack history) are silently skipped
-    and simply won't get a chart icon.
+    Uses one batched download (a few HTTP calls) instead of one request per
+    asset, with a single-fetch fallback for any symbol the batch misses. Only
+    the price series + precomputed stats are stored; the browser derives the ATH
+    (cummax) and drawdown curve from the prices to keep the payload small.
     """
-    data: Dict[str, dict] = {}
-    total = len(df)
-    for pos, (_, r) in enumerate(df.iterrows(), start=1):
+    # (normalized_key, setor, yahoo_symbol, name) for each asset row.
+    specs = []
+    for _, r in df.iterrows():
         key = str(r["Ticker"])
         setor = str(r.get("Setor", ""))
-        sym = _yahoo_symbol(key, setor)
+        specs.append((key, setor, _yahoo_symbol(key, setor), str(r["Name"])))
+
+    batch = _download_batch([s[2] for s in specs], interval="1wk", period="max")
+
+    data: Dict[str, dict] = {}
+    total = len(specs)
+    fallbacks = 0
+    for pos, (key, setor, sym, name) in enumerate(specs, start=1):
         try:
-            hist = yf.Ticker(sym).history(period="max", interval="1wk")
-            close = hist["Close"].dropna()
-            close = close[close > 0]
-            if len(close) < min_points:
-                print(f"  [skip] {sym}: histórico curto ({len(close)})")
+            sub = batch.get(sym)
+            if sub is not None and "Close" in sub.columns:
+                close = sub["Close"]
+            else:
+                # Missing from the batch → single-ticker retry (keeps the chart
+                # icon from vanishing on a transient batch hiccup).
+                close = yf.Ticker(sym).history(period="max", interval="1wk")["Close"]
+                fallbacks += 1
+
+            entry = _build_dd_entry(close, key, name, setor, anos, min_points)
+            if entry is None:
+                print(f"  [skip] {sym}: histórico curto")
                 continue
-            # Limita à janela dos últimos `anos` (bounda o tamanho do payload).
-            cutoff = close.index[-1] - pd.DateOffset(years=anos)
-            trimmed = close[close.index >= cutoff]
-            if len(trimmed) >= min_points:
-                close = trimmed
-
-            ath = close.cummax()
-            dd = (close / ath - 1.0) * 100.0
-
-            max_dd = float(dd.min())
-            max_dd_ts = dd.idxmin()
-            cur_dd = float(dd.iloc[-1])
-            years = max((close.index[-1] - close.index[0]).days / 365.25, 0.01)
-            cagr = (float(close.iloc[-1]) / float(close.iloc[0])) ** (1.0 / years) - 1.0
-
-            data[key] = {
-                "name": str(r["Name"]),
-                "tk": key,
-                "moeda": _dd_currency(setor),
-                "fonte": "Yahoo",
-                "years": round(years, 1),
-                "start": close.index[0].strftime("%Y-%m-%d"),
-                "p": [_round_px(v) for v in close.values],
-                "st": {
-                    "pn": round(float(close.iloc[-1]), 2),
-                    "cd": round(cur_dd, 1),
-                    "md": round(max_dd, 1),
-                    "mdd": f"{_MONTH_ABBR[max_dd_ts.month]}/{max_dd_ts.year}",
-                    "p75": round(float(dd.quantile(0.25)), 1),
-                    "p90": round(float(dd.quantile(0.10)), 1),
-                    "p95": round(float(dd.quantile(0.05)), 1),
-                    "uw": round(float((dd < -0.1).mean() * 100), 0),
-                    "cagr": round(cagr * 100, 1),
-                },
-            }
-            print(f"  [ok] ({pos}/{total}) {sym}: {len(close)} pts")
+            data[key] = entry
+            print(f"  [ok] ({pos}/{total}) {sym}: {len(entry['p'])} pts")
         except Exception as exc:
             print(f"  [WARN] drawdown {sym}: {exc}")
+
+    if fallbacks:
+        print(f"  [batch] drawdown: {fallbacks} via single-fetch fallback")
     return data
 
 

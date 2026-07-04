@@ -18,7 +18,7 @@ on:
       - master
 
 permissions:
-  contents: read
+  contents: write   # commit the updated snapshot_history.json back to the repo
   pages: write
   id-token: write
 
@@ -33,6 +33,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0   # full history so the snapshot commit-back can rebase safely
 
       - name: Set up Python
         uses: actions/setup-python@v6
@@ -53,15 +55,9 @@ jobs:
           done
           exit 1
 
-      - name: Restore snapshot history
-        uses: actions/cache@v4
-        with:
-          path: snapshot_history.json
-          # Unique key per run → restore always falls back to the latest
-          # "fm-snapshot-" prefix, and the post-job step saves the updated file.
-          key: fm-snapshot-${{ github.run_id }}
-          restore-keys: |
-            fm-snapshot-
+      # snapshot_history.json is now versioned in the repo (durable across cache
+      # eviction). The checkout above restores it; the "Persist snapshot history"
+      # step below commits the updated file back after generation.
 
       - name: Generate dashboard
         env:
@@ -77,6 +73,31 @@ jobs:
             fi
           done
           exit 1
+
+      - name: Persist snapshot history
+        # Commit the rolling KPI history back to the repo so it survives Actions
+        # cache eviction. Never fails the job — a bad push just retries next run.
+        # [skip ci] + the GITHUB_TOKEN both prevent this commit from re-triggering.
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add snapshot_history.json
+          # --cached so a brand-new (previously untracked) file counts as a change.
+          if git diff --cached --quiet -- snapshot_history.json; then
+            echo "snapshot_history.json unchanged — nothing to commit."
+            exit 0
+          fi
+          git commit -m "chore: update snapshot history [skip ci]"
+          for attempt in 1 2 3; do
+            if git push origin "HEAD:${GITHUB_REF_NAME}"; then
+              echo "snapshot history pushed."
+              exit 0
+            fi
+            echo "push failed (attempt ${attempt}/3); rebasing onto latest ${GITHUB_REF_NAME}…"
+            git pull --rebase --autostash origin "${GITHUB_REF_NAME}" || true
+          done
+          echo "::warning::Could not push snapshot history after 3 attempts; will retry next run."
+          exit 0
 
       - name: Prepare Pages artifact
         run: |

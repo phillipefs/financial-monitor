@@ -217,5 +217,7 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
-# Financial Monitor — rolling KPI snapshot (persisted in CI via actions/cache)
-snapshot_history.json
+# Financial Monitor — rolling KPI snapshot.
+# Versioned in the repo so the day-over-day KPI history is durable: the CI
+# workflow commits the updated file back after each run. (Previously gitignored
+# and kept only in actions/cache, which GitHub evicts after 7 days of no use.)
