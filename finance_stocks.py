@@ -322,6 +322,8 @@ assets = [
     {"ticker": "XBI", "name": "Biotech ETF", "buy": 32, "sell": 70, "ultra": 40, "setor": "ETF"},
     {"ticker": "SPY", "name": "S&P 500 ETF", "buy": 30, "sell": 70, "ultra": 40, "setor": "ETF"},
     {"ticker": "QQQ", "name": "Nasdaq 100 ETF", "buy": 30, "sell": 70, "ultra": 40, "setor": "ETF"},
+    {"ticker": "GLD", "name": "Gold ETF", "buy": 35, "sell": 70, "ultra": 45, "setor": "ETF"},
+    {"ticker": "SLV", "name": "Silver ETF", "buy": 32, "sell": 70, "ultra": 40, "setor": "ETF"},
 
 
     # Moeda
