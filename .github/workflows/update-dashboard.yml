@@ -10,6 +10,8 @@ on:
     - cron: "7 15 * * 1-5"
     - cron: "7 18 * * 1-5"
     - cron: "7 21 * * 1-5"
+    # Weekend: single run at 08:00 BRT (11:00 UTC) on Saturday and Sunday.
+    - cron: "7 11 * * 6,0"
   push:
     branches:
       - main
