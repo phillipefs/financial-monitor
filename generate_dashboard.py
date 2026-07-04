@@ -36,11 +36,12 @@ OUTPUT_FILE = Path(__file__).parent / "dashboard.html"
 SAO_PAULO_TZ = "America/Sao_Paulo"
 
 # Display order for coverage groups.
-GROUP_ORDER = ["Indices", "Cripto", "EUA", "Brasil", "Moeda"]
+GROUP_ORDER = ["Indices", "Cripto", "EUA", "ETF", "Brasil", "Moeda"]
 GROUP_TITLES = {
     "Indices": "Global Indices",
     "Cripto": "Crypto Assets",
     "EUA": "U.S. Market",
+    "ETF": "ETFs",
     "Brasil": "Brazilian Market",
     "Moeda": "Currency",
 }

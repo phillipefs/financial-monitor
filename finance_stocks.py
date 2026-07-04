@@ -148,7 +148,7 @@ def _mk_table_indices(df: pd.DataFrame) -> str:
 INDEX_NAMES_ORDER = ["Ibovespa", "S&P 500", "Nasdaq 100", "Dow Jones", "DAX"]
 INDEX_NAME_SET = set(INDEX_NAMES_ORDER)
 
-GROUP_ORDER = ["Indices", "Cripto", "EUA", "Brasil", "Moeda"]
+GROUP_ORDER = ["Indices", "Cripto", "EUA", "ETF", "Brasil", "Moeda"]
 
 
 # ==========================================================
@@ -240,6 +240,7 @@ def formatar_mensagem(df_sorted: pd.DataFrame) -> str:
         title_map = {
             "Cripto": "🪙 Cripto",
             "EUA": "🇺🇸 Mercado Americano",
+            "ETF": "🧺 ETFs",
             "Brasil": "🇧🇷 Brasil",
             "Moeda": "💱 Moedas",
             "Indices": "📌 Indices",  # não deve cair aqui (já foi tratado)
@@ -264,6 +265,7 @@ assets = [
     {"ticker": "BTC-USD", "name": "Bitcoin", "buy": 30, "sell": 70, "ultra": 45, "setor": "Cripto"},
     {"ticker": "ETH-USD", "name": "Ethereum", "buy": 30, "sell": 70, "ultra": 45, "setor": "Cripto"},
     {"ticker": "SOL-USD", "name": "Solana", "buy": 30, "sell": 70, "ultra": 45, "setor": "Cripto"},
+    {"ticker": "AAVE-USD", "name": "Aave", "buy": 30, "sell": 70, "ultra": 45, "setor": "Cripto"},
 
     # EUA
     {"ticker": "AMZN", "name": "Amazon", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA"},
@@ -308,6 +310,18 @@ assets = [
     {"ticker": "LRCX", "name": "Lam Research", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA"},
     {"ticker": "QCOM", "name": "Qualcomm", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA"},
     {"ticker": "NU", "name": "Nubank", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA"},
+    {"ticker": "HD", "name": "Home Depot", "buy": 35, "sell": 70, "ultra": 45, "setor": "EUA"},
+    {"ticker": "JNJ", "name": "J&J", "buy": 35, "sell": 70, "ultra": 45, "setor": "EUA"},
+    {"ticker": "PG", "name": "P&G", "buy": 35, "sell": 70, "ultra": 45, "setor": "EUA"},
+    {"ticker": "ADBE", "name": "Adobe", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA"},
+    {"ticker": "UNP", "name": "Union Pacific", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA"},
+    {"ticker": "MELI", "name": "MercadoLibre", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA"},
+
+
+    # ETFs
+    {"ticker": "XBI", "name": "Biotech ETF", "buy": 32, "sell": 70, "ultra": 40, "setor": "ETF"},
+    {"ticker": "SPY", "name": "S&P 500 ETF", "buy": 30, "sell": 70, "ultra": 40, "setor": "ETF"},
+    {"ticker": "QQQ", "name": "Nasdaq 100 ETF", "buy": 30, "sell": 70, "ultra": 40, "setor": "ETF"},
 
 
     # Moeda
@@ -352,6 +366,11 @@ assets = [
     {"ticker": "RENT3.SA", "name": "Localiza", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil"},
     {"ticker": "SOJA3.SA", "name": "Boa Safra", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil"},
     {"ticker": "KLBN4.SA", "name": "Klabin", "buy": 35, "sell": 70, "ultra": 45, "setor": "Brasil"},
+    {"ticker": "GGBR4.SA", "name": "Gerdau", "buy": 32, "sell": 70, "ultra": 40, "setor": "Brasil"},
+    {"ticker": "MULT3.SA", "name": "Multiplan", "buy": 35, "sell": 70, "ultra": 45, "setor": "Brasil"},
+    {"ticker": "AGRO3.SA", "name": "BrasilAgro", "buy": 35, "sell": 70, "ultra": 40, "setor": "Brasil"},
+    {"ticker": "SLCE3.SA", "name": "SLC Agricola", "buy": 35, "sell": 70, "ultra": 40, "setor": "Brasil"},
+    {"ticker": "FLRY3.SA", "name": "Fleury", "buy": 32, "sell": 70, "ultra": 40, "setor": "Brasil"},
 ]
 
 
