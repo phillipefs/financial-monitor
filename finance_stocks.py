@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import tempfile
+import time
 from datetime import datetime
 from decimal import Decimal, ROUND_HALF_UP
 from pathlib import Path
@@ -51,14 +52,20 @@ def _fmt_rsi(v) -> str:
     return "n/a" if v is None or pd.isna(v) else str(int(v))
 
 
-def calculate_rsi(ticker_symbol: str, interval: str, window: int, period: str) -> pd.Series:
-    df = yf.Ticker(ticker_symbol).history(interval=interval, period=period)
-    df.dropna(inplace=True)
+def _compute_rsi_row(df: pd.DataFrame, window: int) -> pd.Series:
+    """Compute the RSI/peak/drawdown/volume snapshot from an already-fetched
+    OHLCV DataFrame.
+
+    Shared by the per-ticker fetch (:func:`calculate_rsi`) and the batched fetch
+    (:func:`collect_rsi_data`) so both paths produce identical results given the
+    same price data — the only difference between them is how the bars arrive.
+    """
+    df = df.dropna()
     if df.empty:
         raise ValueError("no price data returned")
 
-    rsi = RSIIndicator(close=df["Close"], window=window).rsi()
-    df["RSI"] = rsi
+    df = df.copy()
+    df["RSI"] = RSIIndicator(close=df["Close"], window=window).rsi()
 
     peak_date = df["Close"].idxmax()
     peak_close = float(df.loc[peak_date, "Close"])
@@ -92,6 +99,60 @@ def calculate_rsi(ticker_symbol: str, interval: str, window: int, period: str) -
         "Close", "RSI", "Peak_Close", "Peak_Date", "Drawdown_Pct",
         "Vol_Last", "Vol_Prev4Mean",
     ]].iloc[-1]
+
+
+def calculate_rsi(ticker_symbol: str, interval: str, window: int, period: str) -> pd.Series:
+    """Fetch one ticker's history (single HTTP request) and compute its snapshot."""
+    df = yf.Ticker(ticker_symbol).history(interval=interval, period=period)
+    return _compute_rsi_row(df, window)
+
+
+def _download_batch(
+    tickers: List[str],
+    interval: str,
+    period: str,
+    chunk_size: int = 40,
+    retries: int = 3,
+) -> Dict[str, pd.DataFrame]:
+    """Bulk-download OHLCV for many tickers — one HTTP batch per chunk instead of
+    one request per ticker.
+
+    Returns ``{ticker: DataFrame}``. Tickers that come back empty are simply
+    omitted from the dict so the caller can fall back to a single-ticker fetch
+    (that fallback is what keeps assets from silently disappearing when Yahoo
+    throttles a batch).
+    """
+    out: Dict[str, pd.DataFrame] = {}
+    for i in range(0, len(tickers), chunk_size):
+        chunk = tickers[i:i + chunk_size]
+        data = None
+        for attempt in range(1, retries + 1):
+            try:
+                data = yf.download(
+                    chunk, interval=interval, period=period, group_by="ticker",
+                    auto_adjust=True, threads=True, progress=False,
+                )
+                if data is not None and not data.empty:
+                    break
+            except Exception as exc:  # network / parsing hiccup on the whole chunk
+                print(f"[WARN] batch {interval} chunk {i // chunk_size + 1} "
+                      f"attempt {attempt}/{retries}: {exc}")
+            if attempt < retries:
+                time.sleep(attempt * 5)
+
+        if data is None or data.empty:
+            continue
+
+        multi = isinstance(data.columns, pd.MultiIndex)
+        for tk in chunk:
+            try:
+                sub = data[tk] if multi else data
+                sub = sub.dropna(how="all")
+                if not sub.empty and "Close" in sub.columns and sub["Close"].notna().any():
+                    out[tk] = sub
+            except (KeyError, IndexError):
+                pass  # ticker absent from this batch → caller will single-fetch it
+    return out
 
 
 def get_signal(
@@ -440,11 +501,17 @@ def _normalize_ticker(ticker: str, remove_crypto_suffix: bool = False) -> str:
     return normalized
 
 
-def fetch_asset_rsi(asset: Dict[str, object], remove_crypto_suffix: bool = False) -> Dict[str, object]:
-    ticker = str(asset["ticker"])
-    weekly = calculate_rsi(ticker, interval="1wk", window=14, period="5y")
-    monthly = calculate_rsi(ticker, interval="1mo", window=14, period="5y")
+def _build_asset_row(
+    asset: Dict[str, object],
+    weekly: pd.Series,
+    monthly: pd.Series,
+    remove_crypto_suffix: bool = False,
+) -> Dict[str, object]:
+    """Assemble the output row from precomputed weekly/monthly snapshots.
 
+    Independent of how the snapshots were fetched (single request or batch), so
+    both paths yield identical rows."""
+    ticker = str(asset["ticker"])
     weekly_rsi = round_rsi_or_nan(weekly["RSI"])
     monthly_rsi = round_rsi_or_nan(monthly["RSI"])
 
@@ -494,19 +561,67 @@ def fetch_asset_rsi(asset: Dict[str, object], remove_crypto_suffix: bool = False
     }
 
 
+def fetch_asset_rsi(asset: Dict[str, object], remove_crypto_suffix: bool = False) -> Dict[str, object]:
+    """Fetch a single asset (weekly + monthly, two HTTP requests) and build its row.
+
+    Used as the per-ticker fallback when the bulk download misses a ticker, and
+    directly by callers that need one asset in isolation."""
+    ticker = str(asset["ticker"])
+    weekly = calculate_rsi(ticker, interval="1wk", window=14, period="5y")
+    monthly = calculate_rsi(ticker, interval="1mo", window=14, period="5y")
+    return _build_asset_row(asset, weekly, monthly, remove_crypto_suffix=remove_crypto_suffix)
+
+
 def collect_rsi_data(
     asset_list: Optional[List[Dict[str, object]]] = None,
     remove_crypto_suffix: bool = False,
 ) -> pd.DataFrame:
-    results: List[Dict[str, object]] = []
+    """Fetch RSI/volume/drawdown snapshots for every asset.
 
-    for asset in asset_list or assets:
+    Fast path: two bulk downloads (all weekly bars, all monthly bars) instead of
+    ~2 requests per asset, collapsing hundreds of round-trips to a handful. Any
+    ticker missing from a batch falls back to a single-ticker fetch, so transient
+    Yahoo throttling no longer silently drops assets from the universe.
+    """
+    asset_list = list(asset_list or assets)
+    tickers = [str(a["ticker"]) for a in asset_list]
+
+    weekly_batch = _download_batch(tickers, interval="1wk", period="5y")
+    monthly_batch = _download_batch(tickers, interval="1mo", period="5y")
+
+    results: List[Dict[str, object]] = []
+    fallbacks = 0
+    for asset in asset_list:
         ticker = str(asset["ticker"])
+        wdf = weekly_batch.get(ticker)
+        mdf = monthly_batch.get(ticker)
+
+        # Fast path: both series arrived in the bulk download.
+        if wdf is not None and mdf is not None:
+            try:
+                weekly = _compute_rsi_row(wdf, 14)
+                monthly = _compute_rsi_row(mdf, 14)
+                results.append(_build_asset_row(asset, weekly, monthly,
+                                                 remove_crypto_suffix=remove_crypto_suffix))
+                continue
+            except ValueError as exc:
+                # Genuinely too little history (e.g. a just-listed ticker) — no
+                # point refetching, it would fail the same way.
+                if "insufficient history" in str(exc):
+                    print(f"[WARN] {ticker}: {exc}")
+                    continue
+                # Unexpected compute error → try a clean single fetch below.
+
+        # Fallback: missing from a batch, or an unexpected batch compute error.
         try:
             results.append(fetch_asset_rsi(asset, remove_crypto_suffix=remove_crypto_suffix))
+            fallbacks += 1
         except Exception as exc:
             print(f"[WARN] {ticker}: {exc}")
 
+    if fallbacks:
+        print(f"  [batch] {len(results)}/{len(asset_list)} assets "
+              f"({fallbacks} recovered via single-fetch fallback)")
     return pd.DataFrame(results)
 
 
