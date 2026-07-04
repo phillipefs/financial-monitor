@@ -1032,6 +1032,9 @@ RESEARCH_V2_SCRIPT = r"""
   const rows = document.querySelectorAll('.asset-row');
   const signalBtns = document.querySelectorAll('.fbtn[data-filter]');
   const marketBtns = document.querySelectorAll('.fbtn[data-market]');
+  const signalGroup = document.querySelector('.signal-filter');
+  const marketGroup = document.querySelector('.market-filter');
+  const sectorGroup = document.querySelector('.sector-filter');
   const sectorChips = document.querySelectorAll('.sec-chip');
   const sectorCards = document.querySelectorAll('.sec-card');
   const searchInput = document.getElementById('globalSearch');
@@ -1122,7 +1125,28 @@ RESEARCH_V2_SCRIPT = r"""
     if(globalEmpty) globalEmpty.classList.toggle('is-visible', totalVisible === 0);
   }
 
+  function syncFilterButtons() {
+    const signalFocused = state.signal !== 'all';
+    if(signalGroup) signalGroup.classList.toggle('has-selection', signalFocused);
+    signalBtns.forEach(btn => {
+      btn.classList.toggle('is-muted', signalFocused && btn.dataset.filter !== state.signal);
+    });
+
+    const marketFocused = state.market !== 'all';
+    if(marketGroup) marketGroup.classList.toggle('has-selection', marketFocused);
+    marketBtns.forEach(btn => {
+      btn.classList.toggle('is-muted', marketFocused && btn.dataset.market !== state.market);
+    });
+
+    const sectorFocused = state.sector !== 'all';
+    if(sectorGroup) sectorGroup.classList.toggle('has-selection', sectorFocused);
+    sectorChips.forEach(btn => {
+      btn.classList.toggle('is-muted', sectorFocused && btn.dataset.sector !== state.sector);
+    });
+  }
+
   function applyViewState() {
+    syncFilterButtons();
     syncPanels();
   }
 
@@ -1188,8 +1212,8 @@ RESEARCH_V2_SCRIPT = r"""
       const dir = isAsc ? -1 : 1;
 
       tableRows.sort((a, b) => {
-        let va = a.children[col]?.textContent.trim() || '';
-        let vb = b.children[col]?.textContent.trim() || '';
+        let va = a.children[col]?.dataset.sort || a.children[col]?.textContent.trim() || '';
+        let vb = b.children[col]?.dataset.sort || b.children[col]?.textContent.trim() || '';
         const na = parseFloat(va.replace(/[^0-9.\-]/g, ''));
         const nb = parseFloat(vb.replace(/[^0-9.\-]/g, ''));
         if(!isNaN(na) && !isNaN(nb)) return (na - nb) * dir;
@@ -1374,6 +1398,745 @@ body.research-v2.profile-field-v2.theme-light::after{display:none}
 .research-v2.theme-light .market-read h2,
 .research-v2.theme-light .eyebrow,
 .research-v2.theme-light .section-title::before{filter:none}
+
+/* ===== V3 OFFICIAL LAYOUT ===== */
+body.research-v2.profile-field-v3{
+  --rm-bg:#040507;
+  --rm-bg-soft:#07090d;
+  --rm-surface:#0a0d12;
+  --rm-surface-2:#0e1219;
+  --rm-surface-3:#131824;
+  --rm-line:#1a2130;
+  --rm-line-soft:rgba(148,170,200,.10);
+  --rm-text:#e8edf5;
+  --rm-muted:#94a2b8;
+  --rm-dim:#5d6b80;
+  --rm-green:#2ee6a6;
+  --rm-red:#ff6472;
+  --rm-blue:#7aa2ff;
+  --rm-cyan:#26d0e8;
+  --rm-yellow:#f5c34b;
+  --rm-shadow:0 24px 70px rgba(0,0,0,.5);
+  --bg:var(--rm-bg);
+  --bg2:var(--rm-surface);
+  --card:var(--rm-surface-2);
+  --card2:var(--rm-surface-3);
+  --txt:var(--rm-text);
+  --muted:var(--rm-muted);
+  --dim:var(--rm-dim);
+  --line:var(--rm-line);
+  --green:var(--rm-green);
+  --red:var(--rm-red);
+  --blue:var(--rm-blue);
+  --teal:var(--rm-cyan);
+  --yellow:var(--rm-yellow);
+  --radius:14px;
+  --radius-sm:10px;
+  --radius-xs:7px;
+  --spectrum:linear-gradient(90deg,var(--rm-cyan),var(--rm-green) 32%,var(--rm-yellow) 66%,var(--rm-red));
+  position:relative;
+  isolation:isolate;
+  overflow-x:hidden;
+  background:
+    conic-gradient(from 218deg at 10% -14%,rgba(122,162,255,.24),transparent 22%,rgba(46,230,166,.12) 36%,transparent 58%),
+    conic-gradient(from 42deg at 94% 2%,rgba(255,100,114,.15),transparent 24%,rgba(38,208,232,.12) 46%,transparent 68%),
+    linear-gradient(132deg,rgba(122,162,255,.13),transparent 34rem),
+    linear-gradient(228deg,rgba(255,100,114,.09),transparent 38rem),
+    linear-gradient(180deg,#030506 0%,#071017 48%,#030506 100%);
+  background-attachment:fixed;
+  background-size:155% 155%,150% 150%,100% 100%,100% 100%,100% 100%;
+  animation:v3AmbientField 18s ease-in-out infinite alternate;
+}
+body.research-v2.profile-field-v3::before,
+body.research-v2.profile-field-v3::after{
+  content:"";
+  position:fixed;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+}
+body.research-v2.profile-field-v3::before{
+  background:
+    linear-gradient(rgba(148,170,200,.052) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(148,170,200,.044) 1px,transparent 1px),
+    radial-gradient(circle,rgba(122,162,255,.28) 0 1px,transparent 1.45px),
+    radial-gradient(circle,rgba(46,230,166,.18) 0 .9px,transparent 1.3px);
+  background-size:72px 72px,72px 72px,36px 36px,108px 108px;
+  -webkit-mask-image:linear-gradient(180deg,rgba(0,0,0,.74),rgba(0,0,0,.48) 56%,transparent 94%);
+          mask-image:linear-gradient(180deg,rgba(0,0,0,.74),rgba(0,0,0,.48) 56%,transparent 94%);
+  mix-blend-mode:screen;
+  opacity:.56;
+  animation:v3DataGrid 16s linear infinite;
+}
+body.research-v2.profile-field-v3::after{
+  background:
+    repeating-linear-gradient(116deg,transparent 0 4.6rem,rgba(122,162,255,.12) 4.6rem 4.68rem,transparent 4.68rem 9.2rem),
+    repeating-linear-gradient(64deg,transparent 0 6.4rem,rgba(46,230,166,.08) 6.4rem 6.48rem,transparent 6.48rem 12rem),
+    linear-gradient(180deg,transparent 0%,rgba(3,5,6,.22) 72%,rgba(3,5,6,.62) 100%);
+  -webkit-mask-image:linear-gradient(180deg,rgba(0,0,0,.62),rgba(0,0,0,.34) 52%,transparent 92%);
+          mask-image:linear-gradient(180deg,rgba(0,0,0,.62),rgba(0,0,0,.34) 52%,transparent 92%);
+  mix-blend-mode:screen;
+  opacity:.48;
+  animation:v3DataStream 12s ease-in-out infinite alternate;
+}
+.research-v2.profile-field-v3 .topbar,
+.research-v2.profile-field-v3 .v2nav,
+.research-v2.profile-field-v3 .executive-board,
+.research-v2.profile-field-v3 .kpi-strip,
+.research-v2.profile-field-v3 .desk-highlights,
+.research-v2.profile-field-v3 .main,
+.research-v2.profile-field-v3 .footer{
+  position:relative;
+  z-index:1;
+}
+.research-v2.profile-field-v3 .topbar{
+  z-index:120;
+  background:rgba(5,7,10,.92);
+  border-bottom-color:rgba(125,177,255,.18);
+}
+.research-v2.profile-field-v3 .topbar.scrolled{
+  background:rgba(5,7,10,.96);
+  box-shadow:0 12px 34px rgba(0,0,0,.45);
+}
+.research-v2.profile-field-v3 .brand-dot{
+  width:9px;
+  height:9px;
+  border-radius:50%;
+  flex:0 0 auto;
+  background:var(--rm-cyan);
+  box-shadow:0 0 0 3px rgba(38,208,232,.16),0 0 14px rgba(38,208,232,.55);
+  animation:pulseDot 2.6s var(--ease,cubic-bezier(.22,.61,.36,1)) infinite;
+}
+.research-v2.profile-field-v3 .brand-dot::after{
+  content:none;
+  display:none;
+}
+@keyframes pulseDot{
+  0%,100%{box-shadow:0 0 0 3px rgba(38,208,232,.16),0 0 14px rgba(38,208,232,.55)}
+  50%{box-shadow:0 0 0 5px rgba(38,208,232,.07),0 0 5px rgba(38,208,232,.25)}
+}
+.research-v2.profile-field-v3 .topbar-brand{
+  min-width:auto;
+  gap:11px;
+}
+.research-v2.profile-field-v3 .v2nav{
+  position:relative;
+  top:auto;
+  z-index:110;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:10px clamp(16px,3vw,40px);
+  overflow-x:auto;
+  background:rgba(15,23,33,.62);
+  border-bottom:1px solid rgba(148,170,200,.12);
+  backdrop-filter:blur(16px) saturate(1.25);
+  -webkit-backdrop-filter:blur(16px) saturate(1.25);
+  transition:box-shadow .25s ease,background .25s ease;
+}
+.research-v2.profile-field-v3 .v2nav.scrolled{
+  background:rgba(15,23,33,.76);
+  box-shadow:0 10px 26px rgba(0,0,0,.24);
+}
+.research-v2.profile-field-v3 .v2nav-link{
+  color:var(--rm-cyan);
+  text-decoration:none;
+  white-space:nowrap;
+  padding:6px 13px;
+  border:1px solid rgba(38,208,232,.24);
+  border-radius:8px;
+  background:rgba(38,208,232,.09);
+  font-family:var(--font);
+  font-size:.78rem;
+  font-weight:750;
+  line-height:1;
+  letter-spacing:0;
+  text-transform:none;
+  transition:color .2s ease,background .2s ease,border-color .2s ease;
+}
+.research-v2.profile-field-v3 .v2nav-link:hover{
+  color:var(--rm-text);
+  background:rgba(38,208,232,.14);
+  border-color:rgba(38,208,232,.34);
+}
+.research-v2.profile-field-v3 .v2nav-link.active{
+  color:var(--rm-cyan);
+  background:rgba(38,208,232,.12);
+  border-color:rgba(38,208,232,.32);
+  box-shadow:0 0 18px rgba(38,208,232,.08);
+}
+.research-v2.profile-field-v3 #overview,
+.research-v2.profile-field-v3 #onchain,
+.research-v2.profile-field-v3 #sectors,
+.research-v2.profile-field-v3 #matrix{
+  scroll-margin-top:calc(var(--chrome-h,120px) + 12px);
+}
+.research-v2.profile-field-v3 .executive-board,
+.research-v2.profile-field-v3 .kpi-strip,
+.research-v2.profile-field-v3 .desk-highlights,
+.research-v2.profile-field-v3 .main,
+.research-v2.profile-field-v3 .footer{
+  max-width:1500px;
+}
+.research-v2.profile-field-v3 .executive-board{
+  grid-template-columns:minmax(0,1.62fr) minmax(340px,420px);
+  gap:30px;
+  padding:42px clamp(22px,2.6vw,40px) 34px;
+}
+.research-v2.profile-field-v3 .kpi-strip,
+.research-v2.profile-field-v3 .desk-highlights,
+.research-v2.profile-field-v3 .main,
+.research-v2.profile-field-v3 .footer{
+  padding-left:clamp(22px,2.6vw,40px);
+  padding-right:clamp(22px,2.6vw,40px);
+}
+.research-v2.profile-field-v3 .kpi-strip{gap:16px}
+.research-v2.profile-field-v3 .desk-highlights{gap:18px;padding-top:24px}
+.research-v2.profile-field-v3 .main{padding-top:34px}
+.research-v2.profile-field-v3 .brief-copy{
+  min-height:0;
+  padding:0;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+}
+.research-v2.profile-field-v3 .brief-copy h1{
+  max-width:none;
+  margin:0 0 14px;
+  font-size:clamp(1.65rem,3.1vw,2.5rem);
+  line-height:1.14;
+  font-weight:900;
+  letter-spacing:-1.1px;
+  white-space:normal;
+  color:#fff;
+  background:linear-gradient(135deg,#fff 22%,#b9c7dd 78%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.research-v2.profile-field-v3 .brief-copy p{
+  max-width:56ch;
+  color:var(--rm-muted);
+  font-size:.92rem;
+}
+.research-v2.profile-field-v3 .eyebrow{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:16px;
+  color:var(--rm-cyan);
+  font-family:var(--mono);
+  font-size:.64rem;
+  font-weight:600;
+  letter-spacing:2.2px;
+  text-transform:uppercase;
+}
+.research-v2.profile-field-v3 .eyebrow::before{
+  content:"";
+  width:26px;
+  height:1px;
+  background:var(--rm-cyan);
+  opacity:.7;
+}
+.research-v2.profile-field-v3 .market-read,
+.research-v2.profile-field-v3 .kpi-cell,
+.research-v2.profile-field-v3 .highlight-card,
+.research-v2.profile-field-v3 .oc-card,
+.research-v2.profile-field-v3 .filter-strip,
+.research-v2.profile-field-v3 .table-wrap,
+.research-v2.profile-field-v3 .global-empty-state{
+  border-color:var(--rm-line);
+  background:var(--rm-surface);
+  box-shadow:none;
+  backdrop-filter:none;
+}
+.research-v2.profile-field-v3 .market-read{
+  height:auto;
+  padding:20px 22px;
+  border-radius:var(--radius);
+  background:linear-gradient(160deg,var(--rm-surface) 0%,var(--rm-surface-2) 100%);
+  box-shadow:0 18px 50px rgba(0,0,0,.35);
+  position:relative;
+  overflow:hidden;
+}
+.research-v2.profile-field-v3 .market-read::before{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  top:0;
+  height:2px;
+  background:var(--spectrum);
+  opacity:.55;
+}
+.research-v2.profile-field-v3 .market-read h2{
+  margin:0 0 15px;
+  color:var(--rm-dim);
+  font-family:var(--mono);
+  font-size:.64rem;
+  font-weight:700;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  filter:none;
+}
+.research-v2.profile-field-v3 .market-read .mix-row{
+  display:flex;
+  grid-template-columns:none;
+  align-items:center;
+  gap:12px;
+  min-height:0;
+  padding:6px 0;
+  color:inherit;
+  font-size:inherit;
+}
+.research-v2.profile-field-v3 .market-read .mix-row+.mix-row{
+  border-top:1px solid var(--rm-line-soft);
+}
+.research-v2.profile-field-v3 .market-read .mix-row .signal-badge{
+  flex:0 0 92px;
+  min-width:0;
+  justify-content:center;
+  justify-self:auto;
+  text-align:center;
+}
+.research-v2.profile-field-v3 .market-read .mix-row .mix-bar{
+  flex:1;
+  height:6px;
+  border-radius:4px;
+  background:var(--rm-surface-3);
+}
+.research-v2.profile-field-v3 .market-read .mix-row strong{
+  flex:0 0 34px;
+  color:var(--rm-text);
+  font-family:var(--mono);
+  font-size:.88rem;
+  font-weight:700;
+  text-align:right;
+}
+.research-v2.profile-field-v3 .kpi-cell{
+  position:relative;
+  overflow:hidden;
+  border-radius:var(--radius-sm);
+  background:var(--rm-surface);
+  box-shadow:none;
+  transition:transform .25s var(--ease),border-color .25s ease,box-shadow .25s ease,background .25s ease;
+}
+.research-v2.profile-field-v3 .kpi-cell:hover{
+  transform:translateY(-3px);
+  border-color:#243048;
+  background:var(--rm-surface-2);
+  box-shadow:0 14px 34px rgba(0,0,0,.40);
+}
+.research-v2.profile-field-v3 .highlight-card{
+  position:relative;
+  overflow:hidden;
+  border-radius:var(--radius);
+  background:var(--rm-surface);
+  box-shadow:none;
+  transition:transform .25s var(--ease),border-color .25s ease,box-shadow .25s ease,background .25s ease;
+}
+.research-v2.profile-field-v3 .highlight-card:hover{
+  transform:translateY(-2px);
+  border-color:#243048;
+  box-shadow:0 18px 44px rgba(0,0,0,.42);
+}
+.research-v2.profile-field-v3 .highlight-card::before{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  top:0;
+  height:2px;
+}
+.research-v2.profile-field-v3 .highlight-card.opportunities::before{
+  background:linear-gradient(90deg,var(--rm-green),transparent 80%);
+}
+.research-v2.profile-field-v3 .highlight-card.risks::before{
+  background:linear-gradient(90deg,var(--rm-red),transparent 80%);
+}
+.research-v2.profile-field-v3 .oc-card{
+  position:relative;
+  overflow:hidden;
+  background:linear-gradient(165deg,var(--rm-surface) 0%,var(--rm-surface-2) 100%);
+  box-shadow:none;
+  transition:transform .28s var(--ease),border-color .28s ease,box-shadow .28s ease;
+}
+.research-v2.profile-field-v3 .oc-card::before{
+  content:"";
+  position:absolute;
+  top:-60px;
+  right:-60px;
+  width:180px;
+  height:180px;
+  border-radius:50%;
+  background:radial-gradient(closest-side,rgba(38,208,232,.09),transparent);
+  pointer-events:none;
+}
+.research-v2.profile-field-v3 .oc-card:hover{
+  transform:translateY(-3px);
+  border-color:#243048;
+  box-shadow:0 18px 48px rgba(0,0,0,.45);
+}
+.research-v2.profile-field-v3 .filter-strip{
+  position:relative;
+  top:auto;
+  z-index:auto;
+  background:var(--rm-surface);
+  box-shadow:none;
+}
+.research-v2.profile-field-v3 .t-assets{
+  width:100%;
+  min-width:1040px;
+  table-layout:fixed;
+}
+.research-v2.profile-field-v3 .t-assets th,
+.research-v2.profile-field-v3 .t-assets td{
+  box-sizing:border-box;
+}
+.research-v2.profile-field-v3 .t-assets th:nth-child(1),
+.research-v2.profile-field-v3 .t-assets td:nth-child(1){width:86px}
+.research-v2.profile-field-v3 .t-assets th:nth-child(3),
+.research-v2.profile-field-v3 .t-assets td:nth-child(3){width:122px}
+.research-v2.profile-field-v3 .t-assets th:nth-child(4),
+.research-v2.profile-field-v3 .t-assets td:nth-child(4),
+.research-v2.profile-field-v3 .t-assets th:nth-child(5),
+.research-v2.profile-field-v3 .t-assets td:nth-child(5){width:132px}
+.research-v2.profile-field-v3 .t-assets th:nth-child(6),
+.research-v2.profile-field-v3 .t-assets td:nth-child(6){width:106px}
+.research-v2.profile-field-v3 .t-assets th:nth-child(7),
+.research-v2.profile-field-v3 .t-assets td:nth-child(7){width:116px}
+.research-v2.profile-field-v3 .t-assets th:nth-child(8),
+.research-v2.profile-field-v3 .t-assets td:nth-child(8){width:128px}
+.research-v2.profile-field-v3 .t-assets th:nth-child(9),
+.research-v2.profile-field-v3 .t-assets td:nth-child(9){width:138px}
+.research-v2.profile-field-v3 .t-assets th:nth-child(3),
+.research-v2.profile-field-v3 .col-price{
+  text-align:right;
+}
+.research-v2.profile-field-v3 .t-assets th:nth-child(4),
+.research-v2.profile-field-v3 .t-assets th:nth-child(5),
+.research-v2.profile-field-v3 .t-assets th:nth-child(6),
+.research-v2.profile-field-v3 .col-rsi,
+.research-v2.profile-field-v3 .col-dd{
+  text-align:right;
+}
+.research-v2.profile-field-v3 .t-assets th:nth-child(7),
+.research-v2.profile-field-v3 .t-assets th:nth-child(8),
+.research-v2.profile-field-v3 .t-assets th:nth-child(9),
+.research-v2.profile-field-v3 .col-chart,
+.research-v2.profile-field-v3 .col-sig,
+.research-v2.profile-field-v3 .col-vol{
+  text-align:center;
+}
+.research-v2.profile-field-v3 .col-rsi .rsi-meter,
+.research-v2.profile-field-v3 .col-dd .dd-pill{
+  margin-left:auto;
+  margin-right:0;
+}
+.research-v2.profile-field-v3 .col-chart .dd-ico,
+.research-v2.profile-field-v3 .col-sig .signal-badge,
+.research-v2.profile-field-v3 .col-vol .vol-badge{
+  margin-left:auto;
+  margin-right:auto;
+}
+.research-v2.profile-field-v3 .name-cell{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) max-content;
+  align-items:center;
+  column-gap:10px;
+  min-width:0;
+}
+.research-v2.profile-field-v3 .name-cell .cn-txt{
+  display:block;
+  min-width:0;
+}
+.research-v2.profile-field-v3 .name-cell .sec-tag{
+  justify-self:start;
+  margin-left:0;
+}
+.research-v2.profile-field-v3 .fbtn{
+  --btn-accent:var(--rm-cyan);
+  color:var(--btn-accent);
+  border-color:color-mix(in srgb,var(--btn-accent) 30%,transparent);
+  background:color-mix(in srgb,var(--btn-accent) 7%,transparent);
+  transition:opacity .18s ease,filter .18s ease,background .18s ease,border-color .18s ease,color .18s ease;
+}
+.research-v2.profile-field-v3 .fbtn:hover{
+  color:var(--rm-text);
+  border-color:color-mix(in srgb,var(--btn-accent) 50%,transparent);
+  background:color-mix(in srgb,var(--btn-accent) 12%,transparent);
+}
+.research-v2.profile-field-v3 .fbtn.active{
+  color:var(--btn-accent);
+  border-color:color-mix(in srgb,var(--btn-accent) 58%,transparent);
+  background:color-mix(in srgb,var(--btn-accent) 14%,transparent);
+  box-shadow:0 0 18px color-mix(in srgb,var(--btn-accent) 10%,transparent);
+}
+.research-v2.profile-field-v3 .filter-group.has-selection .fbtn.is-muted{
+  opacity:.34;
+  filter:saturate(.55);
+}
+.research-v2.profile-field-v3 .filter-group.has-selection .fbtn.is-muted:hover{
+  opacity:.72;
+  filter:saturate(.9);
+}
+.research-v2.profile-field-v3 .fbtn[data-filter="all"],
+.research-v2.profile-field-v3 .fbtn[data-market="all"]{--btn-accent:var(--rm-cyan)}
+.research-v2.profile-field-v3 .fbtn[data-filter="UltraBuy"],
+.research-v2.profile-field-v3 .fbtn[data-filter="Buy"]{--btn-accent:var(--rm-green)}
+.research-v2.profile-field-v3 .fbtn[data-filter="Neutral"]{--btn-accent:var(--rm-blue)}
+.research-v2.profile-field-v3 .fbtn[data-filter="Sell"]{--btn-accent:var(--rm-red)}
+.research-v2.profile-field-v3 .fbtn[data-market="indices"]{--btn-accent:#7aa2ff}
+.research-v2.profile-field-v3 .fbtn[data-market="cripto"]{--btn-accent:#f5c34b}
+.research-v2.profile-field-v3 .fbtn[data-market="eua"]{--btn-accent:#26d0e8}
+.research-v2.profile-field-v3 .fbtn[data-market="etf"]{--btn-accent:#a78bfa}
+.research-v2.profile-field-v3 .fbtn[data-market="commodities"]{--btn-accent:#ff8a5c}
+.research-v2.profile-field-v3 .fbtn[data-market="brasil"]{--btn-accent:#2ee6a6}
+.research-v2.profile-field-v3 .fbtn[data-market="moeda"]{--btn-accent:#e879a0}
+.research-v2.profile-field-v3 .fbtn.sec-chip{
+  --btn-accent:var(--sc,var(--rm-cyan));
+}
+.research-v2.profile-field-v3 .vol-high{
+  color:var(--rm-green);
+  background:rgba(46,230,166,.11);
+  border-color:rgba(46,230,166,.36);
+}
+.research-v2.profile-field-v3 .vol-low{
+  color:var(--rm-red);
+  background:rgba(255,100,114,.10);
+  border-color:rgba(255,100,114,.34);
+}
+.research-v2.profile-field-v3 .oc-grid{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:18px;
+}
+.research-v2.profile-field-v3 .oc-card{min-width:0}
+.research-v2.profile-field-v3 .fg-card .oc-body{gap:18px}
+.research-v2.profile-field-v3 .fg-card .oc-gauge{flex:0 0 136px}
+.research-v2.profile-field-v3 .fg-card .oc-metrics{min-width:0;gap:4px}
+.research-v2.profile-field-v3 .fg-card .oc-row{gap:14px}
+.research-v2.profile-field-v3 .fg-card .oc-k{flex:0 0 auto}
+.research-v2.profile-field-v3 .fg-card .oc-v{
+  min-width:0;
+  text-align:right;
+  overflow-wrap:anywhere;
+}
+.research-v2.profile-field-v3 .fg-card .oc-footer{
+  justify-content:space-between;
+  gap:12px;
+}
+.research-v2.profile-field-v3 .fg-card .oc-action-val{
+  text-align:right;
+  overflow-wrap:anywhere;
+}
+.research-v2.profile-field-v3 .sig-neutral{
+  color:#8eb6ff;
+  background:rgba(111,168,255,.16);
+  border-color:rgba(111,168,255,.46);
+  box-shadow:0 0 12px rgba(111,168,255,.12);
+}
+.research-v2.profile-field-v3 .oc-risk-pill{
+  font-family:var(--mono);
+  color:var(--rm-muted);
+  border:1px solid var(--rm-line-soft);
+  background:rgba(148,170,200,.07);
+}
+.research-v2.profile-field-v3 .oc-risk-pill.risk-low{
+  color:var(--rm-green);
+  border-color:color-mix(in srgb,var(--rm-green) 40%,transparent);
+  background:color-mix(in srgb,var(--rm-green) 10%,transparent);
+}
+.research-v2.profile-field-v3 .oc-risk-pill.risk-medium{
+  color:var(--rm-yellow);
+  border-color:color-mix(in srgb,var(--rm-yellow) 44%,transparent);
+  background:color-mix(in srgb,var(--rm-yellow) 10%,transparent);
+  box-shadow:0 0 16px color-mix(in srgb,var(--rm-yellow) 13%,transparent);
+}
+.research-v2.profile-field-v3 .oc-risk-pill.risk-medium-high{
+  color:#ffb86c;
+  border-color:rgba(255,184,108,.44);
+  background:rgba(255,184,108,.10);
+  box-shadow:0 0 16px rgba(255,184,108,.12);
+}
+.research-v2.profile-field-v3 .oc-risk-pill.risk-high{
+  color:var(--rm-red);
+  border-color:color-mix(in srgb,var(--rm-red) 42%,transparent);
+  background:color-mix(in srgb,var(--rm-red) 10%,transparent);
+}
+.research-v2.profile-field-v3 .highlight-row{
+  position:relative;
+  gap:12px;
+  transition:background .2s ease,transform .2s var(--ease);
+}
+.research-v2.profile-field-v3 .highlight-row::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:0;
+  bottom:0;
+  width:2px;
+  background:transparent;
+  transition:background .2s ease;
+}
+.research-v2.profile-field-v3 .highlight-row:hover{
+  background:var(--rm-surface-2);
+}
+.research-v2.profile-field-v3 .opportunities .highlight-row:hover::before{
+  background:var(--rm-green);
+}
+.research-v2.profile-field-v3 .risks .highlight-row:hover::before{
+  background:var(--rm-red);
+}
+.research-v2.profile-field-v3 .highlight-rank{
+  flex:0 0 30px;
+  width:30px;
+  height:24px;
+  display:inline-grid;
+  place-items:center;
+  -webkit-text-stroke:0;
+  border:1px solid var(--rm-line-soft);
+  border-radius:999px;
+  background:rgba(148,170,200,.055);
+  font-family:var(--mono);
+  font-size:.62rem;
+  font-weight:850;
+  line-height:1;
+  letter-spacing:0;
+  opacity:.9;
+}
+.research-v2.profile-field-v3 .opportunities .highlight-rank{
+  color:var(--rm-green);
+  border-color:color-mix(in srgb,var(--rm-green) 28%,transparent);
+  background:color-mix(in srgb,var(--rm-green) 8%,transparent);
+}
+.research-v2.profile-field-v3 .risks .highlight-rank{
+  color:var(--rm-red);
+  border-color:color-mix(in srgb,var(--rm-red) 28%,transparent);
+  background:color-mix(in srgb,var(--rm-red) 8%,transparent);
+}
+.research-v2.profile-field-v3 .highlight-chip.chip-market{
+  color:var(--rm-cyan);
+  border-color:rgba(67,215,232,.28);
+  background:rgba(67,215,232,.08);
+}
+.research-v2.profile-field-v3 .highlight-chip.rz-green{color:var(--rm-green);border-color:color-mix(in srgb,var(--rm-green) 30%,transparent);background:color-mix(in srgb,var(--rm-green) 9%,transparent)}
+.research-v2.profile-field-v3 .highlight-chip.rz-teal{color:var(--rm-cyan);border-color:color-mix(in srgb,var(--rm-cyan) 30%,transparent);background:color-mix(in srgb,var(--rm-cyan) 9%,transparent)}
+.research-v2.profile-field-v3 .highlight-chip.rz-blue{color:var(--rm-blue);border-color:color-mix(in srgb,var(--rm-blue) 30%,transparent);background:color-mix(in srgb,var(--rm-blue) 9%,transparent)}
+.research-v2.profile-field-v3 .highlight-chip.rz-yellow{color:var(--rm-yellow);border-color:color-mix(in srgb,var(--rm-yellow) 30%,transparent);background:color-mix(in srgb,var(--rm-yellow) 9%,transparent)}
+.research-v2.profile-field-v3 .highlight-chip.rz-red{color:var(--rm-red);border-color:color-mix(in srgb,var(--rm-red) 30%,transparent);background:color-mix(in srgb,var(--rm-red) 9%,transparent)}
+.research-v2.profile-field-v3 .highlight-chip.rz-na{color:var(--rm-dim);border-color:var(--rm-line-soft);background:rgba(148,170,200,.055)}
+.research-v2.profile-field-v3 .highlight-chip.dd-flat{color:var(--rm-cyan);border-color:rgba(67,215,232,.28);background:rgba(67,215,232,.08)}
+.research-v2.profile-field-v3 .highlight-chip.dd-mild{color:var(--rm-yellow);border-color:rgba(241,188,75,.32);background:rgba(241,188,75,.09)}
+.research-v2.profile-field-v3 .highlight-chip.dd-deep,
+.research-v2.profile-field-v3 .highlight-chip.dd-stress{color:var(--rm-red);border-color:rgba(240,111,104,.32);background:rgba(240,111,104,.09)}
+.research-v2.profile-field-v3 .sector-grid{
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:16px;
+}
+.research-v2.profile-field-v3 .sec-card{padding:16px 18px}
+.research-v2.profile-field-v3 .sc-name{font-size:.96rem}
+.research-v2.profile-field-v3 .sc-n{font-size:.82rem}
+.research-v2.profile-field-v3 .sc-stats{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:7px 10px;
+  align-items:center;
+  margin-bottom:10px;
+  font-size:.78rem;
+}
+.research-v2.profile-field-v3 .sc-stats b{font-size:.95rem}
+.research-v2.profile-field-v3 .rz-na{color:var(--rm-dim)}
+.research-v2.profile-field-v3 .sc-stats span{min-width:0;white-space:nowrap}
+.research-v2.profile-field-v3 .sc-flow{
+  grid-column:1/-1;
+  padding-top:2px;
+  color:var(--rm-dim);
+}
+body.research-v2.profile-field-v3.theme-light{
+  background:
+    conic-gradient(from 218deg at 10% -14%,rgba(13,127,158,.12),transparent 24%,rgba(10,143,99,.08) 38%,transparent 60%),
+    conic-gradient(from 42deg at 94% 2%,rgba(211,58,70,.08),transparent 25%,rgba(13,127,158,.08) 48%,transparent 68%),
+    linear-gradient(180deg,#f5f7fb 0%,#eef2f7 52%,#e8edf4 100%);
+}
+body.research-v2.profile-field-v3.theme-light::before{
+  background:
+    linear-gradient(rgba(30,45,70,.05) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(30,45,70,.04) 1px,transparent 1px),
+    radial-gradient(circle,rgba(13,127,158,.22) 0 1px,transparent 1.45px);
+  background-size:72px 72px,72px 72px,42px 42px;
+  mix-blend-mode:multiply;
+  opacity:.34;
+}
+body.research-v2.profile-field-v3.theme-light::after{
+  opacity:.16;
+  mix-blend-mode:multiply;
+}
+.research-v2.profile-field-v3.theme-light .topbar{
+  background:rgba(255,255,255,.9);
+}
+.research-v2.profile-field-v3.theme-light .v2nav{
+  background:rgba(255,255,255,.72);
+  border-bottom-color:var(--rm-line);
+}
+.research-v2.profile-field-v3.theme-light .v2nav.scrolled{
+  background:rgba(255,255,255,.84);
+  box-shadow:0 10px 24px rgba(15,30,45,.1);
+}
+.research-v2.profile-field-v3.theme-light .v2nav-link.active{
+  background:rgba(14,116,144,.1);
+  border-color:rgba(14,116,144,.3);
+}
+.research-v2.profile-field-v3.theme-light .sig-neutral{
+  color:var(--rm-blue);
+  background:rgba(29,78,216,.1);
+  border-color:rgba(29,78,216,.28);
+  box-shadow:none;
+}
+@keyframes v3AmbientField{
+  from{background-position:0 0,100% 0,0 0,0 0,0 0}
+  to{background-position:16% 8%,84% 9%,0 0,0 0,0 0}
+}
+@keyframes v3DataGrid{
+  to{background-position:72px 72px,72px 72px,36px 36px,-108px 108px}
+}
+@keyframes v3DataStream{
+  from{background-position:0 0,0 0,0 0;opacity:.42}
+  to{background-position:130px -84px,-108px 96px,0 0;opacity:.58}
+}
+@media (max-width:1320px){
+  .research-v2.profile-field-v3 .sector-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media (max-width:1180px){
+  .research-v2.profile-field-v3 .executive-board{grid-template-columns:1fr}
+  .research-v2.profile-field-v3 .oc-grid{grid-template-columns:1fr}
+  .research-v2.profile-field-v3 .fg-card .oc-gauge{flex-basis:150px}
+}
+@media (max-width:1000px){
+  .research-v2.profile-field-v3 .sector-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:760px){
+  .research-v2.profile-field-v3 .executive-board,
+  .research-v2.profile-field-v3 .kpi-strip,
+  .research-v2.profile-field-v3 .desk-highlights,
+  .research-v2.profile-field-v3 .main,
+  .research-v2.profile-field-v3 .footer{
+    padding-left:16px;
+    padding-right:16px;
+  }
+  .research-v2.profile-field-v3 .v2nav{padding-left:16px;padding-right:16px}
+  .research-v2.profile-field-v3 .executive-board{padding-top:30px}
+  .research-v2.profile-field-v3 .sector-grid{grid-template-columns:1fr}
+  .research-v2.profile-field-v3 .sc-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .research-v2.profile-field-v3 .highlight-rank{flex-basis:28px;width:28px}
+}
+@media (prefers-reduced-motion:reduce){
+  body.research-v2.profile-field-v3,
+  body.research-v2.profile-field-v3::before,
+  body.research-v2.profile-field-v3::after{
+    animation:none!important;
+  }
+}
 """
 
 
@@ -1392,15 +2155,54 @@ RESEARCH_V3_SCRIPT = r"""
     document.body.classList.toggle('theme-light', t === 'light');
     themeBtn.textContent = t === 'light' ? '☾' : '☀';
   }
+  const themeKey = 'fm-theme-official';
   let theme = 'dark';
-  try { theme = localStorage.getItem('fm-theme') || 'dark'; } catch(e){}
+  try { theme = localStorage.getItem(themeKey) || 'dark'; } catch(e){}
   applyTheme(theme);
   themeBtn.addEventListener('click', function(){
     theme = theme === 'light' ? 'dark' : 'light';
-    try { localStorage.setItem('fm-theme', theme); } catch(e){}
+    try { localStorage.setItem(themeKey, theme); } catch(e){}
     applyTheme(theme);
   });
   if(metaBox) metaBox.appendChild(themeBtn);
+
+  /* ---- topbar / quick-nav elevation and scrollspy ---- */
+  const topbar = document.querySelector('.topbar');
+  const nav = document.querySelector('.v2nav');
+  function setChromeVars(){
+    const topbarH = topbar ? topbar.offsetHeight : 72;
+    const navH = nav ? nav.offsetHeight : 0;
+    document.documentElement.style.setProperty('--topbar-h', topbarH + 'px');
+    document.documentElement.style.setProperty('--chrome-h', (topbarH + navH) + 'px');
+  }
+  function onChromeScroll(){
+    const scrolled = window.scrollY > 8;
+    if(topbar) topbar.classList.toggle('scrolled', scrolled);
+    if(nav) nav.classList.toggle('scrolled', scrolled);
+  }
+  window.addEventListener('resize', setChromeVars, {passive:true});
+  window.addEventListener('scroll', onChromeScroll, {passive:true});
+  setChromeVars();
+  onChromeScroll();
+
+  const navLinks = Array.prototype.slice.call(document.querySelectorAll('.v2nav-link'));
+  const navTargets = navLinks
+    .map(function(link){ return document.querySelector(link.getAttribute('href')); })
+    .filter(Boolean);
+  function targetTop(el){ return el.getBoundingClientRect().top + window.scrollY; }
+  function updateNavSpy(){
+    if(!navTargets.length) return;
+    const marker = window.scrollY + 170;
+    let current = navTargets[0];
+    navTargets.forEach(function(target){
+      if(targetTop(target) <= marker) current = target;
+    });
+    navLinks.forEach(function(link){
+      link.classList.toggle('active', link.getAttribute('href') === '#' + current.id);
+    });
+  }
+  window.addEventListener('scroll', updateNavSpy, {passive:true});
+  updateNavSpy();
 
   /* ---- Expandable asset rows ---- */
   function closeDetail(row){
@@ -1476,7 +2278,8 @@ DRAWDOWN_CSS = """
 .research-v2 .vol-low{color:var(--rm-muted);background:rgba(148,171,182,.08);border-color:var(--rm-line)}
 .research-v2 .vol-na{color:var(--rm-dim);opacity:.5}
 .research-v2 .dd-ico{width:26px;height:26px;display:inline-grid;place-items:center;cursor:pointer;
-  border:1px solid var(--rm-line);border-radius:7px;background:transparent;color:var(--rm-dim);padding:0;transition:.16s}
+  border:1px solid color-mix(in srgb,var(--rm-red) 28%,var(--rm-line));border-radius:7px;
+  background:color-mix(in srgb,var(--rm-red) 5%,transparent);color:var(--rm-red);padding:0;transition:.16s}
 .research-v2 .dd-ico:hover{color:#fff;border-color:var(--rm-red);
   background:linear-gradient(150deg,var(--rm-red),var(--rm-yellow));transform:translateY(-1px)}
 .research-v2.theme-light .dd-ico:hover{color:#fff}
@@ -1491,9 +2294,10 @@ DRAWDOWN_CSS = """
   background:linear-gradient(90deg,var(--rm-red),var(--rm-yellow))}
 .dd-head{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:18px 22px 10px}
 .dd-title{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;min-width:0}
-.dd-title .nm{font-size:1.15rem;font-weight:800;letter-spacing:-.01em}
+.dd-title .nm{font-size:1.15rem;font-weight:800;letter-spacing:-.01em;color:#fff}
 .dd-title .tk{font-size:.7rem;font-weight:700;color:var(--rm-muted);border:1px solid var(--rm-line);border-radius:6px;padding:3px 7px}
 .dd-title .src{font-size:.7rem;color:var(--rm-dim)}
+.research-v2.theme-light .dd-title .nm{color:var(--rm-text)}
 .dd-x{flex:none;cursor:pointer;width:32px;height:32px;border-radius:8px;border:1px solid var(--rm-line);
   background:transparent;color:var(--rm-muted);font-size:1.2rem;line-height:1;display:grid;place-items:center;transition:.15s}
 .dd-x:hover{color:var(--rm-text);border-color:var(--rm-red)}
@@ -1931,6 +2735,19 @@ def _zone_class(zone: str) -> str:
     return "zone-neutral"
 
 
+def _risk_class(risk: str) -> str:
+    r = (risk or "").lower().replace(" ", "")
+    if "medium/high" in r or ("medium" in r and "high" in r):
+        return "risk-medium-high"
+    if "high" in r:
+        return "risk-high"
+    if "medium" in r:
+        return "risk-medium"
+    if "low" in r:
+        return "risk-low"
+    return "risk-neutral"
+
+
 def _format_price(val: float) -> str:
     if val >= 1000:
         return f"{val:,.0f}"
@@ -2029,6 +2846,7 @@ def _build_onchain_card(coin: str, data: Dict) -> str:
         </div>'''
 
     zone_cls = _zone_class(data["zone"])
+    risk_cls = _risk_class(data["risk"])
     gauge = _mvrv_gauge_svg(data["mvrv"], coin)
     pct_sign = "+" if data["pct_above"] >= 0 else ""
     pct_cls = "pos" if data["pct_above"] >= 0 else "neg"
@@ -2052,7 +2870,7 @@ def _build_onchain_card(coin: str, data: Dict) -> str:
       <div class="oc-footer">
         <span class="oc-action-label">Action:</span>
         <span class="oc-action-val">{escape(data["action"])}</span>
-        <span class="oc-risk-pill">Risk: {escape(data["risk"])}</span>
+        <span class="oc-risk-pill {risk_cls}">Risk: {escape(data["risk"])}</span>
       </div>
     </div>'''
 
@@ -2132,7 +2950,7 @@ def _build_fng_card(data) -> str:
     """Fear & Greed card. Falls back to '-' placeholders when unavailable."""
     if not data:
         return f'''
-    <div class="oc-card">
+    <div class="oc-card fg-card">
       <div class="oc-card-head">
         <span class="oc-icon">&#9878;</span>
         <span class="oc-title">Fear &amp; Greed</span>
@@ -2167,7 +2985,7 @@ def _build_fng_card(data) -> str:
         trend_html = '<span class="oc-v">&#8594; flat vs last week</span>'
 
     return f'''
-    <div class="oc-card">
+    <div class="oc-card fg-card">
       <div class="oc-card-head">
         <span class="oc-icon">&#9878;</span>
         <span class="oc-title">Fear &amp; Greed</span>
@@ -2213,24 +3031,32 @@ def _risk_rank(row: pd.Series) -> tuple:
     )
 
 
-def _build_highlight_rows(df_ranked: pd.DataFrame) -> str:
+def _highlight_rsi_chip(label: str, value) -> str:
+    if value is None or pd.isna(value):
+        return f'<span class="highlight-chip chip-rsi rz-na">{label} n/a</span>'
+    v = int(value)
+    return f'<span class="highlight-chip chip-rsi {_rsi_zone_cls(v)}">{label} {v}</span>'
+
+
+def _build_highlight_rows(df_ranked: pd.DataFrame, rank_kind: str) -> str:
     rows_html = ""
     for index, (_, r) in enumerate(df_ranked.iterrows(), start=1):
         sig_cls = _signal_class(r["Signal"])
         sig_lbl = _signal_label(r["Signal"])
+        drawdown = float(r.get("Drawdown_Pct", 0.0))
         rows_html += f'''
-      <div class="highlight-row">
-        <div class="highlight-rank">{index:02d}</div>
+      <div class="highlight-row rank-{rank_kind}">
+        <div class="highlight-rank">{index}</div>
         <div class="highlight-main">
           <div class="highlight-title">
             <span class="tk-badge">{escape(str(r["Ticker"]))}</span>
             <span class="highlight-name">{escape(str(r["Name"]))}</span>
           </div>
           <div class="highlight-meta">
-            <span class="highlight-chip">{escape(_market_title(r.get("Setor", "")))}</span>
-            <span class="highlight-chip">RSI W {int(r["Weekly_RSI"])}</span>
-            <span class="highlight-chip">RSI M {"n/a" if pd.isna(r["Monthly_RSI"]) else int(r["Monthly_RSI"])}</span>
-            <span class="highlight-chip">DD {_format_percent(float(r.get("Drawdown_Pct", 0.0)))}</span>
+            <span class="highlight-chip chip-market">{escape(_market_title(r.get("Setor", "")))}</span>
+            {_highlight_rsi_chip("RSI W", r["Weekly_RSI"])}
+            {_highlight_rsi_chip("RSI M", r["Monthly_RSI"])}
+            <span class="highlight-chip chip-dd {_drawdown_class(drawdown)}">DD {_format_percent(drawdown)}</span>
           </div>
         </div>
         <div class="highlight-signal">
@@ -2256,7 +3082,7 @@ def _build_executive_rankings(df: pd.DataFrame) -> str:
       <h2>Top Opportunities</h2>
       <span>TOP 5</span>
     </div>
-    <div class="highlight-list">{_build_highlight_rows(opportunity)}
+    <div class="highlight-list">{_build_highlight_rows(opportunity, "opportunity")}
     </div>
   </article>
   <article class="highlight-card risks">
@@ -2264,7 +3090,7 @@ def _build_executive_rankings(df: pd.DataFrame) -> str:
       <h2>Top Risks</h2>
       <span>TOP 5</span>
     </div>
-    <div class="highlight-list">{_build_highlight_rows(risk)}
+    <div class="highlight-list">{_build_highlight_rows(risk, "risk")}
     </div>
   </article>
 </section>'''
@@ -2422,6 +3248,13 @@ def _build_sector_pulse(df: pd.DataFrame) -> tuple:
         neu = counts.get("Neutral", 0)
         sell = counts.get("Sell", 0)
         avg_rsi = int(round(sub["Weekly_RSI"].mean()))
+        monthly_values = sub["Monthly_RSI"].dropna()
+        avg_rsi_m = None if monthly_values.empty else int(round(monthly_values.mean()))
+        avg_rsi_m_html = (
+            '<b class="rz-na">n/a</b>'
+            if avg_rsi_m is None
+            else f'<b class="{_rsi_zone_cls(avg_rsi_m)}">{avg_rsi_m}</b>'
+        )
         best = sub.sort_values("Weekly_RSI").iloc[0]
         n_br = int((sub["Setor"] == "Brasil").sum())
         n_us = n - n_br
@@ -2440,7 +3273,8 @@ def _build_sector_pulse(df: pd.DataFrame) -> tuple:
           <div class="sc-bar">{seg}</div>
           <div class="sc-stats">
             <span><b class="{_rsi_zone_cls(avg_rsi)}">{avg_rsi}</b> avg RSI W</span>
-            <span><b>{ops}</b> buy · <b>{sell}</b> sell</span>
+            <span>{avg_rsi_m_html} avg RSI M</span>
+            <span class="sc-flow"><b>{ops}</b> buy · <b>{sell}</b> sell</span>
           </div>
           <div class="sc-foot">
             <span class="sc-mkt">{mkt.strip()}</span>
@@ -2449,11 +3283,11 @@ def _build_sector_pulse(df: pd.DataFrame) -> tuple:
         </div>'''
 
     pulse = f'''
-  <h2 class="section-title">Sector Pulse <span class="sp-hint">equities · click to filter</span></h2>
+  <h2 class="section-title" id="sectors">Sector Pulse <span class="sp-hint">equities · click to filter</span></h2>
   <div class="sector-grid">{cards}</div>'''
 
-    chips = ('<div class="filter-group"><label>Filter Sector</label>'
-             '<button class="fbtn sec-chip active" data-sector="all">All Sectors</button>')
+    chips = ('<div class="filter-group sector-filter"><label>Filter Sector</label>'
+             '<button class="fbtn sec-chip active" data-sector="all" style="--sc:var(--rm-cyan)">All Sectors</button>')
     for sec in order:
         icon, color = SECTOR_META.get(sec, ("📦", "#94a3b8"))
         chips += (f'<button class="fbtn sec-chip" data-sector="{escape(sec)}" style="--sc:{color}">'
@@ -2484,6 +3318,8 @@ def _build_sector_rows(df_sector: pd.DataFrame, market_key: str, dd_keys: set | 
             rsi_w = r["Weekly_RSI"]
             rsi_m = r["Monthly_RSI"]
             drawdown = float(r.get("Drawdown_Pct", 0.0))
+            vol_ratio = r.get("Vol_Ratio")
+            vol_sort = "-1" if vol_ratio is None or pd.isna(vol_ratio) else f"{float(vol_ratio):.6f}"
             dd_cls = _drawdown_class(drawdown)
             peak_date = _format_peak_date(r.get("Peak_Date"))
             peak_close = _format_price(float(r.get("Peak_Close", r["Weekly_Close"])))
@@ -2507,14 +3343,14 @@ def _build_sector_rows(df_sector: pd.DataFrame, market_key: str, dd_keys: set | 
             rows_html += f'''
             <tr class="asset-row" data-signal="{r['Signal']}" data-market="{escape(market_key)}"{sector_attr} data-ticker="{escape(str(r['Ticker']).lower())}" data-name="{escape(str(r['Name']).lower())}" data-peak-close="{escape(peak_close, quote=True)}" data-peak-date="{escape(peak_date, quote=True)}" data-dd="{escape(_format_percent(drawdown), quote=True)}" data-yahoo="{escape(yahoo_url, quote=True)}" data-tv="{escape(tv_url or '', quote=True)}">
               <td class="col-tk"><span class="tk-badge">{escape(str(r['Ticker']))}</span></td>
-              <td class="col-name">{name_inner}</td>
+              <td class="col-name"><div class="name-cell">{name_inner}</div></td>
               <td class="col-price">{_format_price(r['Weekly_Close'])}</td>
               <td class="col-rsi">{_rsi_meter(rsi_w)}</td>
               <td class="col-rsi">{_rsi_meter(rsi_m)}</td>
               <td class="col-dd"><span class="dd-pill {dd_cls}" title="{escape(peak_meta, quote=True)}">{_format_percent(drawdown)}</span></td>
               <td class="col-chart">{chart_cell}</td>
               <td class="col-sig"><span class="signal-badge {sig_cls}">{sig_lbl}</span></td>
-              <td class="col-vol">{_volume_badge(r.get("Vol_High"), r.get("Vol_Ratio"))}</td>
+              <td class="col-vol" data-sort="{vol_sort}">{_volume_badge(r.get("Vol_High"), vol_ratio)}</td>
             </tr>'''
     return rows_html
 
@@ -2656,7 +3492,7 @@ def generate_html(df: pd.DataFrame, onchain: Dict, deltas: dict | None = None,
                 <th class="th-sort th-r" data-col="5">DD %</th>
                 <th class="th-c">DD Chart</th>
                 <th>Signal</th>
-                <th class="th-c">Volume</th>
+                <th class="th-sort th-c" data-col="8">Volume</th>
               </tr>
             </thead>
             <tbody>{rows}
@@ -2853,7 +3689,7 @@ body{{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:
 {DRAWDOWN_CSS}
 </style>
 </head>
-<body class="research-v2 profile-field-v2">
+<body class="research-v2 profile-field-v3">
 
 <!-- TOPBAR -->
 <header class="topbar">
@@ -2871,8 +3707,16 @@ body{{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:
   </div>
 </header>
 
+<!-- QUICK NAV -->
+<nav class="v2nav" aria-label="Sections">
+  <a href="#overview" class="v2nav-link active">Overview</a>
+  <a href="#onchain" class="v2nav-link">On-Chain</a>
+  <a href="#sectors" class="v2nav-link">Sector Pulse</a>
+  <a href="#matrix" class="v2nav-link">RSI Matrix</a>
+</nav>
+
 <!-- EXECUTIVE BRIEF -->
-<section class="executive-board" aria-label="Executive summary">
+<section class="executive-board" id="overview" aria-label="Executive summary">
   <div class="brief-copy">
     <div class="eyebrow">Multi-asset research desk</div>
     <h1>Institutional dashboard for momentum, on-chain value, and risk zones.</h1>
@@ -2901,7 +3745,7 @@ body{{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:
 <div class="main">
 
   <!-- ON-CHAIN -->
-  <h2 class="section-title">On-Chain Valuation Desk</h2>
+  <h2 class="section-title" id="onchain">On-Chain Valuation Desk</h2>
   <div class="oc-grid">
     {btc_card}
     {eth_card}
@@ -2911,11 +3755,11 @@ body{{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:
   {sector_pulse_html}
 
   <!-- RSI MONITOR -->
-  <h2 class="section-title">RSI Opportunity Matrix</h2>
+  <h2 class="section-title" id="matrix">RSI Opportunity Matrix</h2>
 
   <!-- Filter -->
   <div class="filter-strip">
-    <div class="filter-group">
+    <div class="filter-group signal-filter">
       <label>Filter Signal</label>
       <button class="fbtn active" data-filter="all">All <span class="fc">{total}</span></button>
       <button class="fbtn" data-filter="UltraBuy">Ultra Buy <span class="fc">{ub}</span></button>
@@ -2923,7 +3767,7 @@ body{{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:
       <button class="fbtn" data-filter="Neutral">Neutral <span class="fc">{n}</span></button>
       <button class="fbtn" data-filter="Sell">Sell <span class="fc">{s}</span></button>
     </div>
-    <div class="filter-group">
+    <div class="filter-group market-filter">
       <label>Filter Market</label>
       {market_buttons}
     </div>
