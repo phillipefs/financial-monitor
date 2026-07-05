@@ -1041,9 +1041,9 @@ RESEARCH_V2_SCRIPT = r"""
   const globalEmpty = document.getElementById('globalEmpty');
 
   const state = {
-    signal: 'all',
-    market: 'all',
-    sector: 'all',
+    signals: new Set(),
+    markets: new Set(),
+    sectors: new Set(),
     query: ''
   };
 
@@ -1060,10 +1060,34 @@ RESEARCH_V2_SCRIPT = r"""
     return (value || '').toLowerCase().trim();
   }
 
+  function selectedMatches(selected, value) {
+    return selected.size === 0 || selected.has(value);
+  }
+
+  function toggleSelection(selected, value) {
+    if(value === 'all') {
+      selected.clear();
+      return;
+    }
+    if(selected.has(value)) selected.delete(value);
+    else selected.add(value);
+  }
+
+  function syncButtonGroup(group, buttons, selected, dataKey) {
+    const focused = selected.size > 0;
+    if(group) group.classList.toggle('has-selection', focused);
+    buttons.forEach(btn => {
+      const value = btn.dataset[dataKey];
+      const active = value === 'all' ? !focused : selected.has(value);
+      btn.classList.toggle('active', active);
+      btn.classList.toggle('is-muted', focused && !active);
+    });
+  }
+
   function rowMatches(row) {
-    const signalMatch = state.signal === 'all' || row.dataset.signal === state.signal;
-    const marketMatch = state.market === 'all' || row.dataset.market === state.market;
-    const sectorMatch = state.sector === 'all' || row.dataset.sector === state.sector;
+    const signalMatch = selectedMatches(state.signals, row.dataset.signal);
+    const marketMatch = selectedMatches(state.markets, row.dataset.market);
+    const sectorMatch = selectedMatches(state.sectors, row.dataset.sector);
     const textMatch = !state.query ||
       normalize(row.dataset.ticker).includes(state.query) ||
       normalize(row.dataset.name).includes(state.query);
@@ -1071,17 +1095,17 @@ RESEARCH_V2_SCRIPT = r"""
   }
 
   function syncSectorUI() {
-    sectorChips.forEach(c => c.classList.toggle('active', c.dataset.sector === state.sector));
     sectorCards.forEach(c => {
-      c.classList.toggle('active', c.dataset.sectorCard === state.sector);
-      c.classList.toggle('dimmed', state.sector !== 'all' && c.dataset.sectorCard !== state.sector);
+      const active = state.sectors.has(c.dataset.sectorCard);
+      c.classList.toggle('active', active);
+      c.classList.toggle('dimmed', state.sectors.size > 0 && !active);
     });
   }
 
   function setSummary(item, count, singular, plural) {
     if(!item) return;
     item.textContent = `${count} ${count === 1 ? singular : plural}`;
-    item.hidden = state.signal !== 'all' && count === 0;
+    item.hidden = state.signals.size > 0 && count === 0;
   }
 
   function updatePanelSummary(panel, counts) {
@@ -1114,7 +1138,7 @@ RESEARCH_V2_SCRIPT = r"""
       });
 
       totalVisible += visibleRows;
-      const shouldShowPanel = state.market === 'all' ? visibleRows > 0 : panelName === state.market;
+      const shouldShowPanel = state.markets.size === 0 ? visibleRows > 0 : state.markets.has(panelName);
       panel.classList.toggle('active', shouldShowPanel);
       updatePanelSummary(panel, visibleCounts);
 
@@ -1126,61 +1150,41 @@ RESEARCH_V2_SCRIPT = r"""
   }
 
   function syncFilterButtons() {
-    const signalFocused = state.signal !== 'all';
-    if(signalGroup) signalGroup.classList.toggle('has-selection', signalFocused);
-    signalBtns.forEach(btn => {
-      btn.classList.toggle('is-muted', signalFocused && btn.dataset.filter !== state.signal);
-    });
-
-    const marketFocused = state.market !== 'all';
-    if(marketGroup) marketGroup.classList.toggle('has-selection', marketFocused);
-    marketBtns.forEach(btn => {
-      btn.classList.toggle('is-muted', marketFocused && btn.dataset.market !== state.market);
-    });
-
-    const sectorFocused = state.sector !== 'all';
-    if(sectorGroup) sectorGroup.classList.toggle('has-selection', sectorFocused);
-    sectorChips.forEach(btn => {
-      btn.classList.toggle('is-muted', sectorFocused && btn.dataset.sector !== state.sector);
-    });
+    syncButtonGroup(signalGroup, signalBtns, state.signals, 'filter');
+    syncButtonGroup(marketGroup, marketBtns, state.markets, 'market');
+    syncButtonGroup(sectorGroup, sectorChips, state.sectors, 'sector');
   }
 
   function applyViewState() {
     syncFilterButtons();
+    syncSectorUI();
     syncPanels();
   }
 
   signalBtns.forEach(btn => {
     btn.addEventListener('click', () => {
-      signalBtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      state.signal = btn.dataset.filter;
+      toggleSelection(state.signals, btn.dataset.filter);
       applyViewState();
     });
   });
 
   marketBtns.forEach(btn => {
     btn.addEventListener('click', () => {
-      marketBtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      state.market = btn.dataset.market;
+      toggleSelection(state.markets, btn.dataset.market);
       applyViewState();
     });
   });
 
   sectorChips.forEach(chip => {
     chip.addEventListener('click', () => {
-      state.sector = chip.dataset.sector;
-      syncSectorUI();
+      toggleSelection(state.sectors, chip.dataset.sector);
       applyViewState();
     });
   });
 
   sectorCards.forEach(card => {
     const go = () => {
-      // Cards toggle: clicking the active sector again clears the filter.
-      state.sector = (state.sector === card.dataset.sectorCard) ? 'all' : card.dataset.sectorCard;
-      syncSectorUI();
+      toggleSelection(state.sectors, card.dataset.sectorCard);
       applyViewState();
     };
     card.addEventListener('click', go);
