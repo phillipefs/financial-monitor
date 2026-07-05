@@ -9,7 +9,7 @@ import json
 import math
 import os
 import sys
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from html import escape
 from pathlib import Path
 from typing import Dict, Optional
@@ -2535,6 +2535,102 @@ DRAWDOWN_SCRIPT = r"""
 
 
 # ==============================================================
+# SIGNAL CHANGES ("What changed") — daily per-asset signal history
+# ==============================================================
+SIGNAL_CHANGES_CSS = """
+/* ===== SIGNAL CHANGES (What changed) + SIGNAL TIMELINE ===== */
+.research-v2.profile-field-v3 #changes{scroll-margin-top:calc(var(--chrome-h,120px) + 12px)}
+.research-v2 .wc-section{padding-top:24px;padding-bottom:0}
+.research-v2 .wc-card{min-height:0}
+.research-v2 .wc-card.wc-today h2{color:var(--rm-cyan)}
+.research-v2 .wc-card.wc-week h2{color:var(--rm-blue)}
+.research-v2.profile-field-v3 .wc-card.wc-today::before{background:linear-gradient(90deg,var(--rm-cyan),transparent 80%)}
+.research-v2.profile-field-v3 .wc-card.wc-week::before{background:linear-gradient(90deg,var(--rm-blue),transparent 80%)}
+.research-v2 .wc-row{grid-template-columns:44px minmax(0,1fr) auto}
+.research-v2 .wc-row .highlight-rank{width:auto;min-width:38px;padding:0 7px;justify-self:start}
+.research-v2.profile-field-v3 .wc-today .highlight-rank{color:var(--rm-cyan);border-color:rgba(38,208,232,.28);background:rgba(38,208,232,.08)}
+.research-v2.profile-field-v3 .wc-week .highlight-rank{color:var(--rm-blue);border-color:rgba(122,162,255,.28);background:rgba(122,162,255,.08)}
+.research-v2 .wc-transition{display:flex;align-items:center;gap:7px;justify-content:flex-end;flex-wrap:wrap}
+.research-v2 .wc-transition .signal-badge:first-child{opacity:.55;filter:saturate(.6)}
+.research-v2 .wc-arr{color:var(--rm-dim);font-weight:800;font-family:var(--mono)}
+.research-v2 .wc-since{color:var(--rm-dim)}
+.research-v2 .wc-empty{padding:16px 2px;color:var(--rm-muted);font-size:.85rem}
+.research-v2 .wc-foot{margin-top:10px;padding-top:10px;border-top:1px solid var(--rm-line-soft);color:var(--rm-dim);font-size:.68rem;line-height:1.45}
+/* clickable locate rows (Signal Changes + Top Opportunities/Risks) */
+.research-v2 .highlight-row[data-goto]{cursor:pointer}
+.research-v2 .wc-flash td{background:rgba(38,208,232,.16)!important}
+.research-v2.profile-field-v3 .wc-today .highlight-row:hover::before{background:var(--rm-cyan)}
+.research-v2.profile-field-v3 .wc-week .highlight-row:hover::before{background:var(--rm-blue)}
+/* --- signal timeline inside the expanded asset row --- */
+.research-v2 .wc-tl{display:inline-flex;align-items:center;gap:3px}
+.research-v2 .wc-tl-cell{width:11px;height:11px;border-radius:3px;background:var(--rm-surface-3);border:1px solid var(--rm-line-soft)}
+.research-v2 .wc-tl-cell.s-ub{background:var(--rm-green);border-color:var(--rm-green);box-shadow:0 0 6px rgba(46,230,166,.5)}
+.research-v2 .wc-tl-cell.s-b{background:rgba(46,230,166,.55);border-color:rgba(46,230,166,.7)}
+.research-v2 .wc-tl-cell.s-n{background:rgba(122,162,255,.28);border-color:rgba(122,162,255,.34)}
+.research-v2 .wc-tl-cell.s-s{background:rgba(255,100,114,.6);border-color:rgba(255,100,114,.75)}
+.research-v2 .wc-tl-cell:last-child{outline:1.5px solid var(--rm-text);outline-offset:1px}
+@media (max-width:980px){.research-v2 .wc-transition{justify-content:flex-start}}
+"""
+
+SIGNAL_CHANGES_SCRIPT = r"""
+(function(){
+  "use strict";
+
+  /* ---- click any [data-goto] row (Signal Changes, Top Opportunities,
+     Top Risks) -> scroll to the asset in the RSI Matrix and flash it ---- */
+  document.addEventListener('click', function(e){
+    var el = e.target.closest && e.target.closest('[data-goto]');
+    if(!el) return;
+    if(e.target.closest('a')) return;
+    var tk = (el.getAttribute('data-goto')||'').toLowerCase();
+    var target = null, fallback = null;
+    document.querySelectorAll('.asset-row').forEach(function(row){
+      if((row.dataset.ticker||'') !== tk) return;
+      if(!fallback) fallback = row;
+      if(!target && !row.hidden) target = row;
+    });
+    target = target || fallback;
+    if(!target) return;
+    target.scrollIntoView({behavior:'smooth', block:'center'});
+    target.classList.add('wc-flash');
+    setTimeout(function(){ target.classList.remove('wc-flash'); }, 1800);
+  });
+
+  /* ---- daily signal timeline inside the expanded row detail ----
+     window.SIGNAL_HISTORY = { TICKER: [["YYYY-MM-DD","Signal"], ...] } */
+  var HIST = window.SIGNAL_HISTORY || {};
+  var TL_DAYS = 14;
+  var CLS = {UltraBuy:'s-ub', Buy:'s-b', Neutral:'s-n', Sell:'s-s'};
+  function injectTimeline(row){
+    var d = row._detail;
+    if(!d || d.querySelector('.wc-detail')) return;
+    var tkEl = row.querySelector('.tk-badge');
+    var seq = HIST[tkEl ? tkEl.textContent.trim() : ''];
+    if(!seq || !seq.length) return;
+    var cells = '';
+    var shown = seq.slice(-TL_DAYS);
+    for(var i = shown.length; i < TL_DAYS; i++)
+      cells += '<span class="wc-tl-cell" title="no data"></span>';
+    shown.forEach(function(p){
+      cells += '<span class="wc-tl-cell '+(CLS[p[1]]||'')+'" title="'+p[0]+' &middot; '+p[1]+'"></span>';
+    });
+    var wrap = document.createElement('span');
+    wrap.className = 'detail-item wc-detail';
+    wrap.innerHTML = '<span class="k">Signal &middot; last '+TL_DAYS+'d</span>'
+                   + '<span class="v wc-tl">'+cells+'</span>';
+    var inner = d.querySelector('.detail-inner');
+    if(inner) inner.insertBefore(wrap, inner.querySelector('.detail-links'));
+  }
+  /* runs after the row's own expand handler (document bubble phase) */
+  document.addEventListener('click', function(e){
+    var row = e.target.closest && e.target.closest('.asset-row');
+    if(row && row.classList.contains('expanded')) injectTimeline(row);
+  });
+})();
+"""
+
+
+# ==============================================================
 # DATA FETCHING
 # ==============================================================
 def fetch_rsi_data() -> pd.DataFrame:
@@ -3048,7 +3144,7 @@ def _build_highlight_rows(df_ranked: pd.DataFrame, rank_kind: str) -> str:
         sig_lbl = _signal_label(r["Signal"])
         drawdown = float(r.get("Drawdown_Pct", 0.0))
         rows_html += f'''
-      <div class="highlight-row rank-{rank_kind}">
+      <div class="highlight-row rank-{rank_kind}" data-goto="{escape(str(r["Ticker"]), quote=True)}" title="Click to locate in the RSI Matrix">
         <div class="highlight-rank">{index}</div>
         <div class="highlight-main">
           <div class="highlight-title">
@@ -3441,8 +3537,204 @@ def _kpi_delta_html(key: str, deltas) -> str:
             f'<span class="d-ctx">vs yesterday</span></div>')
 
 
+SIGNAL_HISTORY_FILE = Path(__file__).parent / "signal_history.json"
+SIGNAL_HISTORY_DAYS = 90    # daily entries kept in the rolling file
+TIMELINE_DAYS = 14          # per-asset timeline embedded in the page
+WEEK_WINDOW_DAYS = 7        # "This Week" bucket: transitions up to N calendar days back
+MAX_CHANGE_ROWS = 15        # rows rendered per card (header always shows the real total)
+
+
+def _load_signal_history() -> list:
+    try:
+        data = json.loads(SIGNAL_HISTORY_FILE.read_text(encoding="utf-8"))
+        return data if isinstance(data, list) else []
+    except (FileNotFoundError, ValueError, OSError):
+        return []
+
+
+def _update_signal_history(df: pd.DataFrame) -> list:
+    """Persist today's per-ticker signal/RSI snapshot and return the history.
+
+    One entry per calendar day (São Paulo). Today's entry is OVERWRITTEN on
+    every run so intraday runs always reflect the latest reading of the week
+    in progress — signals are intentionally real-time, not close-confirmed.
+    Past days keep the last state recorded for them.
+    """
+    today = sao_paulo_now().strftime("%Y-%m-%d")
+    signals: Dict[str, str] = {}
+    rsi_w: Dict[str, int] = {}
+    for _, r in df.iterrows():
+        tk = str(r["Ticker"])
+        signals[tk] = str(r["Signal"])
+        if not pd.isna(r["Weekly_RSI"]):
+            rsi_w[tk] = int(r["Weekly_RSI"])
+
+    history = [
+        e for e in _load_signal_history()
+        if isinstance(e, dict) and e.get("date") and e["date"] != today
+    ]
+    history.sort(key=lambda e: e["date"])
+    history.append({"date": today, "signals": signals, "rsi_w": rsi_w})
+    history = history[-SIGNAL_HISTORY_DAYS:]
+    try:
+        SIGNAL_HISTORY_FILE.write_text(
+            json.dumps(history, ensure_ascii=False, separators=(",", ":")),
+            encoding="utf-8",
+        )
+    except OSError as exc:
+        print(f"  [WARN] Could not write signal history: {exc}")
+    return history
+
+
+def _compute_signal_changes(history: list, df: pd.DataFrame) -> dict:
+    """Diff current signals against the persisted daily history.
+
+    Returns {"today": [...], "week": [...]}. "today" = the signal differs from
+    the last previous-day snapshot; "week" = the current streak started 1..
+    WEEK_WINDOW_DAYS calendar days ago (stable since). Buckets are mutually
+    exclusive and sorted by significance (UltraBuy/Buy first, then Sell).
+    """
+    today_str = sao_paulo_now().strftime("%Y-%m-%d")
+    prev_entries = sorted(
+        (e for e in history
+         if isinstance(e, dict) and e.get("date") and e["date"] < today_str),
+        key=lambda e: e["date"],
+    )
+    out: dict = {"today": [], "week": []}
+    if not prev_entries:
+        return out
+    today_date = date.fromisoformat(today_str)
+
+    for _, r in df.iterrows():
+        tk = str(r["Ticker"])
+        cur = str(r["Signal"])
+        series = [
+            (e["date"], e["signals"][tk], e.get("rsi_w", {}).get(tk))
+            for e in prev_entries
+            if tk in e.get("signals", {})
+        ]
+        if not series:
+            continue  # asset without recorded history yet
+        cur_rsi = None if pd.isna(r["Weekly_RSI"]) else int(r["Weekly_RSI"])
+        series.append((today_str, cur, cur_rsi))
+
+        # Walk back to where the current signal streak started.
+        i = len(series) - 1
+        while i > 0 and series[i - 1][1] == cur:
+            i -= 1
+        if i == 0:
+            continue  # stable across the whole recorded window
+        days_ago = (today_date - date.fromisoformat(series[i][0])).days
+        item = {
+            "ticker": tk,
+            "name": str(r["Name"]),
+            "market": str(r.get("Setor", "")),
+            "signal": cur,
+            "prev": series[i - 1][1],
+            "rsi": cur_rsi,
+            "rsi_prev": series[i - 1][2],
+            "days_ago": days_ago,
+        }
+        if days_ago == 0:
+            out["today"].append(item)
+        elif days_ago <= WEEK_WINDOW_DAYS:
+            out["week"].append(item)
+
+    order = {"UltraBuy": 0, "Buy": 1, "Sell": 2, "Neutral": 3}
+    def _key(c):
+        return (order.get(c["signal"], 9), c["rsi"] if c["rsi"] is not None else 50)
+    out["today"].sort(key=_key)
+    out["week"].sort(key=lambda c: (c["days_ago"],) + _key(c))
+    return out
+
+
+def _build_change_row(c: dict) -> str:
+    when = "today" if c["days_ago"] == 0 else f"{c['days_ago']}d ago"
+    rank = "NEW" if c["days_ago"] == 0 else f"{c['days_ago']}d"
+    rsi_chip = ""
+    if c.get("rsi_prev") is not None and c.get("rsi") is not None:
+        rsi_chip = (f'<span class="highlight-chip">RSI W {int(c["rsi_prev"])} '
+                    f'&rarr; {int(c["rsi"])}</span>')
+    return f'''
+      <div class="highlight-row wc-row" data-goto="{escape(c["ticker"], quote=True)}" title="Click to locate in the RSI Matrix">
+        <div class="highlight-rank">{rank}</div>
+        <div class="highlight-main">
+          <div class="highlight-title">
+            <span class="tk-badge">{escape(c["ticker"])}</span>
+            <span class="highlight-name">{escape(c["name"])}</span>
+          </div>
+          <div class="highlight-meta">
+            <span class="highlight-chip chip-market">{escape(_market_title(c["market"]))}</span>
+            {rsi_chip}
+            <span class="highlight-chip wc-since">{when}</span>
+          </div>
+        </div>
+        <div class="highlight-signal wc-transition">
+          <span class="signal-badge {_signal_class(c["prev"])}">{_signal_label(c["prev"])}</span>
+          <span class="wc-arr">&rarr;</span>
+          <span class="signal-badge {_signal_class(c["signal"])}">{_signal_label(c["signal"])}</span>
+        </div>
+      </div>'''
+
+
+def _build_signal_changes_section(changes: dict) -> str:
+    def card(kind: str, title: str, span: str, items: list,
+             empty_msg: str, foot: str) -> str:
+        shown = items[:MAX_CHANGE_ROWS]
+        if shown:
+            body = ('<div class="highlight-list">'
+                    + "".join(_build_change_row(c) for c in shown)
+                    + '</div>')
+        else:
+            body = f'<div class="wc-empty">{empty_msg}</div>'
+        extra = (f" Showing {len(shown)} of {len(items)}."
+                 if len(items) > len(shown) else "")
+        return f'''
+  <article class="highlight-card wc-card wc-{kind}">
+    <div class="highlight-head">
+      <h2>{title} ({len(items)})</h2>
+      <span>{span}</span>
+    </div>
+    {body}
+    <div class="wc-foot">{foot}{extra}</div>
+  </article>'''
+
+    today_card = card(
+        "today", "Signal Changes — Today", "VS LAST SESSION",
+        changes["today"],
+        "No signal changes vs the last session.",
+        "Zone transitions vs the previous daily snapshot. Readings use the "
+        "week in progress and refresh on every run.",
+    )
+    week_card = card(
+        "week", "Signal Changes — This Week", f"LAST {WEEK_WINDOW_DAYS} DAYS",
+        changes["week"],
+        "No signal changes in the window. History builds up from daily runs.",
+        "Click any row to locate the asset in the RSI Matrix. Expand a table "
+        "row to see its signal timeline.",
+    )
+    return f'''
+<section class="desk-highlights wc-section" id="changes" aria-label="Signal changes">{today_card}{week_card}
+</section>'''
+
+
+def _build_signal_timeline_payload(history: list) -> Dict[str, list]:
+    """Per-ticker [["YYYY-MM-DD", "Signal"], ...] for the last TIMELINE_DAYS
+    daily entries — powers the mini timeline in the expanded asset row."""
+    entries = sorted(
+        (e for e in history if isinstance(e, dict) and e.get("date")),
+        key=lambda e: e["date"],
+    )[-TIMELINE_DAYS:]
+    payload: Dict[str, list] = {}
+    for e in entries:
+        for tk, sig in e.get("signals", {}).items():
+            payload.setdefault(tk, []).append([e["date"], sig])
+    return payload
+
+
 def generate_html(df: pd.DataFrame, onchain: Dict, deltas: dict | None = None,
-                  dd_data: dict | None = None, with_sectors: bool = True) -> str:
+                  dd_data: dict | None = None, with_sectors: bool = True,
+                  signal_history: list | None = None) -> str:
     dd_data = dd_data or {}
     dd_keys = set(dd_data.keys())
     dd_data_json = json.dumps(dd_data, separators=(",", ":"), ensure_ascii=False)
@@ -3465,6 +3757,14 @@ def generate_html(df: pd.DataFrame, onchain: Dict, deltas: dict | None = None,
     eth_card = _build_onchain_card("ETH", onchain.get("ETH")) if onchain else ""
     fng_card = _build_fng_card(onchain.get("FNG") if onchain else None)
     executive_rankings = _build_executive_rankings(df)
+
+    # Signal changes ("What changed") + per-asset timeline payload
+    signal_history = signal_history or []
+    signal_changes_html = _build_signal_changes_section(
+        _compute_signal_changes(signal_history, df))
+    signal_hist_json = json.dumps(
+        _build_signal_timeline_payload(signal_history),
+        separators=(",", ":"), ensure_ascii=False)
 
     # Build market filter buttons + table content
     market_buttons = '''<button class="fbtn active" data-market="all">All</button>'''
@@ -3695,6 +3995,7 @@ body{{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:
 {RESEARCH_V2_CSS}
 {RESEARCH_V3_CSS}
 {DRAWDOWN_CSS}
+{SIGNAL_CHANGES_CSS}
 </style>
 </head>
 <body class="research-v2 profile-field-v3">
@@ -3718,6 +4019,7 @@ body{{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:
 <!-- QUICK NAV -->
 <nav class="v2nav" aria-label="Sections">
   <a href="#overview" class="v2nav-link active">Overview</a>
+  <a href="#changes" class="v2nav-link">Changes</a>
   <a href="#onchain" class="v2nav-link">On-Chain</a>
   <a href="#sectors" class="v2nav-link">Sector Pulse</a>
   <a href="#matrix" class="v2nav-link">RSI Matrix</a>
@@ -3747,6 +4049,8 @@ body{{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:
   <div class="kpi-cell"><div class="kpi-num" style="color:var(--rm-blue)">{n}</div><div class="kpi-label">Neutral</div>{_kpi_delta_html("Neutral", deltas)}</div>
   <div class="kpi-cell"><div class="kpi-num" style="color:var(--rm-red)">{s}</div><div class="kpi-label">Overbought</div>{_kpi_delta_html("Sell", deltas)}</div>
 </div>
+
+{signal_changes_html}
 
 {executive_rankings}
 
@@ -3792,7 +4096,7 @@ body{{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:
   Financial Monitor Research · Updated <a>{now}</a> · Data: Yahoo Finance + CoinMetrics · Static research dashboard
 </div>
 
-<script>window.DD_DATA={dd_data_json};</script>
+<script>window.DD_DATA={dd_data_json};window.SIGNAL_HISTORY={signal_hist_json};</script>
 <script>
 {RESEARCH_V2_SCRIPT}
 </script>
@@ -3801,6 +4105,9 @@ body{{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:
 </script>
 <script>
 {DRAWDOWN_SCRIPT}
+</script>
+<script>
+{SIGNAL_CHANGES_SCRIPT}
 </script>
 </body>
 </html>'''
@@ -3827,13 +4134,14 @@ def main():
     print(f"  [OK] {len(df)} assets processed")
 
     deltas = _update_snapshot(df)
+    signal_history = _update_signal_history(df)
 
     print("[3/4] Building drawdown history (long weekly series)...")
     dd_data = build_drawdown_data(df)
     print(f"  [OK] drawdown ready for {len(dd_data)}/{len(df)} assets")
 
     print("[4/4] Generating dashboard HTML...")
-    html = generate_html(df, onchain, deltas, dd_data)
+    html = generate_html(df, onchain, deltas, dd_data, signal_history=signal_history)
     OUTPUT_FILE.write_text(html, encoding="utf-8")
     print(f"  [OK] Saved to: {OUTPUT_FILE}")
     print(f"\n  Open in browser: file:///{OUTPUT_FILE.as_posix()}")

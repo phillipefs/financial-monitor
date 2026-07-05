@@ -75,16 +75,22 @@ jobs:
           exit 1
 
       - name: Persist snapshot history
-        # Commit the rolling KPI history back to the repo so it survives Actions
-        # cache eviction. Never fails the job — a bad push just retries next run.
+        # Commit the rolling KPI + per-asset signal histories back to the repo so
+        # they survive Actions cache eviction. Never fails the job — a bad push
+        # just retries next run.
         # [skip ci] + the GITHUB_TOKEN both prevent this commit from re-triggering.
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add snapshot_history.json
+          # Stage whichever history files the generator produced this run.
+          for f in snapshot_history.json signal_history.json; do
+            if [ -f "$f" ]; then
+              git add "$f"
+            fi
+          done
           # --cached so a brand-new (previously untracked) file counts as a change.
-          if git diff --cached --quiet -- snapshot_history.json; then
-            echo "snapshot_history.json unchanged — nothing to commit."
+          if git diff --cached --quiet; then
+            echo "History files unchanged — nothing to commit."
             exit 0
           fi
           git commit -m "chore: update snapshot history [skip ci]"

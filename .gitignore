@@ -224,3 +224,5 @@ __marimo__/
 # Versioned in the repo so the day-over-day KPI history is durable: the CI
 # workflow commits the updated file back after each run. (Previously gitignored
 # and kept only in actions/cache, which GitHub evicts after 7 days of no use.)
+
+ideas/
