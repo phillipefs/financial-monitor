@@ -18,12 +18,19 @@ O arquivo final e um HTML estatico, pronto para abrir no navegador ou publicar n
 
 ```text
 .
+|-- .agents/skills/                   # Fonte unica das skills compartilhadas
+|-- .codex/skills/                    # Copia sincronizada para Codex
+|-- .claude/skills/                   # Copia sincronizada para Claude Code
+|-- .github/workflows/update-dashboard.yml
+|-- scripts/sync-skills.ps1           # Sincroniza skills entre ferramentas
+|-- AGENTS.md                         # Instrucoes do projeto para Codex
+|-- CLAUDE.md                         # Instrucoes do projeto para Claude Code
 |-- finance_stocks.py                 # Ativos, calculo de RSI e sinais
 |-- onchain.py                        # Coleta e classificacao MVRV BTC/ETH
 |-- generate_dashboard.py             # Gera dashboard.html
 |-- dashboard.html                    # Saida gerada localmente
 |-- requirements.txt                  # Dependencias Python
-`-- .github/workflows/update-dashboard.yml
+`-- snapshot_history.json             # Historico versionado de KPIs
 ```
 
 ## Requisitos
@@ -66,16 +73,21 @@ O workflow em `.github/workflows/update-dashboard.yml` executa:
 1. checkout do repositorio;
 2. instalacao do Python e dependencias;
 3. execucao de `generate_dashboard.py`;
-4. copia de `dashboard.html` para `_site/index.html`;
-5. publicacao no GitHub Pages.
+4. commit de `snapshot_history.json` quando houver mudanca;
+5. copia de `dashboard.html` para `_site/index.html` e `_site/dashboard.html`;
+6. publicacao no GitHub Pages.
 
-Agenda configurada:
+Agenda configurada no GitHub Actions:
 
 ```yaml
-cron: "0 15 * * *"
+- cron: "7 11 * * 1-5"  # seg-sex 08:07 BRT
+- cron: "7 15 * * 1-5"  # seg-sex 12:07 BRT
+- cron: "7 18 * * 1-5"  # seg-sex 15:07 BRT
+- cron: "7 21 * * 1-5"  # seg-sex 18:07 BRT
+- cron: "7 11 * * 6,0"  # sab-dom 08:07 BRT
 ```
 
-O cron do GitHub usa UTC. Essa configuracao roda diariamente as 15:00 UTC, equivalente a 12:00 em Brasilia/Sao Paulo quando o fuso esta em UTC-3.
+O cron do GitHub usa UTC. Os minutos foram deslocados para `:07` para reduzir congestionamento no topo da hora.
 
 Para ativar a publicacao:
 
@@ -101,6 +113,30 @@ Exemplo:
 ```bash
 YFINANCE_CACHE_DIR=/tmp/yfinance-cache python generate_dashboard.py
 ```
+
+## Codex e Claude Code
+
+O projeto usa uma estrutura de skills compartilhadas para evitar duplicacao entre Codex e Claude Code:
+
+- `.agents/skills/` e a fonte oficial.
+- `.codex/skills/` e a copia lida pelo Codex.
+- `.claude/skills/` e a copia lida pelo Claude Code.
+- `AGENTS.md` guarda instrucoes do projeto para Codex.
+- `CLAUDE.md` guarda instrucoes equivalentes para Claude Code.
+
+Edite skills somente em `.agents/skills/`. Depois, sincronize:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\sync-skills.ps1
+```
+
+Para conferir o que seria sincronizado sem escrever arquivos:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\sync-skills.ps1 -DryRun
+```
+
+O script usa `robocopy /MIR` com validacao de caminhos para espelhar apenas `.codex/skills/` e `.claude/skills/`. O arquivo local `.claude/settings.local.json` fica fora do Git.
 
 ## Fontes de Dados
 
