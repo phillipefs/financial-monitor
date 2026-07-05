@@ -2649,7 +2649,8 @@ def build_drawdown_data(df: pd.DataFrame, anos: int = 20, min_points: int = 40) 
     for _, r in df.iterrows():
         key = str(r["Ticker"])
         setor = str(r.get("Setor", ""))
-        specs.append((key, setor, _yahoo_symbol(key, setor), str(r["Name"])))
+        yahoo_symbol = str(r.get("Yahoo_Ticker") or _yahoo_symbol(key, setor))
+        specs.append((key, setor, yahoo_symbol, str(r["Name"])))
 
     batch = _download_batch([s[2] for s in specs], interval="1wk", period="max")
 
@@ -3149,31 +3150,32 @@ _TV_INDEX_MAP = {
 }
 
 
-def _asset_links(ticker: str, setor: str) -> tuple:
-    """Reconstruct Yahoo Finance and TradingView URLs from the normalized ticker + group.
+def _asset_links(ticker: str, setor: str, yahoo_symbol: object = None) -> tuple:
+    """Build Yahoo Finance and TradingView URLs from display ticker + group.
 
-    The DataFrame ticker is normalized (``.SA``/``^``/``-USD`` stripped), so the raw
-    symbol is rebuilt per group. Returns ``(yahoo_url, tradingview_url_or_None)``.
+    The DataFrame ticker is normalized for display, while ``Yahoo_Ticker`` keeps
+    the raw symbol for special cases such as HYPE32196-USD.
     """
     tk = str(ticker).upper()
-    tk_q = quote(tk, safe="")
+    raw_symbol = str(yahoo_symbol or "").strip()
 
     if setor == "Indices":
-        yahoo = f"https://finance.yahoo.com/quote/{quote('^' + tk, safe='')}"
+        yahoo_symbol_out = raw_symbol or ("^" + tk)
         tv_sym = _TV_INDEX_MAP.get(tk)
     elif setor == "Cripto":
-        yahoo = f"https://finance.yahoo.com/quote/{quote(tk + '-USD', safe='')}"
+        yahoo_symbol_out = raw_symbol or (tk + "-USD")
         tv_sym = f"{tk}USD"
     elif setor == "Brasil":
-        yahoo = f"https://finance.yahoo.com/quote/{quote(tk + '.SA', safe='')}"
+        yahoo_symbol_out = raw_symbol or (tk + ".SA")
         tv_sym = f"BMFBOVESPA:{tk}"
     elif setor == "Moeda":
-        yahoo = f"https://finance.yahoo.com/quote/{tk_q}"
+        yahoo_symbol_out = raw_symbol or tk
         tv_sym = "FX_IDC:USDBRL" if tk == "BRL=X" else None
     else:  # EUA and anything else: plain symbol
-        yahoo = f"https://finance.yahoo.com/quote/{tk_q}"
+        yahoo_symbol_out = raw_symbol or tk
         tv_sym = tk.replace("-", ".")
 
+    yahoo = f"https://finance.yahoo.com/quote/{quote(yahoo_symbol_out, safe='')}"
     tv_url = None
     if tv_sym:
         tv_url = f"https://www.tradingview.com/chart/?symbol={quote(tv_sym, safe='')}"
@@ -3328,7 +3330,11 @@ def _build_sector_rows(df_sector: pd.DataFrame, market_key: str, dd_keys: set | 
             peak_meta = f"Top close: {peak_close}"
             if peak_date:
                 peak_meta += f" | Date: {peak_date}"
-            yahoo_url, tv_url = _asset_links(r["Ticker"], str(r.get("Setor", "")))
+            yahoo_url, tv_url = _asset_links(
+                r["Ticker"],
+                str(r.get("Setor", "")),
+                r.get("Yahoo_Ticker"),
+            )
             tkey = str(r["Ticker"])
             if tkey in dd_keys:
                 chart_cell = (

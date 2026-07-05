@@ -366,6 +366,7 @@ assets = [
     {"ticker": "ETH-USD", "name": "Ethereum", "buy": 30, "sell": 70, "ultra": 45, "setor": "Cripto"},
     {"ticker": "SOL-USD", "name": "Solana", "buy": 30, "sell": 70, "ultra": 45, "setor": "Cripto"},
     {"ticker": "AAVE-USD", "name": "Aave", "buy": 30, "sell": 70, "ultra": 45, "setor": "Cripto"},
+    {"ticker": "HYPE32196-USD", "display_ticker": "HYPE", "name": "Hyperliquid", "buy": 30, "sell": 70, "ultra": 45, "setor": "Cripto"},
 
     # EUA
     {"ticker": "AMZN", "name": "Amazon", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Consumer"},
@@ -542,10 +543,16 @@ def _build_asset_row(
         vol_ratio = None  # sem volume confiável (ex.: câmbio) ou histórico curto
         vol_high = None
 
-    norm_ticker = _normalize_ticker(ticker, remove_crypto_suffix=remove_crypto_suffix)
+    display_ticker = asset.get("display_ticker")
+    norm_ticker = (
+        str(display_ticker)
+        if display_ticker
+        else _normalize_ticker(ticker, remove_crypto_suffix=remove_crypto_suffix)
+    )
 
     return {
         "Ticker": norm_ticker,
+        "Yahoo_Ticker": ticker,
         "Name": asset["name"],
         "Weekly_Close": float(round(weekly["Close"], 2)),
         "Weekly_RSI": weekly_rsi,
