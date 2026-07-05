@@ -2722,7 +2722,7 @@ def _signal_class(signal: str) -> str:
 
 
 def _signal_label(signal: str) -> str:
-    return {"UltraBuy": "ULTRA BUY", "Buy": "BUY", "Neutral": "NEUTRAL", "Sell": "SELL"}.get(signal, signal)
+    return {"UltraBuy": "ULTRA BUY", "Buy": "BUY", "Neutral": "NEUTRAL", "Sell": "OVERBOUGHT"}.get(signal, signal)
 
 
 def _zone_class(zone: str) -> str:
@@ -3278,7 +3278,7 @@ def _build_sector_pulse(df: pd.DataFrame) -> tuple:
           <div class="sc-stats">
             <span><b class="{_rsi_zone_cls(avg_rsi)}">{avg_rsi}</b> avg RSI W</span>
             <span>{avg_rsi_m_html} avg RSI M</span>
-            <span class="sc-flow"><b>{ops}</b> buy · <b>{sell}</b> sell</span>
+            <span class="sc-flow"><b>{ops}</b> buy · <b>{sell}</b> overbought</span>
           </div>
           <div class="sc-foot">
             <span class="sc-mkt">{mkt.strip()}</span>
@@ -3735,7 +3735,7 @@ body{{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:
     <div class="mix-row"><span class="signal-badge sig-ultrabuy">Ultra Buy</span><div class="mix-bar"><span style="--w:{ub_pct:.1f}%;--c:var(--rm-green)"></span></div><strong>{ub}</strong></div>
     <div class="mix-row"><span class="signal-badge sig-buy">Buy</span><div class="mix-bar"><span style="--w:{b_pct:.1f}%;--c:var(--rm-green)"></span></div><strong>{b}</strong></div>
     <div class="mix-row"><span class="signal-badge sig-neutral">Neutral</span><div class="mix-bar"><span style="--w:{n_pct:.1f}%;--c:var(--rm-blue)"></span></div><strong>{n}</strong></div>
-    <div class="mix-row"><span class="signal-badge sig-sell">Sell</span><div class="mix-bar"><span style="--w:{s_pct:.1f}%;--c:var(--rm-red)"></span></div><strong>{s}</strong></div>
+    <div class="mix-row"><span class="signal-badge sig-sell">OVERBOUGHT</span><div class="mix-bar"><span style="--w:{s_pct:.1f}%;--c:var(--rm-red)"></span></div><strong>{s}</strong></div>
   </aside>
 </section>
 
@@ -3773,7 +3773,7 @@ body{{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:
       <button class="fbtn" data-filter="UltraBuy">Ultra Buy <span class="fc">{ub}</span></button>
       <button class="fbtn" data-filter="Buy">Buy <span class="fc">{b}</span></button>
       <button class="fbtn" data-filter="Neutral">Neutral <span class="fc">{n}</span></button>
-      <button class="fbtn" data-filter="Sell">Sell <span class="fc">{s}</span></button>
+      <button class="fbtn" data-filter="Sell">OVERBOUGHT <span class="fc">{s}</span></button>
     </div>
     <div class="filter-group market-filter">
       <label>Filter Market</label>
