@@ -561,6 +561,11 @@ def _build_asset_row(
         "Peak_Close": float(round(weekly["Peak_Close"], 2)),
         "Peak_Date": weekly["Peak_Date"],
         "Signal": signal,
+        # Per-asset thresholds carried through so the dashboard's Watch-zone can
+        # measure each asset's distance to its OWN buy/sell trigger (not a generic
+        # 30/70). Buy fires at RSI<=buy; Sell fires at RSI>=sell.
+        "Buy_Threshold": int(asset["buy"]),
+        "Sell_Threshold": int(asset["sell"]),
         "Vol_Ratio": vol_ratio,
         "Vol_High": vol_high,
         "Setor": asset.get("setor", ""),

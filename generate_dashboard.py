@@ -2542,29 +2542,58 @@ DRAWDOWN_SCRIPT = r"""
 # SIGNAL CHANGES ("What changed") — daily per-asset signal history
 # ==============================================================
 SIGNAL_CHANGES_CSS = """
-/* ===== SIGNAL CHANGES (What changed) + SIGNAL TIMELINE ===== */
+/* ===== SIGNAL CHANGES (What changed) + WATCH-ZONE + SIGNAL TIMELINE ===== */
 .research-v2.profile-field-v3 #changes{scroll-margin-top:calc(var(--chrome-h,120px) + 12px)}
 .research-v2 .wc-section{padding-top:24px;padding-bottom:0}
 .research-v2 .wc-card{min-height:0}
+/* three cards side by side on wide screens; Near Trigger drops full-width at the
+   2-col breakpoint, everything stacks below 980px (inherits desk-highlights 1fr) */
+@media(min-width:1301px){.research-v2 .wc-section{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(min-width:981px) and (max-width:1300px){
+  .research-v2 .wc-section{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .research-v2 .wc-card.wc-neartrigger{grid-column:1/-1}
+}
 .research-v2 .wc-card.wc-today h2{color:var(--rm-cyan)}
 .research-v2 .wc-card.wc-week h2{color:var(--rm-blue)}
+.research-v2 .wc-card.wc-neartrigger h2{color:var(--rm-yellow)}
 .research-v2.profile-field-v3 .wc-card.wc-today::before{background:linear-gradient(90deg,var(--rm-cyan),transparent 80%)}
 .research-v2.profile-field-v3 .wc-card.wc-week::before{background:linear-gradient(90deg,var(--rm-blue),transparent 80%)}
+.research-v2.profile-field-v3 .wc-card.wc-neartrigger::before{background:linear-gradient(90deg,var(--rm-yellow),transparent 80%)}
 .research-v2 .wc-row{grid-template-columns:44px minmax(0,1fr) auto}
 .research-v2 .wc-row .highlight-rank{width:auto;min-width:38px;padding:0 7px;justify-self:start}
 .research-v2.profile-field-v3 .wc-today .highlight-rank{color:var(--rm-cyan);border-color:rgba(38,208,232,.28);background:rgba(38,208,232,.08)}
 .research-v2.profile-field-v3 .wc-week .highlight-rank{color:var(--rm-blue);border-color:rgba(122,162,255,.28);background:rgba(122,162,255,.08)}
-.research-v2 .wc-transition{display:flex;align-items:center;gap:7px;justify-content:flex-end;flex-wrap:wrap}
+.research-v2.profile-field-v3 .wc-neartrigger .highlight-rank{color:var(--rm-yellow);border-color:rgba(245,195,75,.32);background:rgba(245,195,75,.09)}
+.research-v2 .wc-transition{display:flex;align-items:center;gap:5px;justify-content:flex-end;flex-wrap:nowrap}
+.research-v2 .wc-transition .signal-badge{font-size:.58rem;padding:3px 7px}
 .research-v2 .wc-transition .signal-badge:first-child{opacity:.55;filter:saturate(.6)}
-.research-v2 .wc-arr{color:var(--rm-dim);font-weight:800;font-family:var(--mono)}
+.research-v2 .wc-arr{color:var(--rm-dim);font-weight:800;font-family:var(--mono);margin:0 -1px}
 .research-v2 .wc-since{color:var(--rm-dim)}
+/* name + market share the title line (ticker dropped); name ellipsizes, market stays;
+   RSI + days stay together on line 2 (nowrap) instead of splitting to a 3rd line */
+.research-v2 .wc-row .highlight-title .highlight-name{flex:0 1 auto;min-width:0}
+.research-v2 .wc-row .highlight-title .highlight-chip.chip-market{flex:0 0 auto}
+.research-v2 .wc-row .highlight-meta{flex-wrap:nowrap}
+.research-v2 .nt-dist{font-weight:800;font-size:.76rem;white-space:nowrap}
+.research-v2 .nt-dist.nt-buy{color:var(--rm-green)}
+.research-v2 .nt-dist.nt-sell{color:var(--rm-red)}
 .research-v2 .wc-empty{padding:16px 2px;color:var(--rm-muted);font-size:.85rem}
 .research-v2 .wc-foot{margin-top:10px;padding-top:10px;border-top:1px solid var(--rm-line-soft);color:var(--rm-dim);font-size:.68rem;line-height:1.45}
-/* clickable locate rows (Signal Changes + Top Opportunities/Risks) */
+/* fixed equal-height lists with internal scroll + bottom fade when more remains */
+.research-v2 .wc-scrollwrap{position:relative}
+.research-v2 .wc-scrollwrap .highlight-list{display:block;height:432px;overflow-y:auto;padding-right:8px;scrollbar-width:thin;scrollbar-color:var(--rm-line) transparent}
+.research-v2 .wc-scrollwrap .highlight-list::-webkit-scrollbar{width:8px}
+.research-v2 .wc-scrollwrap .highlight-list::-webkit-scrollbar-track{background:transparent}
+.research-v2 .wc-scrollwrap .highlight-list::-webkit-scrollbar-thumb{background:var(--rm-line);border-radius:8px}
+.research-v2 .wc-scrollwrap .highlight-list::-webkit-scrollbar-thumb:hover{background:var(--rm-dim)}
+.research-v2 .wc-scrollwrap::after{content:"";position:absolute;left:0;right:8px;bottom:0;height:46px;border-radius:0 0 8px 8px;background:linear-gradient(180deg,transparent,var(--rm-surface) 86%);pointer-events:none;opacity:0;transition:opacity .2s}
+.research-v2 .wc-scrollwrap.has-more::after{opacity:1}
+/* clickable locate rows (Signal Changes + Watch-zone + Top Opportunities/Risks) */
 .research-v2 .highlight-row[data-goto]{cursor:pointer}
 .research-v2 .wc-flash td{background:rgba(38,208,232,.16)!important}
 .research-v2.profile-field-v3 .wc-today .highlight-row:hover::before{background:var(--rm-cyan)}
 .research-v2.profile-field-v3 .wc-week .highlight-row:hover::before{background:var(--rm-blue)}
+.research-v2.profile-field-v3 .wc-neartrigger .highlight-row:hover::before{background:var(--rm-yellow)}
 /* --- signal timeline inside the expanded asset row --- */
 .research-v2 .wc-tl{display:inline-flex;align-items:center;gap:3px}
 .research-v2 .wc-tl-cell{width:11px;height:11px;border-radius:3px;background:var(--rm-surface-3);border:1px solid var(--rm-line-soft)}
@@ -2629,6 +2658,19 @@ SIGNAL_CHANGES_SCRIPT = r"""
   document.addEventListener('click', function(e){
     var row = e.target.closest && e.target.closest('.asset-row');
     if(row && row.classList.contains('expanded')) injectTimeline(row);
+  });
+
+  /* ---- fixed-height card lists: toggle the bottom fade while more remains ---- */
+  document.querySelectorAll('#changes .wc-scrollwrap').forEach(function(wrap){
+    var list = wrap.querySelector('.highlight-list');
+    if(!list) return;
+    function sync(){
+      var more = list.scrollHeight - list.scrollTop - list.clientHeight > 4;
+      wrap.classList.toggle('has-more', more);
+    }
+    list.addEventListener('scroll', sync, {passive:true});
+    window.addEventListener('resize', sync, {passive:true});
+    sync();
   });
 })();
 """
@@ -3545,7 +3587,6 @@ SIGNAL_HISTORY_FILE = Path(__file__).parent / "signal_history.json"
 SIGNAL_HISTORY_DAYS = 90    # daily entries kept in the rolling file
 TIMELINE_DAYS = 14          # per-asset timeline embedded in the page
 WEEK_WINDOW_DAYS = 7        # "This Week" bucket: transitions up to N calendar days back
-MAX_CHANGE_ROWS = 15        # rows rendered per card (header always shows the real total)
 
 
 def _load_signal_history() -> list:
@@ -3664,11 +3705,10 @@ def _build_change_row(c: dict) -> str:
         <div class="highlight-rank">{rank}</div>
         <div class="highlight-main">
           <div class="highlight-title">
-            <span class="tk-badge">{escape(c["ticker"])}</span>
             <span class="highlight-name">{escape(c["name"])}</span>
+            <span class="highlight-chip chip-market">{escape(_market_title(c["market"]))}</span>
           </div>
           <div class="highlight-meta">
-            <span class="highlight-chip chip-market">{escape(_market_title(c["market"]))}</span>
             {rsi_chip}
             <span class="highlight-chip wc-since">{when}</span>
           </div>
@@ -3681,44 +3721,123 @@ def _build_change_row(c: dict) -> str:
       </div>'''
 
 
-def _build_signal_changes_section(changes: dict) -> str:
-    def card(kind: str, title: str, span: str, items: list,
-             empty_msg: str, foot: str) -> str:
-        shown = items[:MAX_CHANGE_ROWS]
-        if shown:
-            body = ('<div class="highlight-list">'
-                    + "".join(_build_change_row(c) for c in shown)
-                    + '</div>')
+NEAR_TRIGGER_MAX = 4  # max RSI-W points from a buy/sell threshold to flag as "near"
+
+
+def _compute_near_triggers(df: pd.DataFrame) -> list:
+    """Neutral assets within NEAR_TRIGGER_MAX RSI-W points of their OWN buy/sell
+    threshold. Buy candidates first, then Overbought; closest first within each.
+
+    Uses each asset's real per-asset thresholds (carried in the DataFrame), so
+    e.g. MSTR (buy=25) and HD (buy=35) are measured against their own lines, not
+    a generic 30/70.
+    """
+    out: list = []
+    for _, r in df.iterrows():
+        if str(r["Signal"]) != "Neutral":
+            continue
+        rsi = r.get("Weekly_RSI")
+        buy = r.get("Buy_Threshold")
+        sell = r.get("Sell_Threshold")
+        if rsi is None or pd.isna(rsi) or pd.isna(buy) or pd.isna(sell):
+            continue
+        rsi, buy, sell = int(rsi), int(buy), int(sell)
+        d_buy = rsi - buy      # points above the buy line
+        d_sell = sell - rsi    # points below the sell line
+        # A Neutral asset sits strictly between the two lines; the nearer wins.
+        if d_buy <= d_sell:
+            direction, dist = "Buy", d_buy
         else:
-            body = f'<div class="wc-empty">{empty_msg}</div>'
-        extra = (f" Showing {len(shown)} of {len(items)}."
-                 if len(items) > len(shown) else "")
-        return f'''
+            direction, dist = "Sell", d_sell
+        if dist < 0 or dist > NEAR_TRIGGER_MAX:
+            continue
+        out.append({
+            "ticker": str(r["Ticker"]),
+            "name": str(r["Name"]),
+            "market": str(r.get("Setor", "")),
+            "rsi": rsi,
+            "dist": dist,
+            "direction": direction,
+        })
+
+    dir_order = {"Buy": 0, "Sell": 1}
+    out.sort(key=lambda c: (dir_order[c["direction"]], c["dist"], c["rsi"]))
+    return out
+
+
+def _build_near_trigger_row(c: dict, index: int) -> str:
+    is_sell = c["direction"] == "Sell"
+    cls = "nt-sell" if is_sell else "nt-buy"
+    arrow = "&uarr;" if is_sell else "&darr;"
+    to_label = "OVERBOUGHT" if is_sell else "Buy"
+    plural = "" if c["dist"] == 1 else "s"
+    return f'''
+      <div class="highlight-row wc-row" data-goto="{escape(c["ticker"], quote=True)}" title="Click to locate in the RSI Matrix">
+        <div class="highlight-rank">{index}</div>
+        <div class="highlight-main">
+          <div class="highlight-title">
+            <span class="highlight-name">{escape(c["name"])}</span>
+            <span class="highlight-chip chip-market">{escape(_market_title(c["market"]))}</span>
+          </div>
+          <div class="highlight-meta">
+            <span class="highlight-chip">RSI W {c["rsi"]}</span>
+          </div>
+        </div>
+        <div class="highlight-signal">
+          <span class="nt-dist {cls}">{arrow} {c["dist"]} pt{plural} to {to_label}</span>
+        </div>
+      </div>'''
+
+
+def _wc_card(kind: str, title: str, span: str, count: int, rows_html: str,
+             empty_msg: str, foot: str) -> str:
+    """One Signal-Changes/Watch-zone card. Non-empty lists go in a fixed-height
+    scroller (equal card heights, internal scroll + bottom fade); empty lists
+    show a placeholder and let the grid stretch the card to match its siblings."""
+    if rows_html:
+        body = (f'<div class="wc-scrollwrap"><div class="highlight-list">'
+                f'{rows_html}</div></div>')
+    else:
+        body = f'<div class="wc-empty">{empty_msg}</div>'
+    return f'''
   <article class="highlight-card wc-card wc-{kind}">
     <div class="highlight-head">
-      <h2>{title} ({len(items)})</h2>
+      <h2>{title} ({count})</h2>
       <span>{span}</span>
     </div>
     {body}
-    <div class="wc-foot">{foot}{extra}</div>
+    <div class="wc-foot">{foot}</div>
   </article>'''
 
-    today_card = card(
+
+def _build_signal_changes_section(changes: dict, near_triggers: list) -> str:
+    today_card = _wc_card(
         "today", "Signal Changes — Today", "VS LAST SESSION",
-        changes["today"],
+        len(changes["today"]),
+        "".join(_build_change_row(c) for c in changes["today"]),
         "No signal changes vs the last session.",
         "Zone transitions vs the previous daily snapshot. Readings use the "
         "week in progress and refresh on every run.",
     )
-    week_card = card(
+    week_card = _wc_card(
         "week", "Signal Changes — This Week", f"LAST {WEEK_WINDOW_DAYS} DAYS",
-        changes["week"],
+        len(changes["week"]),
+        "".join(_build_change_row(c) for c in changes["week"]),
         "No signal changes in the window. History builds up from daily runs.",
         "Click any row to locate the asset in the RSI Matrix. Expand a table "
         "row to see its signal timeline.",
     )
+    nt_card = _wc_card(
+        "neartrigger", "Watch-zone — Near Trigger", "&le;4 PTS · BUY FIRST",
+        len(near_triggers),
+        "".join(_build_near_trigger_row(c, i)
+                for i, c in enumerate(near_triggers, start=1)),
+        "No asset within 4 points of a buy/sell trigger.",
+        f"Neutral assets within {NEAR_TRIGGER_MAX} RSI-W points of their own buy/"
+        "sell threshold — buy candidates first, then overbought, closest first.",
+    )
     return f'''
-<section class="desk-highlights wc-section" id="changes" aria-label="Signal changes">{today_card}{week_card}
+<section class="desk-highlights wc-section" id="changes" aria-label="Signal changes and watch-zone">{today_card}{week_card}{nt_card}
 </section>'''
 
 
@@ -3762,10 +3881,11 @@ def generate_html(df: pd.DataFrame, onchain: Dict, deltas: dict | None = None,
     fng_card = _build_fng_card(onchain.get("FNG") if onchain else None)
     executive_rankings = _build_executive_rankings(df)
 
-    # Signal changes ("What changed") + per-asset timeline payload
+    # Signal changes ("What changed") + Watch-zone + per-asset timeline payload
     signal_history = signal_history or []
     signal_changes_html = _build_signal_changes_section(
-        _compute_signal_changes(signal_history, df))
+        _compute_signal_changes(signal_history, df),
+        _compute_near_triggers(df))
     signal_hist_json = json.dumps(
         _build_signal_timeline_payload(signal_history),
         separators=(",", ":"), ensure_ascii=False)
