@@ -18,12 +18,44 @@
     isso so mantem a pasta do Claude mais limpa.
 #>
 
+param(
+    [switch]$DryRun
+)
+
 $ErrorActionPreference = 'Stop'
 
-$repoRoot = Split-Path -Parent $PSScriptRoot
-$source = Join-Path $repoRoot '.agents\skills'
-$codexDest = Join-Path $repoRoot '.codex\skills'
-$claudeDest = Join-Path $repoRoot '.claude\skills'
+$repoRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
+$source = [System.IO.Path]::GetFullPath((Join-Path $repoRoot '.agents\skills'))
+$codexDest = [System.IO.Path]::GetFullPath((Join-Path $repoRoot '.codex\skills'))
+$claudeDest = [System.IO.Path]::GetFullPath((Join-Path $repoRoot '.claude\skills'))
+
+function Assert-ExactRepoPath {
+    param(
+        [string]$Actual,
+        [string]$ExpectedRelative,
+        [string]$Label
+    )
+
+    $expected = [System.IO.Path]::GetFullPath((Join-Path $repoRoot $ExpectedRelative))
+    $actualNorm = $Actual.TrimEnd([System.IO.Path]::DirectorySeparatorChar, [System.IO.Path]::AltDirectorySeparatorChar)
+    $expectedNorm = $expected.TrimEnd([System.IO.Path]::DirectorySeparatorChar, [System.IO.Path]::AltDirectorySeparatorChar)
+
+    if (-not [string]::Equals($actualNorm, $expectedNorm, [System.StringComparison]::OrdinalIgnoreCase)) {
+        throw "$Label resolveu para caminho inesperado: $Actual (esperado: $expected)"
+    }
+}
+
+Assert-ExactRepoPath -Actual $source -ExpectedRelative '.agents\skills' -Label 'Fonte'
+Assert-ExactRepoPath -Actual $codexDest -ExpectedRelative '.codex\skills' -Label 'Destino Codex'
+Assert-ExactRepoPath -Actual $claudeDest -ExpectedRelative '.claude\skills' -Label 'Destino Claude'
+
+if (
+    [string]::Equals($source, $codexDest, [System.StringComparison]::OrdinalIgnoreCase) -or
+    [string]::Equals($source, $claudeDest, [System.StringComparison]::OrdinalIgnoreCase) -or
+    [string]::Equals($codexDest, $claudeDest, [System.StringComparison]::OrdinalIgnoreCase)
+) {
+    throw 'Fonte e destinos de sync precisam ser caminhos distintos.'
+}
 
 if (-not (Test-Path $source)) {
     throw "Fonte nao encontrada: $source"
@@ -37,6 +69,9 @@ function Invoke-RobocopyMirror {
     )
 
     $args = @($Src, $Dst, '/MIR', '/NFL', '/NDL', '/NJH', '/NJS')
+    if ($DryRun) {
+        $args += '/L'
+    }
     if ($ExcludeDirs.Count -gt 0) {
         $args += '/XD'
         $args += $ExcludeDirs
@@ -48,6 +83,10 @@ function Invoke-RobocopyMirror {
     if ($LASTEXITCODE -ge 8) {
         throw "robocopy falhou (exit code $LASTEXITCODE) copiando $Src -> $Dst"
     }
+}
+
+if ($DryRun) {
+    Write-Host 'Dry run ativo: nenhuma alteracao sera feita.'
 }
 
 Write-Host "Sincronizando $source -> $codexDest"
