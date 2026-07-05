@@ -1,0 +1,4 @@
+﻿interface:
+  display_name: "Frontend Patterns"
+  short_description: "React and Next.js UI patterns"
+  default_prompt: "Use $frontend-patterns to implement a maintainable React or Next.js UI with accessible, performant patterns."

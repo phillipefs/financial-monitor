@@ -1787,7 +1787,7 @@ body.research-v2.profile-field-v3::after{
 }
 .research-v2.profile-field-v3 .t-assets{
   width:100%;
-  min-width:1040px;
+  min-width:1280px;
   table-layout:fixed;
 }
 .research-v2.profile-field-v3 .t-assets th,
@@ -1796,6 +1796,8 @@ body.research-v2.profile-field-v3::after{
 }
 .research-v2.profile-field-v3 .t-assets th:nth-child(1),
 .research-v2.profile-field-v3 .t-assets td:nth-child(1){width:86px}
+.research-v2.profile-field-v3 .t-assets th:nth-child(2),
+.research-v2.profile-field-v3 .t-assets td:nth-child(2){width:320px}
 .research-v2.profile-field-v3 .t-assets th:nth-child(3),
 .research-v2.profile-field-v3 .t-assets td:nth-child(3){width:122px}
 .research-v2.profile-field-v3 .t-assets th:nth-child(4),
