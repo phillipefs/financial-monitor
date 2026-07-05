@@ -2611,6 +2611,19 @@ SIGNAL_CHANGES_CSS = """
 .research-v2 .wc-tl-cell:last-child{outline:1.5px solid var(--rm-text);outline-offset:1px}
 @media (max-width:980px){.research-v2 .wc-transition{justify-content:flex-start}}
 @media (max-width:560px){
+  .research-v2 #changes .highlight-head{
+    align-items:flex-start;
+    flex-wrap:wrap;
+    gap:7px 10px;
+  }
+  .research-v2 #changes .highlight-head h2{
+    flex:1 1 100%;
+    line-height:1.18;
+  }
+  .research-v2 #changes .highlight-head span{
+    white-space:normal;
+    text-align:left;
+  }
   .research-v2 .wc-row{
     grid-template-columns:38px minmax(0,1fr);
     align-items:start;
