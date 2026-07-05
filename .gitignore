@@ -217,6 +217,9 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
+# Local Claude Code permissions/settings. Project skills live under .claude/skills.
+.claude/settings.local.json
+
 # Financial Monitor — rolling KPI snapshot.
 # Versioned in the repo so the day-over-day KPI history is durable: the CI
 # workflow commits the updated file back after each run. (Previously gitignored
