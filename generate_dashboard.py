@@ -523,7 +523,7 @@ body.research-v2{
 }
 
 .research-v2 .t-assets{
-  min-width:840px;
+  min-width:960px;
   font-size:.84rem;
 }
 
@@ -553,7 +553,7 @@ body.research-v2{
 }
 .research-v2 .col-name{color:var(--rm-muted)}
 .research-v2 .th-r,
-.research-v2 .t-assets th:nth-child(8),
+.research-v2 .t-assets th:nth-child(9),
 .research-v2 .col-price,
 .research-v2 .col-rsi,
 .research-v2 .col-dd,
@@ -564,7 +564,8 @@ body.research-v2{
 .research-v2 .t-assets th:nth-child(4),
 .research-v2 .t-assets th:nth-child(5),
 .research-v2 .t-assets th:nth-child(6),
-.research-v2 .t-assets th:nth-child(8),
+.research-v2 .t-assets th:nth-child(7),
+.research-v2 .t-assets th:nth-child(9),
 .research-v2 .col-price,
 .research-v2 .col-rsi,
 .research-v2 .col-dd,
@@ -1791,7 +1792,7 @@ body.research-v2.profile-field-v3::after{
 }
 .research-v2.profile-field-v3 .t-assets{
   width:100%;
-  min-width:1280px;
+  min-width:1440px;
   table-layout:fixed;
 }
 .research-v2.profile-field-v3 .t-assets th,
@@ -1803,33 +1804,35 @@ body.research-v2.profile-field-v3::after{
 .research-v2.profile-field-v3 .t-assets th:nth-child(2),
 .research-v2.profile-field-v3 .t-assets td:nth-child(2){width:320px}
 .research-v2.profile-field-v3 .t-assets th:nth-child(3),
-.research-v2.profile-field-v3 .t-assets td:nth-child(3){width:122px}
+.research-v2.profile-field-v3 .t-assets td:nth-child(3){width:160px}
 .research-v2.profile-field-v3 .t-assets th:nth-child(4),
-.research-v2.profile-field-v3 .t-assets td:nth-child(4),
+.research-v2.profile-field-v3 .t-assets td:nth-child(4){width:122px}
 .research-v2.profile-field-v3 .t-assets th:nth-child(5),
-.research-v2.profile-field-v3 .t-assets td:nth-child(5){width:132px}
+.research-v2.profile-field-v3 .t-assets td:nth-child(5),
 .research-v2.profile-field-v3 .t-assets th:nth-child(6),
-.research-v2.profile-field-v3 .t-assets td:nth-child(6){width:106px}
+.research-v2.profile-field-v3 .t-assets td:nth-child(6){width:132px}
 .research-v2.profile-field-v3 .t-assets th:nth-child(7),
-.research-v2.profile-field-v3 .t-assets td:nth-child(7){width:116px}
+.research-v2.profile-field-v3 .t-assets td:nth-child(7){width:106px}
 .research-v2.profile-field-v3 .t-assets th:nth-child(8),
-.research-v2.profile-field-v3 .t-assets td:nth-child(8){width:128px}
+.research-v2.profile-field-v3 .t-assets td:nth-child(8){width:116px}
 .research-v2.profile-field-v3 .t-assets th:nth-child(9),
-.research-v2.profile-field-v3 .t-assets td:nth-child(9){width:138px}
-.research-v2.profile-field-v3 .t-assets th:nth-child(3),
+.research-v2.profile-field-v3 .t-assets td:nth-child(9){width:128px}
+.research-v2.profile-field-v3 .t-assets th:nth-child(10),
+.research-v2.profile-field-v3 .t-assets td:nth-child(10){width:138px}
+.research-v2.profile-field-v3 .t-assets th:nth-child(4),
 .research-v2.profile-field-v3 .col-price{
   text-align:right;
 }
-.research-v2.profile-field-v3 .t-assets th:nth-child(4),
 .research-v2.profile-field-v3 .t-assets th:nth-child(5),
 .research-v2.profile-field-v3 .t-assets th:nth-child(6),
+.research-v2.profile-field-v3 .t-assets th:nth-child(7),
 .research-v2.profile-field-v3 .col-rsi,
 .research-v2.profile-field-v3 .col-dd{
   text-align:right;
 }
-.research-v2.profile-field-v3 .t-assets th:nth-child(7),
 .research-v2.profile-field-v3 .t-assets th:nth-child(8),
 .research-v2.profile-field-v3 .t-assets th:nth-child(9),
+.research-v2.profile-field-v3 .t-assets th:nth-child(10),
 .research-v2.profile-field-v3 .col-chart,
 .research-v2.profile-field-v3 .col-sig,
 .research-v2.profile-field-v3 .col-vol{
@@ -1847,19 +1850,24 @@ body.research-v2.profile-field-v3::after{
   margin-right:auto;
 }
 .research-v2.profile-field-v3 .name-cell{
-  display:grid;
-  grid-template-columns:minmax(0,1fr) max-content;
-  align-items:center;
-  column-gap:10px;
+  display:block;
   min-width:0;
 }
 .research-v2.profile-field-v3 .name-cell .cn-txt{
   display:block;
   min-width:0;
 }
-.research-v2.profile-field-v3 .name-cell .sec-tag{
-  justify-self:start;
+.research-v2.profile-field-v3 .col-sector{
+  color:var(--rm-muted);
+}
+.research-v2.profile-field-v3 .col-sector .sec-tag{
   margin-left:0;
+  max-width:100%;
+}
+.research-v2.profile-field-v3 .sec-na{
+  color:var(--rm-dim);
+  font-family:var(--mono);
+  font-size:.72rem;
 }
 .research-v2.profile-field-v3 .fbtn{
   --btn-accent:var(--rm-cyan);
@@ -2559,7 +2567,7 @@ SIGNAL_CHANGES_CSS = """
 .research-v2.profile-field-v3 .wc-card.wc-today::before{background:linear-gradient(90deg,var(--rm-cyan),transparent 80%)}
 .research-v2.profile-field-v3 .wc-card.wc-week::before{background:linear-gradient(90deg,var(--rm-blue),transparent 80%)}
 .research-v2.profile-field-v3 .wc-card.wc-neartrigger::before{background:linear-gradient(90deg,var(--rm-yellow),transparent 80%)}
-.research-v2 .wc-row{grid-template-columns:44px minmax(0,1fr) auto}
+.research-v2 .wc-row{grid-template-columns:44px minmax(0,1fr) minmax(108px,auto)}
 .research-v2 .wc-row .highlight-rank{width:auto;min-width:38px;padding:0 7px;justify-self:start}
 .research-v2.profile-field-v3 .wc-today .highlight-rank{color:var(--rm-cyan);border-color:rgba(38,208,232,.28);background:rgba(38,208,232,.08)}
 .research-v2.profile-field-v3 .wc-week .highlight-rank{color:var(--rm-blue);border-color:rgba(122,162,255,.28);background:rgba(122,162,255,.08)}
@@ -2569,11 +2577,10 @@ SIGNAL_CHANGES_CSS = """
 .research-v2 .wc-transition .signal-badge:first-child{opacity:.55;filter:saturate(.6)}
 .research-v2 .wc-arr{color:var(--rm-dim);font-weight:800;font-family:var(--mono);margin:0 -1px}
 .research-v2 .wc-since{color:var(--rm-dim)}
-/* name + market share the title line (ticker dropped); name ellipsizes, market stays;
-   RSI + days stay together on line 2 (nowrap) instead of splitting to a 3rd line */
-.research-v2 .wc-row .highlight-title .highlight-name{flex:0 1 auto;min-width:0}
-.research-v2 .wc-row .highlight-title .highlight-chip.chip-market{flex:0 0 auto}
-.research-v2 .wc-row .highlight-meta{flex-wrap:nowrap}
+/* ticker + name mirror Top Opportunities; market stays in the metadata line */
+.research-v2 .wc-row .highlight-title .tk-badge{flex:0 0 auto}
+.research-v2 .wc-row .highlight-title .highlight-name{flex:1 1 auto;min-width:0}
+.research-v2 .wc-row .highlight-meta{flex-wrap:wrap}
 .research-v2 .nt-dist{font-weight:800;font-size:.76rem;white-space:nowrap}
 .research-v2 .nt-dist.nt-buy{color:var(--rm-green)}
 .research-v2 .nt-dist.nt-sell{color:var(--rm-red)}
@@ -2603,6 +2610,30 @@ SIGNAL_CHANGES_CSS = """
 .research-v2 .wc-tl-cell.s-s{background:rgba(255,100,114,.6);border-color:rgba(255,100,114,.75)}
 .research-v2 .wc-tl-cell:last-child{outline:1.5px solid var(--rm-text);outline-offset:1px}
 @media (max-width:980px){.research-v2 .wc-transition{justify-content:flex-start}}
+@media (max-width:560px){
+  .research-v2 .wc-row{
+    grid-template-columns:38px minmax(0,1fr);
+    align-items:start;
+    gap:8px 10px;
+  }
+  .research-v2 .wc-row .highlight-signal{
+    grid-column:2;
+    grid-row:2;
+    justify-content:flex-start;
+    min-width:0;
+    margin-top:1px;
+  }
+  .research-v2 .wc-row .highlight-name{
+    white-space:normal;
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+    line-height:1.25;
+  }
+  .research-v2 .wc-row .highlight-meta{gap:5px}
+  .research-v2 .wc-transition{flex-wrap:wrap}
+  .research-v2 .nt-dist{white-space:normal;line-height:1.25}
+}
 """
 
 SIGNAL_CHANGES_SCRIPT = r"""
@@ -3488,12 +3519,14 @@ def _build_sector_rows(df_sector: pd.DataFrame, market_key: str, dd_keys: set | 
                 chart_cell = '<span class="dd-na">—</span>'
             industria = str(r.get("Industria", "")) if show_sector else ""
             sector_attr = f' data-sector="{escape(industria, quote=True)}"' if show_sector else ""
-            name_inner = f'<span class="cn-txt">{escape(str(r["Name"]))}</span>' + (
-                _sector_badge(industria) if show_sector else "")
+            name_inner = f'<span class="cn-txt">{escape(str(r["Name"]))}</span>'
+            sector_html = _sector_badge(industria) if industria else '<span class="sec-na">-</span>'
+            sector_sort = industria.lower() if industria else ""
             rows_html += f'''
             <tr class="asset-row" data-signal="{r['Signal']}" data-market="{escape(market_key)}"{sector_attr} data-ticker="{escape(str(r['Ticker']).lower())}" data-name="{escape(str(r['Name']).lower())}" data-peak-close="{escape(peak_close, quote=True)}" data-peak-date="{escape(peak_date, quote=True)}" data-dd="{escape(_format_percent(drawdown), quote=True)}" data-yahoo="{escape(yahoo_url, quote=True)}" data-tv="{escape(tv_url or '', quote=True)}">
               <td class="col-tk"><span class="tk-badge">{escape(str(r['Ticker']))}</span></td>
               <td class="col-name"><div class="name-cell">{name_inner}</div></td>
+              <td class="col-sector" data-sort="{escape(sector_sort, quote=True)}">{sector_html}</td>
               <td class="col-price">{_format_price(r['Weekly_Close'])}</td>
               <td class="col-rsi">{_rsi_meter(rsi_w)}</td>
               <td class="col-rsi">{_rsi_meter(rsi_m)}</td>
@@ -3705,10 +3738,11 @@ def _build_change_row(c: dict) -> str:
         <div class="highlight-rank">{rank}</div>
         <div class="highlight-main">
           <div class="highlight-title">
+            <span class="tk-badge">{escape(c["ticker"])}</span>
             <span class="highlight-name">{escape(c["name"])}</span>
-            <span class="highlight-chip chip-market">{escape(_market_title(c["market"]))}</span>
           </div>
           <div class="highlight-meta">
+            <span class="highlight-chip chip-market">{escape(_market_title(c["market"]))}</span>
             {rsi_chip}
             <span class="highlight-chip wc-since">{when}</span>
           </div>
@@ -3776,10 +3810,11 @@ def _build_near_trigger_row(c: dict, index: int) -> str:
         <div class="highlight-rank">{index}</div>
         <div class="highlight-main">
           <div class="highlight-title">
+            <span class="tk-badge">{escape(c["ticker"])}</span>
             <span class="highlight-name">{escape(c["name"])}</span>
-            <span class="highlight-chip chip-market">{escape(_market_title(c["market"]))}</span>
           </div>
           <div class="highlight-meta">
+            <span class="highlight-chip chip-market">{escape(_market_title(c["market"]))}</span>
             <span class="highlight-chip">RSI W {c["rsi"]}</span>
           </div>
         </div>
@@ -3918,13 +3953,14 @@ def generate_html(df: pd.DataFrame, onchain: Dict, deltas: dict | None = None,
               <tr>
                 <th class="th-sort" data-col="0">Ticker</th>
                 <th class="th-sort" data-col="1">Name</th>
-                <th class="th-sort th-r" data-col="2">Price</th>
-                <th class="th-sort th-r" data-col="3">RSI W</th>
-                <th class="th-sort th-r" data-col="4">RSI M</th>
-                <th class="th-sort th-r" data-col="5">DD %</th>
+                <th class="th-sort" data-col="2">Sector</th>
+                <th class="th-sort th-r" data-col="3">Price</th>
+                <th class="th-sort th-r" data-col="4">RSI W</th>
+                <th class="th-sort th-r" data-col="5">RSI M</th>
+                <th class="th-sort th-r" data-col="6">DD %</th>
                 <th class="th-c">DD Chart</th>
                 <th>Signal</th>
-                <th class="th-sort th-c" data-col="8">Volume</th>
+                <th class="th-sort th-c" data-col="9">Volume</th>
               </tr>
             </thead>
             <tbody>{rows}

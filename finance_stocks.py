@@ -433,6 +433,7 @@ assets = [
     {"ticker": "XBI", "name": "Biotech ETF", "buy": 32, "sell": 70, "ultra": 40, "setor": "ETF"},
     {"ticker": "SPY", "name": "S&P 500 ETF", "buy": 30, "sell": 70, "ultra": 40, "setor": "ETF"},
     {"ticker": "QQQ", "name": "Nasdaq 100 ETF", "buy": 30, "sell": 70, "ultra": 40, "setor": "ETF"},
+    {"ticker": "IWM", "name": "Russell 2000 ETF", "buy": 30, "sell": 70, "ultra": 40, "setor": "ETF"},
     # --- Commodities (metais, energia e agrícolas) ---
     {"ticker": "GLD", "name": "Gold", "buy": 35, "sell": 70, "ultra": 45, "setor": "Commodities"},
     {"ticker": "SLV", "name": "Silver", "buy": 32, "sell": 70, "ultra": 40, "setor": "Commodities"},
