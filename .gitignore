@@ -220,9 +220,9 @@ __marimo__/
 # Local Claude Code permissions/settings. Project skills live under .claude/skills.
 .claude/settings.local.json
 
-# Financial Monitor — rolling KPI snapshot.
-# Versioned in the repo so the day-over-day KPI history is durable: the CI
-# workflow commits the updated file back after each run. (Previously gitignored
-# and kept only in actions/cache, which GitHub evicts after 7 days of no use.)
+# Financial Monitor rolling histories.
+# snapshot_history.json and signal_history.json are intentionally versioned so
+# GitHub Actions has durable history to commit back. Local dashboard runs read
+# them but do not persist changes unless FM_PERSIST_HISTORY=1 is set.
 
 ideas/

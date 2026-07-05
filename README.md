@@ -30,7 +30,8 @@ O arquivo final e um HTML estatico, pronto para abrir no navegador ou publicar n
 |-- generate_dashboard.py             # Gera dashboard.html
 |-- dashboard.html                    # Saida gerada localmente
 |-- requirements.txt                  # Dependencias Python
-`-- snapshot_history.json             # Historico versionado de KPIs
+|-- snapshot_history.json             # Historico versionado de KPIs
+`-- signal_history.json               # Historico versionado de sinais
 ```
 
 ## Requisitos
@@ -53,6 +54,14 @@ Gere o dashboard:
 python generate_dashboard.py
 ```
 
+Por padrao, a execucao local le os historicos versionados, mas nao grava
+`snapshot_history.json` nem `signal_history.json`. Isso evita conflito com os
+commits automaticos do GitHub Actions. Para gravar historicos localmente:
+
+```bash
+FM_PERSIST_HISTORY=1 python generate_dashboard.py
+```
+
 Abra o arquivo gerado:
 
 ```text
@@ -73,7 +82,7 @@ O workflow em `.github/workflows/update-dashboard.yml` executa:
 1. checkout do repositorio;
 2. instalacao do Python e dependencias;
 3. execucao de `generate_dashboard.py`;
-4. commit de `snapshot_history.json` quando houver mudanca;
+4. commit de `snapshot_history.json` e `signal_history.json` quando houver mudanca;
 5. copia de `dashboard.html` para `_site/index.html` e `_site/dashboard.html`;
 6. publicacao no GitHub Pages.
 

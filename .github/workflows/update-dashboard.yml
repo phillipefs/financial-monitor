@@ -18,7 +18,7 @@ on:
       - master
 
 permissions:
-  contents: write   # commit the updated snapshot_history.json back to the repo
+  contents: write   # commit the updated history files back to the repo
   pages: write
   id-token: write
 
@@ -34,7 +34,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
-          fetch-depth: 0   # full history so the snapshot commit-back can rebase safely
+          fetch-depth: 0   # full history so the history commit-back can rebase safely
 
       - name: Set up Python
         uses: actions/setup-python@v6
@@ -55,13 +55,14 @@ jobs:
           done
           exit 1
 
-      # snapshot_history.json is now versioned in the repo (durable across cache
-      # eviction). The checkout above restores it; the "Persist snapshot history"
-      # step below commits the updated file back after generation.
+      # snapshot_history.json and signal_history.json are versioned in the repo
+      # (durable across cache eviction). The checkout above restores them; the
+      # "Persist histories" step below commits the updated files after generation.
 
       - name: Generate dashboard
         env:
           YFINANCE_CACHE_DIR: ${{ runner.temp }}/yfinance-cache
+          FM_PERSIST_HISTORY: "1"
         run: |
           for attempt in 1 2 3; do
             echo "Generate dashboard attempt ${attempt}/3"
@@ -74,7 +75,7 @@ jobs:
           done
           exit 1
 
-      - name: Persist snapshot history
+      - name: Persist histories
         # Commit the rolling KPI + per-asset signal histories back to the repo so
         # they survive Actions cache eviction. Never fails the job — a bad push
         # just retries next run.
@@ -93,10 +94,10 @@ jobs:
             echo "History files unchanged — nothing to commit."
             exit 0
           fi
-          git commit -m "chore: update snapshot history [skip ci]"
+          git commit -m "chore: update dashboard histories [skip ci]"
           for attempt in 1 2 3; do
             if git push origin "HEAD:${GITHUB_REF_NAME}"; then
-              echo "snapshot history pushed."
+              echo "dashboard histories pushed."
               exit 0
             fi
             echo "push failed (attempt ${attempt}/3); rebasing onto latest ${GITHUB_REF_NAME}…"

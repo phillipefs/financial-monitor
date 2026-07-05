@@ -1792,7 +1792,7 @@ body.research-v2.profile-field-v3::after{
 }
 .research-v2.profile-field-v3 .t-assets{
   width:100%;
-  min-width:1440px;
+  min-width:1280px;
   table-layout:fixed;
 }
 .research-v2.profile-field-v3 .t-assets th,
@@ -1800,25 +1800,25 @@ body.research-v2.profile-field-v3::after{
   box-sizing:border-box;
 }
 .research-v2.profile-field-v3 .t-assets th:nth-child(1),
-.research-v2.profile-field-v3 .t-assets td:nth-child(1){width:86px}
+.research-v2.profile-field-v3 .t-assets td:nth-child(1){width:78px}
 .research-v2.profile-field-v3 .t-assets th:nth-child(2),
-.research-v2.profile-field-v3 .t-assets td:nth-child(2){width:320px}
+.research-v2.profile-field-v3 .t-assets td:nth-child(2){width:258px}
 .research-v2.profile-field-v3 .t-assets th:nth-child(3),
-.research-v2.profile-field-v3 .t-assets td:nth-child(3){width:160px}
+.research-v2.profile-field-v3 .t-assets td:nth-child(3){width:148px}
 .research-v2.profile-field-v3 .t-assets th:nth-child(4),
-.research-v2.profile-field-v3 .t-assets td:nth-child(4){width:122px}
+.research-v2.profile-field-v3 .t-assets td:nth-child(4){width:112px}
 .research-v2.profile-field-v3 .t-assets th:nth-child(5),
 .research-v2.profile-field-v3 .t-assets td:nth-child(5),
 .research-v2.profile-field-v3 .t-assets th:nth-child(6),
-.research-v2.profile-field-v3 .t-assets td:nth-child(6){width:132px}
+.research-v2.profile-field-v3 .t-assets td:nth-child(6){width:116px}
 .research-v2.profile-field-v3 .t-assets th:nth-child(7),
-.research-v2.profile-field-v3 .t-assets td:nth-child(7){width:106px}
+.research-v2.profile-field-v3 .t-assets td:nth-child(7){width:96px}
 .research-v2.profile-field-v3 .t-assets th:nth-child(8),
-.research-v2.profile-field-v3 .t-assets td:nth-child(8){width:116px}
+.research-v2.profile-field-v3 .t-assets td:nth-child(8){width:104px}
 .research-v2.profile-field-v3 .t-assets th:nth-child(9),
-.research-v2.profile-field-v3 .t-assets td:nth-child(9){width:128px}
+.research-v2.profile-field-v3 .t-assets td:nth-child(9){width:122px}
 .research-v2.profile-field-v3 .t-assets th:nth-child(10),
-.research-v2.profile-field-v3 .t-assets td:nth-child(10){width:138px}
+.research-v2.profile-field-v3 .t-assets td:nth-child(10){width:130px}
 .research-v2.profile-field-v3 .t-assets th:nth-child(4),
 .research-v2.profile-field-v3 .col-price{
   text-align:right;
@@ -3555,6 +3555,19 @@ SNAPSHOT_FILE = Path(__file__).parent / "snapshot_history.json"
 SNAPSHOT_KEYS = ["total", "UltraBuy", "Buy", "Neutral", "Sell"]
 
 
+def _should_persist_history() -> bool:
+    """Only CI should update versioned history files by default.
+
+    Local dashboard runs still read the committed histories and include the
+    current snapshot in memory, but they do not dirty the working tree unless
+    explicitly requested with FM_PERSIST_HISTORY=1.
+    """
+    override = os.getenv("FM_PERSIST_HISTORY")
+    if override is not None:
+        return override.strip().lower() in {"1", "true", "yes", "on"}
+    return os.getenv("GITHUB_ACTIONS", "").strip().lower() == "true"
+
+
 def _load_snapshot_history() -> list:
     try:
         data = json.loads(SNAPSHOT_FILE.read_text(encoding="utf-8"))
@@ -3574,7 +3587,7 @@ def _count_signals(df: pd.DataFrame) -> dict:
     }
 
 
-def _update_snapshot(df: pd.DataFrame) -> dict | None:
+def _update_snapshot(df: pd.DataFrame, persist: bool = True) -> dict | None:
     """Append today's signal counts to a rolling history file and return day-over-day
     deltas vs the most recent snapshot from a *previous* calendar day (São Paulo tz).
 
@@ -3598,12 +3611,13 @@ def _update_snapshot(df: pd.DataFrame) -> dict | None:
 
     history.append({"ts": now.isoformat(timespec="seconds"), "date": today, "counts": counts})
     history = history[-30:]
-    try:
-        SNAPSHOT_FILE.write_text(
-            json.dumps(history, ensure_ascii=False, indent=2), encoding="utf-8"
-        )
-    except OSError as exc:
-        print(f"  [WARN] Could not write snapshot history: {exc}")
+    if persist:
+        try:
+            SNAPSHOT_FILE.write_text(
+                json.dumps(history, ensure_ascii=False, indent=2), encoding="utf-8"
+            )
+        except OSError as exc:
+            print(f"  [WARN] Could not write snapshot history: {exc}")
 
     return deltas
 
@@ -3643,7 +3657,7 @@ def _load_signal_history() -> list:
         return []
 
 
-def _update_signal_history(df: pd.DataFrame) -> list:
+def _update_signal_history(df: pd.DataFrame, persist: bool = True) -> list:
     """Persist today's per-ticker signal/RSI snapshot and return the history.
 
     One entry per calendar day (São Paulo). Today's entry is OVERWRITTEN on
@@ -3667,13 +3681,14 @@ def _update_signal_history(df: pd.DataFrame) -> list:
     history.sort(key=lambda e: e["date"])
     history.append({"date": today, "signals": signals, "rsi_w": rsi_w})
     history = history[-SIGNAL_HISTORY_DAYS:]
-    try:
-        SIGNAL_HISTORY_FILE.write_text(
-            json.dumps(history, ensure_ascii=False, separators=(",", ":")),
-            encoding="utf-8",
-        )
-    except OSError as exc:
-        print(f"  [WARN] Could not write signal history: {exc}")
+    if persist:
+        try:
+            SIGNAL_HISTORY_FILE.write_text(
+                json.dumps(history, ensure_ascii=False, separators=(",", ":")),
+                encoding="utf-8",
+            )
+        except OSError as exc:
+            print(f"  [WARN] Could not write signal history: {exc}")
     return history
 
 
@@ -4306,8 +4321,11 @@ def main():
 
     print(f"  [OK] {len(df)} assets processed")
 
-    deltas = _update_snapshot(df)
-    signal_history = _update_signal_history(df)
+    persist_history = _should_persist_history()
+    deltas = _update_snapshot(df, persist=persist_history)
+    signal_history = _update_signal_history(df, persist=persist_history)
+    if not persist_history:
+        print("  [info] History files not persisted locally (set FM_PERSIST_HISTORY=1 to write).")
 
     print("[3/4] Building drawdown history (long weekly series)...")
     dd_data = build_drawdown_data(df)
