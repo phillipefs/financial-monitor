@@ -2821,7 +2821,7 @@ def _build_dd_entry(close: pd.Series, key: str, name: str, setor: str,
     }
 
 
-def build_drawdown_data(df: pd.DataFrame, anos: int = 20, min_points: int = 40) -> Dict[str, dict]:
+def build_drawdown_data(df: pd.DataFrame, anos: int = 30, min_points: int = 40) -> Dict[str, dict]:
     """Bulk-download long weekly history for every asset and build the drawdown payload.
 
     Returns a dict keyed by the normalized ticker (matching ``df['Ticker']``).
@@ -2908,7 +2908,7 @@ def _signal_class(signal: str) -> str:
 
 
 def _signal_label(signal: str) -> str:
-    return {"UltraBuy": "ULTRA BUY", "Buy": "BUY", "Neutral": "NEUTRAL", "Sell": "OVERBOUGHT"}.get(signal, signal)
+    return {"UltraBuy": "ULTRA BUY", "Buy": "BUY", "Neutral": "NEUTRAL", "Sell": "Overbought"}.get(signal, signal)
 
 
 def _zone_class(zone: str) -> str:
@@ -3831,7 +3831,7 @@ def _build_near_trigger_row(c: dict, index: int) -> str:
     is_sell = c["direction"] == "Sell"
     cls = "nt-sell" if is_sell else "nt-buy"
     arrow = "&uarr;" if is_sell else "&darr;"
-    to_label = "OVERBOUGHT" if is_sell else "Buy"
+    to_label = "Overbought" if is_sell else "Buy"
     plural = "" if c["dist"] == 1 else "s"
     return f'''
       <div class="highlight-row wc-row" data-goto="{escape(c["ticker"], quote=True)}" title="Click to locate in the RSI Matrix">
@@ -4225,7 +4225,7 @@ body{{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:
     <div class="mix-row"><span class="signal-badge sig-ultrabuy">Ultra Buy</span><div class="mix-bar"><span style="--w:{ub_pct:.1f}%;--c:var(--rm-green)"></span></div><strong>{ub}</strong></div>
     <div class="mix-row"><span class="signal-badge sig-buy">Buy</span><div class="mix-bar"><span style="--w:{b_pct:.1f}%;--c:var(--rm-green)"></span></div><strong>{b}</strong></div>
     <div class="mix-row"><span class="signal-badge sig-neutral">Neutral</span><div class="mix-bar"><span style="--w:{n_pct:.1f}%;--c:var(--rm-blue)"></span></div><strong>{n}</strong></div>
-    <div class="mix-row"><span class="signal-badge sig-sell">OVERBOUGHT</span><div class="mix-bar"><span style="--w:{s_pct:.1f}%;--c:var(--rm-red)"></span></div><strong>{s}</strong></div>
+    <div class="mix-row"><span class="signal-badge sig-sell">Overbought</span><div class="mix-bar"><span style="--w:{s_pct:.1f}%;--c:var(--rm-red)"></span></div><strong>{s}</strong></div>
   </aside>
 </section>
 
@@ -4265,7 +4265,7 @@ body{{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:
       <button class="fbtn" data-filter="UltraBuy">Ultra Buy <span class="fc">{ub}</span></button>
       <button class="fbtn" data-filter="Buy">Buy <span class="fc">{b}</span></button>
       <button class="fbtn" data-filter="Neutral">Neutral <span class="fc">{n}</span></button>
-      <button class="fbtn" data-filter="Sell">OVERBOUGHT <span class="fc">{s}</span></button>
+      <button class="fbtn" data-filter="Sell">Overbought <span class="fc">{s}</span></button>
     </div>
     <div class="filter-group market-filter">
       <label>Filter Market</label>
