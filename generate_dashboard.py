@@ -1112,7 +1112,7 @@ RESEARCH_V2_SCRIPT = r"""
   function updatePanelSummary(panel, counts) {
     setSummary(panel.querySelector('.ps-green'), counts.opportunities, 'opportunity', 'opportunities');
     setSummary(panel.querySelector('.ps-blue'), counts.neutral, 'neutral', 'neutral');
-    setSummary(panel.querySelector('.ps-red'), counts.overbought, 'overbought', 'overbought');
+    setSummary(panel.querySelector('.ps-red'), counts.overbought, 'OVERBOUGHT', 'OVERBOUGHT');
   }
 
   function syncPanels() {
@@ -2774,6 +2774,28 @@ def _round_px(v: float) -> float:
     return round(v, 4)
 
 
+def _trim_brazilian_adjustment_breaks(close: pd.Series, key: str) -> pd.Series:
+    """Trim pre-adjustment artifacts from older Brazilian equity histories."""
+    if len(close) < 3:
+        return close
+
+    returns = close.pct_change()
+    breaks = returns[(returns >= 3.0) | (returns <= -0.95)].dropna()
+    if breaks.empty:
+        return close
+
+    start = breaks.index[-1]
+    trimmed = close.loc[start:]
+    if len(trimmed) >= 40:
+        print(
+            f"  [clean] {key}: trimmed history before "
+            f"{pd.Timestamp(start).strftime('%Y-%m-%d')} "
+            f"(adjustment break {float(breaks.iloc[-1]) * 100:.1f}%)"
+        )
+        return trimmed
+    return close
+
+
 def _build_dd_entry(close: pd.Series, key: str, name: str, setor: str,
                     anos: int, min_points: int) -> Optional[dict]:
     """Build one drawdown payload entry from a raw weekly Close series.
@@ -2784,6 +2806,10 @@ def _build_dd_entry(close: pd.Series, key: str, name: str, setor: str,
     close = close[close > 0]
     if len(close) < min_points:
         return None
+    if setor == "Brasil":
+        close = _trim_brazilian_adjustment_breaks(close, key)
+        if len(close) < min_points:
+            return None
     # Limita à janela dos últimos `anos` (bounda o tamanho do payload).
     cutoff = close.index[-1] - pd.DateOffset(years=anos)
     trimmed = close[close.index >= cutoff]
@@ -2908,7 +2934,7 @@ def _signal_class(signal: str) -> str:
 
 
 def _signal_label(signal: str) -> str:
-    return {"UltraBuy": "ULTRA BUY", "Buy": "BUY", "Neutral": "NEUTRAL", "Sell": "Overbought"}.get(signal, signal)
+    return {"UltraBuy": "ULTRA BUY", "Buy": "BUY", "Neutral": "NEUTRAL", "Sell": "OVERBOUGHT"}.get(signal, signal)
 
 
 def _zone_class(zone: str) -> str:
@@ -3464,7 +3490,7 @@ def _build_sector_pulse(df: pd.DataFrame) -> tuple:
           <div class="sc-stats">
             <span><b class="{_rsi_zone_cls(avg_rsi)}">{avg_rsi}</b> avg RSI W</span>
             <span>{avg_rsi_m_html} avg RSI M</span>
-            <span class="sc-flow"><b>{ops}</b> buy · <b>{sell}</b> overbought</span>
+            <span class="sc-flow"><b>{ops}</b> buy · <b>{sell}</b> OVERBOUGHT</span>
           </div>
           <div class="sc-foot">
             <span class="sc-mkt">{mkt.strip()}</span>
@@ -3831,7 +3857,7 @@ def _build_near_trigger_row(c: dict, index: int) -> str:
     is_sell = c["direction"] == "Sell"
     cls = "nt-sell" if is_sell else "nt-buy"
     arrow = "&uarr;" if is_sell else "&darr;"
-    to_label = "Overbought" if is_sell else "Buy"
+    to_label = "OVERBOUGHT" if is_sell else "Buy"
     plural = "" if c["dist"] == 1 else "s"
     return f'''
       <div class="highlight-row wc-row" data-goto="{escape(c["ticker"], quote=True)}" title="Click to locate in the RSI Matrix">
@@ -3897,7 +3923,7 @@ def _build_signal_changes_section(changes: dict, near_triggers: list) -> str:
                 for i, c in enumerate(near_triggers, start=1)),
         "No asset within 4 points of a buy/sell trigger.",
         f"Neutral assets within {NEAR_TRIGGER_MAX} RSI-W points of their own buy/"
-        "sell threshold — buy candidates first, then overbought, closest first.",
+        "sell threshold — buy candidates first, then OVERBOUGHT, closest first.",
     )
     return f'''
 <section class="desk-highlights wc-section" id="changes" aria-label="Signal changes and watch-zone">{today_card}{week_card}{nt_card}
@@ -3973,7 +3999,7 @@ def generate_html(df: pd.DataFrame, onchain: Dict, deltas: dict | None = None,
         <div class="panel-summary">
           <span class="ps-item ps-green">{s_counts.get("UltraBuy", 0) + s_counts.get("Buy", 0)} opportunities</span>
           <span class="ps-item ps-blue">{s_counts.get("Neutral", 0)} neutral</span>
-          <span class="ps-item ps-red">{s_counts.get("Sell", 0)} overbought</span>
+          <span class="ps-item ps-red">{s_counts.get("Sell", 0)} OVERBOUGHT</span>
         </div>
         <div class="table-wrap">
           <table class="t-assets">
@@ -4235,7 +4261,7 @@ body{{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:
   <div class="kpi-cell"><div class="kpi-num" style="color:var(--rm-green)">{ub}</div><div class="kpi-label">Extreme asymmetry</div>{_kpi_delta_html("UltraBuy", deltas)}</div>
   <div class="kpi-cell"><div class="kpi-num" style="color:var(--rm-green)">{b}</div><div class="kpi-label">Buy zone</div>{_kpi_delta_html("Buy", deltas)}</div>
   <div class="kpi-cell"><div class="kpi-num" style="color:var(--rm-blue)">{n}</div><div class="kpi-label">Neutral</div>{_kpi_delta_html("Neutral", deltas)}</div>
-  <div class="kpi-cell"><div class="kpi-num" style="color:var(--rm-red)">{s}</div><div class="kpi-label">Overbought</div>{_kpi_delta_html("Sell", deltas)}</div>
+  <div class="kpi-cell"><div class="kpi-num" style="color:var(--rm-red)">{s}</div><div class="kpi-label">OVERBOUGHT</div>{_kpi_delta_html("Sell", deltas)}</div>
 </div>
 
 {signal_changes_html}
@@ -4265,7 +4291,7 @@ body{{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:
       <button class="fbtn" data-filter="UltraBuy">Ultra Buy <span class="fc">{ub}</span></button>
       <button class="fbtn" data-filter="Buy">Buy <span class="fc">{b}</span></button>
       <button class="fbtn" data-filter="Neutral">Neutral <span class="fc">{n}</span></button>
-      <button class="fbtn" data-filter="Sell">Overbought <span class="fc">{s}</span></button>
+      <button class="fbtn" data-filter="Sell">OVERBOUGHT <span class="fc">{s}</span></button>
     </div>
     <div class="filter-group market-filter">
       <label>Filter Market</label>
