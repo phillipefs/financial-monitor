@@ -554,10 +554,11 @@ body.research-v2{
 }
 .research-v2 .col-name{color:var(--rm-muted)}
 .research-v2 .th-r,
-.research-v2 .t-assets th:nth-child(9),
+.research-v2 .t-assets th:nth-child(10),
 .research-v2 .col-price,
 .research-v2 .col-rsi,
 .research-v2 .col-dd,
+.research-v2 .col-cagr,
 .research-v2 .col-sig{
   text-align:center;
 }
@@ -567,9 +568,11 @@ body.research-v2{
 .research-v2 .t-assets th:nth-child(6),
 .research-v2 .t-assets th:nth-child(7),
 .research-v2 .t-assets th:nth-child(9),
+.research-v2 .t-assets th:nth-child(10),
 .research-v2 .col-price,
 .research-v2 .col-rsi,
 .research-v2 .col-dd,
+.research-v2 .col-cagr,
 .research-v2 .col-sig{
   width:12%;
 }
@@ -582,6 +585,11 @@ body.research-v2{
 .research-v2 .col-sig .signal-badge{
   margin-inline:auto;
 }
+.research-v2 .col-cagr{font-variant-numeric:tabular-nums;white-space:nowrap}
+.research-v2 .cagr-value{font-weight:800}
+.research-v2 .cagr-pos{color:var(--rm-green)}
+.research-v2 .cagr-neg{color:var(--rm-red)}
+.research-v2 .cagr-flat{color:var(--rm-muted)}
 
 .research-v2 .rsi-pill{
   border-radius:5px;
@@ -1801,9 +1809,9 @@ body.research-v2.profile-field-v3::after{
   box-sizing:border-box;
 }
 .research-v2.profile-field-v3 .t-assets th:nth-child(1),
-.research-v2.profile-field-v3 .t-assets td:nth-child(1){width:78px}
+.research-v2.profile-field-v3 .t-assets td:nth-child(1){width:88px}
 .research-v2.profile-field-v3 .t-assets th:nth-child(2),
-.research-v2.profile-field-v3 .t-assets td:nth-child(2){width:258px}
+.research-v2.profile-field-v3 .t-assets td:nth-child(2){width:220px}
 .research-v2.profile-field-v3 .t-assets th:nth-child(3),
 .research-v2.profile-field-v3 .t-assets td:nth-child(3){width:148px}
 .research-v2.profile-field-v3 .t-assets th:nth-child(4),
@@ -1815,11 +1823,13 @@ body.research-v2.profile-field-v3::after{
 .research-v2.profile-field-v3 .t-assets th:nth-child(7),
 .research-v2.profile-field-v3 .t-assets td:nth-child(7){width:96px}
 .research-v2.profile-field-v3 .t-assets th:nth-child(8),
-.research-v2.profile-field-v3 .t-assets td:nth-child(8){width:104px}
+.research-v2.profile-field-v3 .t-assets td:nth-child(8){width:64px}
 .research-v2.profile-field-v3 .t-assets th:nth-child(9),
-.research-v2.profile-field-v3 .t-assets td:nth-child(9){width:122px}
+.research-v2.profile-field-v3 .t-assets td:nth-child(9){width:88px}
 .research-v2.profile-field-v3 .t-assets th:nth-child(10),
-.research-v2.profile-field-v3 .t-assets td:nth-child(10){width:130px}
+.research-v2.profile-field-v3 .t-assets td:nth-child(10){width:122px}
+.research-v2.profile-field-v3 .t-assets th:nth-child(11),
+.research-v2.profile-field-v3 .t-assets td:nth-child(11){width:110px}
 .research-v2.profile-field-v3 .t-assets th:nth-child(4),
 .research-v2.profile-field-v3 .col-price{
   text-align:right;
@@ -1827,13 +1837,15 @@ body.research-v2.profile-field-v3::after{
 .research-v2.profile-field-v3 .t-assets th:nth-child(5),
 .research-v2.profile-field-v3 .t-assets th:nth-child(6),
 .research-v2.profile-field-v3 .t-assets th:nth-child(7),
+.research-v2.profile-field-v3 .t-assets th:nth-child(9),
 .research-v2.profile-field-v3 .col-rsi,
-.research-v2.profile-field-v3 .col-dd{
+.research-v2.profile-field-v3 .col-dd,
+.research-v2.profile-field-v3 .col-cagr{
   text-align:right;
 }
 .research-v2.profile-field-v3 .t-assets th:nth-child(8),
-.research-v2.profile-field-v3 .t-assets th:nth-child(9),
 .research-v2.profile-field-v3 .t-assets th:nth-child(10),
+.research-v2.profile-field-v3 .t-assets th:nth-child(11),
 .research-v2.profile-field-v3 .col-chart,
 .research-v2.profile-field-v3 .col-sig,
 .research-v2.profile-field-v3 .col-vol{
@@ -2337,6 +2349,8 @@ svg.dd-chart{display:block;width:100%;height:auto;overflow:visible}
 .dd-mklbl{font-size:10.5px;font-weight:800}
 .dd-cross{stroke:var(--rm-muted);stroke-width:1;opacity:.55;stroke-dasharray:3 3}
 .dd-hov{fill:var(--rm-red);stroke:#fff;stroke-width:1.5}
+.dd-hov-date{fill:var(--rm-dim);font-family:var(--mono);font-size:10.5px;font-weight:800;
+  paint-order:stroke;stroke:var(--rm-surface);stroke-width:4px;stroke-linejoin:round}
 .dd-tip{position:fixed;pointer-events:none;z-index:99999;background:var(--rm-surface-3);color:var(--rm-text);
   border:1px solid var(--rm-line);border-radius:8px;padding:6px 9px;font-size:.72rem;
   box-shadow:var(--rm-shadow);opacity:0;transition:opacity .1s;white-space:nowrap;
@@ -2399,6 +2413,7 @@ DRAWDOWN_SCRIPT = r"""
 
   function cummax(a){ let m=-Infinity, o=new Array(a.length); for(let i=0;i<a.length;i++){ if(a[i]>m)m=a[i]; o[i]=m; } return o; }
   function dateAt(baseMs,i){ return new Date(baseMs + i*7*86400000); }
+  function monthYear(d){ return d.toLocaleDateString("en-US",{month:"short",year:"numeric"}).replace(" ","/"); }
   function yearTicks(baseMs,n){
     const out=[]; let last=null;
     for(let i=0;i<n;i++){ const y=dateAt(baseMs,i).getFullYear(); if(y!==last){ out.push({i,y}); last=y; } }
@@ -2451,7 +2466,7 @@ DRAWDOWN_SCRIPT = r"""
 
   /* ---- main underwater chart ---- */
   function drawDD(host,a,dd,baseMs,n){
-    const s=a.st, H=330, PADT=14, PADB=26;
+    const s=a.st, H=330, PADT=14, PADB=40;
     const minv=Math.min.apply(null,dd), dHi=Math.max(Math.max.apply(null,dd),0);
     const domHi=dHi>0?dHi*1.15:0.6, domLo=minv*1.06;
     const yOf=v=> PADT + (domHi-v)/(domHi-domLo)*(H-PADT-PADB);
@@ -2485,10 +2500,11 @@ DRAWDOWN_SCRIPT = r"""
       '<circle class="dd-dot" cx="'+cx+'" cy="'+cy+'" r="4" fill="var(--rm-yellow)"/>'+
       '<line class="dd-cross" id="ddC" y1="'+PADT+'" y2="'+(H-PADB)+'" style="opacity:0"/>'+
       '<circle class="dd-hov" id="ddH" r="4.5" style="opacity:0"/>'+
+      '<text class="dd-hov-date" id="ddD" y="'+(H-21)+'" text-anchor="middle" style="opacity:0"></text>'+
       '<rect id="ddHit" x="'+PADL+'" y="0" width="'+(W-PADL-PADR)+'" height="'+H+'" fill="transparent" style="cursor:crosshair"/>'+
       '</svg>';
     const svg=host.querySelector("svg"), hit=host.querySelector("#ddHit");
-    const cross=host.querySelector("#ddC"), hov=host.querySelector("#ddH");
+    const cross=host.querySelector("#ddC"), hov=host.querySelector("#ddH"), dateLabel=host.querySelector("#ddD");
     hit.addEventListener("pointermove",ev=>{
       const r=svg.getBoundingClientRect(); const vx=(ev.clientX-r.left)/r.width*W;
       let i=Math.round((vx-PADL)/(W-PADL-PADR)*(n-1)); i=Math.max(0,Math.min(n-1,i));
@@ -2496,11 +2512,15 @@ DRAWDOWN_SCRIPT = r"""
       cross.setAttribute("x1",px); cross.setAttribute("x2",px); cross.style.opacity=1;
       hov.setAttribute("cx",px); hov.setAttribute("cy",py); hov.style.opacity=1;
       const d=dateAt(baseMs,i);
+      dateLabel.textContent=monthYear(d);
+      dateLabel.setAttribute("x",px);
+      dateLabel.setAttribute("text-anchor",px<PADL+42?"start":px>W-PADR-42?"end":"middle");
+      dateLabel.style.opacity=1;
       tip.innerHTML='<span class="td">'+d.toLocaleDateString("en-GB")+'</span><br><b>'+fmtPct(dd[i])+'</b> from ATH';
       tip.style.opacity=1; tip.style.left=(ev.clientX+14)+"px"; tip.style.top=(ev.clientY-10)+"px";
       if(window._ddSync) window._ddSync(i);
     });
-    hit.addEventListener("pointerleave",()=>{ cross.style.opacity=0; hov.style.opacity=0; tip.style.opacity=0;
+    hit.addEventListener("pointerleave",()=>{ cross.style.opacity=0; hov.style.opacity=0; dateLabel.style.opacity=0; tip.style.opacity=0;
       if(window._ddSync) window._ddSync(-1); });
   }
 
@@ -3532,9 +3552,9 @@ def _build_sector_pulse(df: pd.DataFrame) -> tuple:
     return pulse, chips
 
 
-def _build_sector_rows(df_sector: pd.DataFrame, market_key: str, dd_keys: set | None = None,
+def _build_sector_rows(df_sector: pd.DataFrame, market_key: str, dd_data: dict | None = None,
                        show_sector: bool = False) -> str:
-    dd_keys = dd_keys or set()
+    dd_data = dd_data or {}
     rows_html = ""
     for sig in SIGNAL_ORDER:
         sub = df_sector[df_sector["Signal"] == sig].copy()
@@ -3567,7 +3587,21 @@ def _build_sector_rows(df_sector: pd.DataFrame, market_key: str, dd_keys: set | 
                 r.get("Yahoo_Ticker"),
             )
             tkey = str(r["Ticker"])
-            if tkey in dd_keys:
+            dd_entry = dd_data.get(tkey)
+            cagr_sort = ""
+            cagr_cell = '<span class="dd-na">-</span>'
+            if dd_entry:
+                cagr = float(dd_entry["st"]["cagr"])
+                cagr_class = "cagr-pos" if cagr > 0 else "cagr-neg" if cagr < 0 else "cagr-flat"
+                cagr_title = (
+                    f'CAGR over the {float(dd_entry["years"]):.1f}-year drawdown history '
+                    f'({dd_entry.get("fonte", "Yahoo")})'
+                )
+                cagr_cell = (
+                    f'<span class="cagr-value {cagr_class}" title="{escape(cagr_title, quote=True)}">'
+                    f'{"+" if cagr > 0 else ""}{_format_percent(cagr)}</span>'
+                )
+                cagr_sort = f"{cagr:.6f}"
                 chart_cell = (
                     f'<button class="dd-ico" type="button" data-dd="{escape(tkey, quote=True)}" '
                     f'title="Historical drawdown" aria-label="Historical drawdown of {escape(str(r["Name"]), quote=True)}">'
@@ -3590,6 +3624,7 @@ def _build_sector_rows(df_sector: pd.DataFrame, market_key: str, dd_keys: set | 
               <td class="col-rsi">{_rsi_meter(rsi_m)}</td>
               <td class="col-dd"><span class="dd-pill {dd_cls}" title="{escape(peak_meta, quote=True)}">{_format_percent(drawdown)}</span></td>
               <td class="col-chart">{chart_cell}</td>
+              <td class="col-cagr" data-sort="{cagr_sort}">{cagr_cell}</td>
               <td class="col-sig"><span class="signal-badge {sig_cls}">{sig_lbl}</span></td>
               <td class="col-vol" data-sort="{vol_sort}">{_volume_badge(r.get("Vol_High"), vol_ratio)}</td>
             </tr>'''
@@ -3967,7 +4002,6 @@ def generate_html(df: pd.DataFrame, onchain: Dict, deltas: dict | None = None,
                   dd_data: dict | None = None, with_sectors: bool = True,
                   signal_history: list | None = None) -> str:
     dd_data = dd_data or {}
-    dd_keys = set(dd_data.keys())
     dd_data_json = json.dumps(dd_data, separators=(",", ":"), ensure_ascii=False)
     sector_pulse_html, sector_filter_html = (
         _build_sector_pulse(df) if with_sectors else ("", ""))
@@ -4012,7 +4046,7 @@ def generate_html(df: pd.DataFrame, onchain: Dict, deltas: dict | None = None,
         s_counts = sub["Signal"].value_counts().to_dict()
         market_buttons += f'''<button class="fbtn" data-market="{grupo.lower()}">{title} <span class="fc">{cnt}</span></button>'''
 
-        rows = _build_sector_rows(sub, grupo.lower(), dd_keys, show_sector=with_sectors)
+        rows = _build_sector_rows(sub, grupo.lower(), dd_data, show_sector=with_sectors)
         sector_panels += f'''
       <div class="sector-panel {"active" if first else ""}" id="panel-{grupo.lower()}">
         <div class="panel-summary">
@@ -4032,8 +4066,9 @@ def generate_html(df: pd.DataFrame, onchain: Dict, deltas: dict | None = None,
                 <th class="th-sort th-r" data-col="5">RSI M</th>
                 <th class="th-sort th-r" data-col="6">DD %</th>
                 <th class="th-c">DD Chart</th>
+                <th class="th-sort th-r" data-col="8" title="Compound annual growth rate over the DD Chart history">CAGR</th>
                 <th>Signal</th>
-                <th class="th-sort th-c" data-col="9">Volume</th>
+                <th class="th-sort th-c" data-col="10">Volume</th>
               </tr>
             </thead>
             <tbody>{rows}
