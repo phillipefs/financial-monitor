@@ -25,7 +25,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 os.environ.setdefault("CURL_CA_BUNDLE", "")
 
 # Reuse the existing data collection logic.
-from finance_stocks import collect_rsi_data, _download_batch
+from finance_stocks import assets, collect_rsi_data, _download_batch
 from onchain import (
     classify_mvrv_btc,
     classify_mvrv_eth,
@@ -2214,10 +2214,17 @@ RESEARCH_V3_SCRIPT = r"""
 
   const navLinks = Array.prototype.slice.call(document.querySelectorAll('.v2nav-link'));
   const navTargets = navLinks
+    .filter(function(link){ return !link.hasAttribute('data-contract-tab'); })
     .map(function(link){ return document.querySelector(link.getAttribute('href')); })
     .filter(Boolean);
   function targetTop(el){ return el.getBoundingClientRect().top + window.scrollY; }
   function updateNavSpy(){
+    if(document.body.classList.contains('data-contract-open')){
+      navLinks.forEach(function(link){
+        link.classList.toggle('active', link.hasAttribute('data-contract-tab'));
+      });
+      return;
+    }
     if(!navTargets.length) return;
     const marker = window.scrollY + 170;
     let current = navTargets[0];
@@ -2742,6 +2749,182 @@ SIGNAL_CHANGES_SCRIPT = r"""
 """
 
 
+DATA_CONTRACT_CSS = r"""
+/* ===== DATA CONTRACT ===== */
+.research-v2.profile-field-v3 .data-contract-board{
+  max-width:1320px;margin:20px auto 0;padding:0 clamp(16px,3vw,34px);
+}
+.research-v2.profile-field-v3 .dq-shell{
+  overflow:hidden;border:1px solid var(--rm-line);border-radius:var(--radius);
+  background:linear-gradient(165deg,var(--rm-surface) 0%,var(--rm-surface-2) 100%);
+}
+.research-v2.profile-field-v3 .dq-head{
+  display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px;align-items:start;
+  padding:22px;border-bottom:1px solid var(--rm-line-soft);
+}
+.research-v2.profile-field-v3 .dq-head h2{margin:6px 0;font-size:1.05rem;line-height:1.2}
+.research-v2.profile-field-v3 .dq-head p{max-width:790px;color:var(--rm-muted);font-size:.82rem}
+.research-v2.profile-field-v3 .dq-verdict{
+  min-width:210px;padding:12px 14px;border:1px solid rgba(53,208,143,.32);
+  border-radius:var(--radius-sm);background:rgba(53,208,143,.07);text-align:right;
+}
+.research-v2.profile-field-v3 .dq-verdict.is-warn{
+  border-color:rgba(241,188,75,.35);background:rgba(241,188,75,.08);
+}
+.research-v2.profile-field-v3 .dq-verdict.is-error{
+  border-color:rgba(240,111,104,.38);background:rgba(240,111,104,.08);
+}
+.research-v2.profile-field-v3 .dq-verdict span{
+  display:block;color:var(--rm-green);font-family:var(--mono);font-size:.64rem;
+  font-weight:800;text-transform:uppercase;
+}
+.research-v2.profile-field-v3 .dq-verdict.is-warn span{color:var(--rm-yellow)}
+.research-v2.profile-field-v3 .dq-verdict.is-error span{color:var(--rm-red)}
+.research-v2.profile-field-v3 .dq-verdict strong{display:block;margin-top:4px;font-size:.9rem}
+.research-v2.profile-field-v3 .dq-stats{
+  display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:1px;background:var(--rm-line-soft);
+}
+.research-v2.profile-field-v3 .dq-stat{padding:14px 16px;background:rgba(7,9,11,.26)}
+.research-v2.profile-field-v3 .dq-stat strong{
+  display:block;color:var(--rm-text);font-family:var(--mono);font-size:1.25rem;line-height:1;
+}
+.research-v2.profile-field-v3 .dq-stat span{
+  display:block;margin-top:6px;color:var(--rm-dim);font-size:.66rem;font-weight:800;text-transform:uppercase;
+}
+.research-v2.profile-field-v3 .dq-stat.is-ok strong{color:var(--rm-green)}
+.research-v2.profile-field-v3 .dq-stat.is-info strong{color:var(--rm-cyan)}
+.research-v2.profile-field-v3 .dq-stat.is-warn strong{color:var(--rm-yellow)}
+.research-v2.profile-field-v3 .dq-stat.is-error strong{color:var(--rm-red)}
+.research-v2.profile-field-v3 .dq-grid{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;padding:18px 22px 8px;
+}
+.research-v2.profile-field-v3 .dq-card{
+  padding:14px;border:1px solid var(--rm-line-soft);border-radius:var(--radius-sm);background:rgba(7,9,11,.22);
+}
+.research-v2.profile-field-v3 .dq-card.is-error{border-color:rgba(240,111,104,.42);background:rgba(240,111,104,.06)}
+.research-v2.profile-field-v3 .dq-card.is-warn{border-color:rgba(241,188,75,.38);background:rgba(241,188,75,.055)}
+.research-v2.profile-field-v3 .dq-card.is-info{border-color:rgba(67,215,232,.28);background:rgba(67,215,232,.045)}
+.research-v2.profile-field-v3 .dq-card-top{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;
+}
+.research-v2.profile-field-v3 .dq-card h3{margin:0;font-size:.84rem}
+.research-v2.profile-field-v3 .dq-card p{color:var(--rm-muted);font-size:.76rem;line-height:1.45}
+.research-v2.profile-field-v3 .dq-card dl{
+  display:grid;grid-template-columns:auto 1fr;gap:6px 12px;margin-top:12px;font-size:.72rem;
+}
+.research-v2.profile-field-v3 .dq-card dt{color:var(--rm-dim);font-weight:800;text-transform:uppercase}
+.research-v2.profile-field-v3 .dq-card dd{color:var(--rm-text);font-family:var(--mono);text-align:right}
+.research-v2.profile-field-v3 .dq-chip{
+  display:inline-flex;align-items:center;justify-content:center;min-height:20px;padding:3px 8px;
+  border-radius:999px;font-family:var(--mono);font-size:.58rem;font-weight:800;text-transform:uppercase;white-space:nowrap;
+}
+.research-v2.profile-field-v3 .dq-chip.ok{color:var(--rm-green);background:rgba(53,208,143,.12);border:1px solid rgba(53,208,143,.28)}
+.research-v2.profile-field-v3 .dq-chip.info{color:var(--rm-cyan);background:rgba(67,215,232,.10);border:1px solid rgba(67,215,232,.25)}
+.research-v2.profile-field-v3 .dq-chip.warn{color:var(--rm-yellow);background:rgba(241,188,75,.11);border:1px solid rgba(241,188,75,.32)}
+.research-v2.profile-field-v3 .dq-chip.error{color:var(--rm-red);background:rgba(240,111,104,.11);border:1px solid rgba(240,111,104,.34)}
+.research-v2.profile-field-v3 .dq-table-wrap{
+  margin:12px 22px 22px;border:1px solid var(--rm-line-soft);border-radius:var(--radius-sm);overflow:auto;
+}
+.research-v2.profile-field-v3 .dq-table{width:100%;min-width:1160px;border-collapse:collapse;font-size:.74rem}
+.research-v2.profile-field-v3 .dq-table th,.research-v2.profile-field-v3 .dq-table td{
+  padding:10px 12px;border-bottom:1px solid var(--rm-line-soft);text-align:left;vertical-align:top;
+}
+.research-v2.profile-field-v3 .dq-table th{
+  position:sticky;top:0;z-index:1;color:var(--rm-dim);background:var(--rm-surface-2);
+  font-size:.62rem;font-weight:900;text-transform:uppercase;
+}
+.research-v2.profile-field-v3 .dq-table tr:last-child td{border-bottom:none}
+.research-v2.profile-field-v3 .dq-table code{color:var(--rm-text);font-family:var(--mono);font-weight:800}
+.research-v2.profile-field-v3 .dq-muted{color:var(--rm-muted)}
+.research-v2.profile-field-v3 .dq-action{
+  border:1px solid var(--rm-line);border-radius:999px;background:rgba(67,215,232,.06);
+  color:var(--rm-cyan);cursor:pointer;font-size:.66rem;font-weight:800;padding:5px 9px;text-transform:uppercase;
+}
+.research-v2.profile-field-v3 .dq-action:hover{border-color:rgba(67,215,232,.5);background:rgba(67,215,232,.12)}
+.research-v2.profile-field-v3 .asset-row.dq-focus td{animation:dqPulse 1.6s ease}
+body.research-v2.profile-field-v3:not(.data-contract-open) .data-contract-board{display:none}
+body.research-v2.profile-field-v3.data-contract-open .executive-board,
+body.research-v2.profile-field-v3.data-contract-open .kpi-strip,
+body.research-v2.profile-field-v3.data-contract-open .desk-highlights,
+body.research-v2.profile-field-v3.data-contract-open .main,
+body.research-v2.profile-field-v3.data-contract-open .footer{display:none!important}
+body.research-v2.profile-field-v3.data-contract-open .data-contract-board{
+  display:block;min-height:calc(100vh - var(--chrome-h,118px));padding-top:28px;padding-bottom:42px;
+}
+@keyframes dqPulse{
+  0%,100%{box-shadow:none}25%{box-shadow:inset 0 0 0 999px rgba(67,215,232,.055)}
+}
+@media(max-width:960px){
+  .research-v2.profile-field-v3 .dq-head{grid-template-columns:1fr}
+  .research-v2.profile-field-v3 .dq-verdict{text-align:left}
+  .research-v2.profile-field-v3 .dq-stats{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .research-v2.profile-field-v3 .dq-grid{grid-template-columns:1fr}
+}
+@media(max-width:560px){
+  .research-v2.profile-field-v3 .dq-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .research-v2.profile-field-v3 .dq-head,.research-v2.profile-field-v3 .dq-grid{padding-left:14px;padding-right:14px}
+  .research-v2.profile-field-v3 .dq-table-wrap{margin-left:14px;margin-right:14px}
+}
+"""
+
+
+DATA_CONTRACT_SCRIPT = r"""
+(function(){
+  "use strict";
+  var contractTab = document.querySelector('[data-contract-tab]');
+  var navLinks = Array.prototype.slice.call(document.querySelectorAll('.v2nav-link'));
+  var mainLinks = navLinks.filter(function(link){ return !link.hasAttribute('data-contract-tab'); });
+  var search = document.getElementById('globalSearch');
+  var normalPlaceholder = search ? search.getAttribute('placeholder') : '';
+
+  function setActive(link){
+    navLinks.forEach(function(item){ item.classList.toggle('active', item === link); });
+  }
+  function filterContract(){
+    if(!search || !document.body.classList.contains('data-contract-open')) return;
+    var query = search.value.trim().toLowerCase();
+    document.querySelectorAll('.dq-asset-row').forEach(function(row){
+      row.hidden = Boolean(query) && (row.getAttribute('data-search') || '').indexOf(query) === -1;
+    });
+  }
+  function openContract(){
+    document.body.classList.add('data-contract-open');
+    if(contractTab) setActive(contractTab);
+    if(search) search.setAttribute('placeholder', 'Search ticker, source, or data alert');
+    filterContract();
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+  function closeContract(){
+    document.body.classList.remove('data-contract-open');
+    if(search) search.setAttribute('placeholder', normalPlaceholder);
+  }
+  if(contractTab){
+    contractTab.addEventListener('click', function(event){ event.preventDefault();openContract(); });
+  }
+  mainLinks.forEach(function(link){ link.addEventListener('click', closeContract); });
+  if(search) search.addEventListener('input', filterContract);
+
+  document.querySelectorAll('[data-dq-goto]').forEach(function(button){
+    button.addEventListener('click', function(){
+      var ticker = (button.getAttribute('data-dq-goto') || '').toLowerCase();
+      var row = Array.prototype.find.call(document.querySelectorAll('.asset-row'), function(item){
+        return (item.getAttribute('data-ticker') || '').toLowerCase() === ticker;
+      });
+      if(!row) return;
+      closeContract();
+      var matrixLink = document.querySelector('.v2nav-link[href="#matrix"]');
+      if(matrixLink) setActive(matrixLink);
+      window.setTimeout(function(){
+        row.scrollIntoView({behavior:'smooth',block:'center'});
+        row.classList.add('dq-focus');
+        window.setTimeout(function(){ row.classList.remove('dq-focus'); },1800);
+      },80);
+    });
+  });
+})();
+"""
+
+
 # ==============================================================
 # DATA FETCHING
 # ==============================================================
@@ -2828,8 +3011,12 @@ def _build_dd_entry(close: pd.Series, key: str, name: str, setor: str,
     close = close[close > 0]
     if len(close) < min_points:
         return None
+    adjustment = "Native close" if fonte == "CoinMetrics" else "Auto-adjusted close"
     if setor == "Brasil":
+        original_start = close.index[0]
         close = _trim_brazilian_adjustment_breaks(close, key)
+        if close.index[0] != original_start:
+            adjustment = "Auto-adjusted + break trim"
         if len(close) < min_points:
             return None
     # Limita à janela dos últimos `anos` (bounda o tamanho do payload).
@@ -2846,6 +3033,7 @@ def _build_dd_entry(close: pd.Series, key: str, name: str, setor: str,
     cur_dd = float(dd.iloc[-1])
     years = max((close.index[-1] - close.index[0]).days / 365.25, 0.01)
     cagr = (float(close.iloc[-1]) / float(close.iloc[0])) ** (1.0 / years) - 1.0
+    as_of = pd.Timestamp(close.index[-1])
 
     return {
         "name": name,
@@ -2854,6 +3042,10 @@ def _build_dd_entry(close: pd.Series, key: str, name: str, setor: str,
         "fonte": fonte,
         "years": round(years, 1),
         "start": close.index[0].strftime("%Y-%m-%d"),
+        "as_of": as_of.strftime("%Y-%m-%d"),
+        "bars": int(len(close)),
+        "requested_years": int(anos),
+        "adjustment": adjustment,
         "p": [_round_px(v) for v in close.values],
         "st": {
             "pn": round(float(close.iloc[-1]), 2),
@@ -4008,6 +4200,213 @@ def _build_signal_timeline_payload(history: list) -> Dict[str, list]:
     return payload
 
 
+def _configured_ticker(asset: dict) -> str:
+    """Return the configured asset key in the same format rendered by the dashboard."""
+    if asset.get("display_ticker"):
+        return str(asset["display_ticker"])
+    ticker = str(asset["ticker"])
+    setor = str(asset.get("setor", ""))
+    if ticker.startswith("^"):
+        ticker = ticker[1:]
+    if setor == "Cripto" and ticker.endswith("-USD"):
+        ticker = ticker[:-4]
+    if setor == "Brasil" and ticker.endswith(".SA"):
+        ticker = ticker[:-3]
+    return ticker
+
+
+def _build_data_contract(df: pd.DataFrame, dd_data: dict) -> str:
+    """Build a per-asset, evidence-based data diagnostic for this exact run."""
+    configured = [(_configured_ticker(asset), asset) for asset in assets]
+    rendered = {str(row["Ticker"]): row for _, row in df.iterrows()}
+
+    as_of_dates = []
+    for entry in dd_data.values():
+        try:
+            as_of_dates.append(date.fromisoformat(str(entry.get("as_of", ""))))
+        except ValueError:
+            pass
+    reference_date = max(as_of_dates) if as_of_dates else None
+
+    diagnostics = []
+    for ticker, asset in configured:
+        row = rendered.get(ticker)
+        entry = dd_data.get(ticker)
+        alerts = []
+        severity = "ok"
+        status = "Ready"
+
+        if row is None:
+            alerts.append("MISSING_ASSET")
+            severity, status = "error", "Missing"
+        elif entry is None:
+            alerts.append("MISSING_DD_HISTORY")
+            severity, status = "warn", "Review"
+        else:
+            source = str(entry.get("fonte", "Yahoo"))
+            if "fallback" in source.lower():
+                alerts.append("FALLBACK_USED")
+            if float(entry.get("years", 0.0) or 0.0) < 5.0:
+                alerts.append("SHORT_HISTORY")
+            try:
+                asset_as_of = date.fromisoformat(str(entry.get("as_of", "")))
+                if reference_date and (reference_date - asset_as_of).days > 14:
+                    alerts.append("STALE_DATA")
+            except ValueError:
+                alerts.append("AS_OF_UNAVAILABLE")
+
+            if "STALE_DATA" in alerts or "AS_OF_UNAVAILABLE" in alerts:
+                severity, status = "warn", "Review"
+            elif "FALLBACK_USED" in alerts:
+                severity, status = "info", "Fallback"
+            elif "SHORT_HISTORY" in alerts:
+                severity, status = "info", "Limited"
+
+        if row is None:
+            source_text = "Yahoo RSI / no usable snapshot"
+            as_of_text = "—"
+            bars_text = "0"
+            adjustment = "—"
+            impact = "Excluded from breadth and signal counts."
+        elif entry is None:
+            source_text = "Yahoo RSI / DD unavailable"
+            as_of_text = "—"
+            bars_text = "—"
+            adjustment = "—"
+            impact = "RSI remains usable; historical risk metrics are unavailable."
+        else:
+            dd_source = str(entry.get("fonte", "Yahoo"))
+            source_text = f"Yahoo RSI / {dd_source} DD"
+            as_of_text = str(entry.get("as_of") or "—")
+            bars = int(entry.get("bars", len(entry.get("p", []))) or 0)
+            years = float(entry.get("years", 0.0) or 0.0)
+            bars_text = f"{bars} weekly / {years:.1f}y"
+            adjustment = str(entry.get("adjustment") or "Not reported")
+            if "STALE_DATA" in alerts or "AS_OF_UNAVAILABLE" in alerts:
+                impact = "Do not treat the latest signal as current without review."
+            elif "FALLBACK_USED" in alerts:
+                impact = "Usable with the fallback source disclosed."
+            elif "SHORT_HISTORY" in alerts:
+                impact = "Historical DD statistics cover less than the 5Y table horizon."
+            else:
+                impact = "Snapshot and historical risk series are available."
+
+        diagnostics.append({
+            "ticker": ticker,
+            "name": str(asset.get("name", "")),
+            "rendered": row is not None,
+            "severity": severity,
+            "status": status,
+            "source": source_text,
+            "as_of": as_of_text,
+            "bars": bars_text,
+            "adjustment": adjustment,
+            "alerts": alerts,
+            "impact": impact,
+        })
+
+    severity_order = {"error": 0, "warn": 1, "info": 2, "ok": 3}
+    diagnostics.sort(key=lambda item: (severity_order[item["severity"]], item["ticker"]))
+    expected_count = len(configured)
+    rendered_count = len(rendered)
+    missing_count = sum(not item["rendered"] for item in diagnostics)
+    dd_ready_count = sum(ticker in dd_data for ticker, _ in configured)
+    fallback_count = sum("FALLBACK_USED" in item["alerts"] for item in diagnostics)
+    short_history_count = sum("SHORT_HISTORY" in item["alerts"] for item in diagnostics)
+    inspection_count = sum(item["severity"] == "warn" for item in diagnostics)
+
+    if missing_count:
+        verdict_class = "is-error"
+        verdict_label = "Publish with warning"
+        verdict_detail = f"{missing_count} missing / {inspection_count} to review"
+    elif inspection_count:
+        verdict_class = "is-warn"
+        verdict_label = "Review data quality"
+        verdict_detail = f"{inspection_count} asset(s) need inspection"
+    else:
+        verdict_class = ""
+        verdict_label = "Contract passed"
+        verdict_detail = f"{rendered_count}/{expected_count} assets ready"
+
+    adjusted_count = sum(
+        bool(entry.get("adjustment")) and entry.get("adjustment") != "Native close"
+        for entry in dd_data.values()
+    )
+    cleaned_count = sum("break trim" in str(entry.get("adjustment", "")) for entry in dd_data.values())
+    latest_label = reference_date.isoformat() if reference_date else "unavailable"
+
+    table_rows = []
+    for item in diagnostics:
+        alert_text = ", ".join(item["alerts"]) if item["alerts"] else "NONE"
+        action = (
+            f'<button class="dq-action" data-dq-goto="{escape(item["ticker"], quote=True)}">Find row</button>'
+            if item["rendered"] else ""
+        )
+        search_text = " ".join([
+            item["ticker"], item["name"], item["source"], item["adjustment"], alert_text
+        ]).lower()
+        table_rows.append(f'''
+          <tr class="dq-asset-row" data-search="{escape(search_text, quote=True)}">
+            <td><code>{escape(item["ticker"])}</code><br><span class="dq-muted">{escape(item["name"])}</span></td>
+            <td><span class="dq-chip {item["severity"]}">{escape(item["status"])}</span></td>
+            <td>{escape(item["source"])}</td>
+            <td><code>{escape(item["as_of"])}</code></td>
+            <td>{escape(item["bars"])}</td>
+            <td>{escape(item["adjustment"])}</td>
+            <td><code>{escape(alert_text)}</code></td>
+            <td class="dq-muted">{escape(item["impact"])}</td>
+            <td>{action}</td>
+          </tr>''')
+
+    return f'''
+<section class="data-contract-board" id="data-contract" aria-label="Data contract diagnostics">
+  <div class="dq-shell">
+    <div class="dq-head">
+      <div>
+        <div class="eyebrow">Data contract · current run</div>
+        <h2>Coverage, history, source, and adjustment diagnostics.</h2>
+        <p>Calculated from the same inputs that generated this dashboard. Yahoo series are auto-adjusted; split events are not independently verified.</p>
+      </div>
+      <div class="dq-verdict {verdict_class}">
+        <span>{escape(verdict_label)}</span>
+        <strong>{escape(verdict_detail)}</strong>
+      </div>
+    </div>
+    <div class="dq-stats" aria-label="Data quality summary">
+      <div class="dq-stat"><strong>{expected_count}</strong><span>Configured</span></div>
+      <div class="dq-stat is-ok"><strong>{rendered_count}</strong><span>Rendered</span></div>
+      <div class="dq-stat {'is-error' if missing_count else 'is-ok'}"><strong>{missing_count}</strong><span>Missing</span></div>
+      <div class="dq-stat {'is-ok' if dd_ready_count == rendered_count else 'is-warn'}"><strong>{dd_ready_count}</strong><span>DD histories</span></div>
+      <div class="dq-stat {'is-info' if fallback_count else 'is-ok'}"><strong>{fallback_count}</strong><span>Fallback sources</span></div>
+      <div class="dq-stat {'is-warn' if short_history_count else 'is-ok'}"><strong>{short_history_count}</strong><span>Short histories</span></div>
+    </div>
+    <div class="dq-grid">
+      <article class="dq-card {'is-error' if missing_count else 'is-info'}">
+        <div class="dq-card-top"><h3>Coverage contract</h3><span class="dq-chip {'error' if missing_count else 'ok'}">{'Gap' if missing_count else 'Complete'}</span></div>
+        <p>The configured universe and rendered matrix are compared on every generation. Missing assets remain visible here instead of silently reducing breadth.</p>
+        <dl><dt>Configured</dt><dd>{expected_count}</dd><dt>Rendered</dt><dd>{rendered_count}</dd></dl>
+      </article>
+      <article class="dq-card {'is-warn' if short_history_count else 'is-info'}">
+        <div class="dq-card-top"><h3>History sufficiency</h3><span class="dq-chip {'warn' if short_history_count else 'ok'}">{short_history_count} short</span></div>
+        <p>Assets with under five years of weekly history remain usable, but their historical drawdown distribution has less context than the 5Y table horizon.</p>
+        <dl><dt>Latest as of</dt><dd>{escape(latest_label)}</dd><dt>Under 5 years</dt><dd>{short_history_count}</dd></dl>
+      </article>
+      <article class="dq-card is-info">
+        <div class="dq-card-top"><h3>Source &amp; adjustment</h3><span class="dq-chip info">Traceable</span></div>
+        <p>RSI snapshots come from Yahoo. Historical DD uses Yahoo or CoinMetrics, with fallback and Brazilian adjustment-break cleanup recorded per asset.</p>
+        <dl><dt>Adjusted series</dt><dd>{adjusted_count}</dd><dt>Break trims</dt><dd>{cleaned_count}</dd></dl>
+      </article>
+    </div>
+    <div class="dq-table-wrap">
+      <table class="dq-table">
+        <thead><tr><th>Asset</th><th>Status</th><th>Source / Series</th><th>As of</th><th>Bars / Horizon</th><th>Adjustment</th><th>Alerts</th><th>Decision impact</th><th></th></tr></thead>
+        <tbody>{''.join(table_rows)}</tbody>
+      </table>
+    </div>
+  </div>
+</section>'''
+
+
 def generate_html(df: pd.DataFrame, onchain: Dict, deltas: dict | None = None,
                   dd_data: dict | None = None, with_sectors: bool = True,
                   signal_history: list | None = None) -> str:
@@ -4032,6 +4431,7 @@ def generate_html(df: pd.DataFrame, onchain: Dict, deltas: dict | None = None,
     eth_card = _build_onchain_card("ETH", onchain.get("ETH")) if onchain else ""
     fng_card = _build_fng_card(onchain.get("FNG") if onchain else None)
     executive_rankings = _build_executive_rankings(df)
+    data_contract_html = _build_data_contract(df, dd_data)
 
     # Signal changes ("What changed") + Watch-zone + per-asset timeline payload
     signal_history = signal_history or []
@@ -4274,6 +4674,7 @@ body{{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:
 {RESEARCH_V3_CSS}
 {DRAWDOWN_CSS}
 {SIGNAL_CHANGES_CSS}
+{DATA_CONTRACT_CSS}
 </style>
 </head>
 <body class="research-v2 profile-field-v3">
@@ -4301,6 +4702,7 @@ body{{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:
   <a href="#onchain" class="v2nav-link">On-Chain</a>
   <a href="#sectors" class="v2nav-link">Sector Pulse</a>
   <a href="#matrix" class="v2nav-link">RSI Matrix</a>
+  <a href="#data-contract" class="v2nav-link" data-contract-tab="true">Data Contract</a>
 </nav>
 
 <!-- EXECUTIVE BRIEF -->
@@ -4318,6 +4720,8 @@ body{{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:
     <div class="mix-row"><span class="signal-badge sig-sell">Overbought</span><div class="mix-bar"><span style="--w:{s_pct:.1f}%;--c:var(--rm-red)"></span></div><strong>{s}</strong></div>
   </aside>
 </section>
+
+{data_contract_html}
 
 <!-- KPI STRIP -->
 <div class="kpi-strip" aria-label="Key indicators">
@@ -4386,6 +4790,9 @@ body{{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:
 </script>
 <script>
 {SIGNAL_CHANGES_SCRIPT}
+</script>
+<script>
+{DATA_CONTRACT_SCRIPT}
 </script>
 </body>
 </html>'''
