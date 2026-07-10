@@ -30,6 +30,7 @@ from onchain import (
     classify_mvrv_btc,
     classify_mvrv_eth,
     coinmetrics_price_realized_mvrv,
+    coinmetrics_weekly_price_series,
     fear_greed_index,
 )
 
@@ -1112,7 +1113,7 @@ RESEARCH_V2_SCRIPT = r"""
   function updatePanelSummary(panel, counts) {
     setSummary(panel.querySelector('.ps-green'), counts.opportunities, 'opportunity', 'opportunities');
     setSummary(panel.querySelector('.ps-blue'), counts.neutral, 'neutral', 'neutral');
-    setSummary(panel.querySelector('.ps-red'), counts.overbought, 'OVERBOUGHT', 'OVERBOUGHT');
+    setSummary(panel.querySelector('.ps-red'), counts.overbought, 'Overbought', 'Overbought');
   }
 
   function syncPanels() {
@@ -2797,7 +2798,7 @@ def _trim_brazilian_adjustment_breaks(close: pd.Series, key: str) -> pd.Series:
 
 
 def _build_dd_entry(close: pd.Series, key: str, name: str, setor: str,
-                    anos: int, min_points: int) -> Optional[dict]:
+                    anos: int, min_points: int, fonte: str = "Yahoo") -> Optional[dict]:
     """Build one drawdown payload entry from a raw weekly Close series.
 
     Returns ``None`` when the history is too short. Pure computation — shared by
@@ -2829,7 +2830,7 @@ def _build_dd_entry(close: pd.Series, key: str, name: str, setor: str,
         "name": name,
         "tk": key,
         "moeda": _dd_currency(setor),
-        "fonte": "Yahoo",
+        "fonte": fonte,
         "years": round(years, 1),
         "start": close.index[0].strftime("%Y-%m-%d"),
         "p": [_round_px(v) for v in close.values],
@@ -2864,28 +2865,46 @@ def build_drawdown_data(df: pd.DataFrame, anos: int = 30, min_points: int = 40) 
         yahoo_symbol = str(r.get("Yahoo_Ticker") or _yahoo_symbol(key, setor))
         specs.append((key, setor, yahoo_symbol, str(r["Name"])))
 
-    batch = _download_batch([s[2] for s in specs], interval="1wk", period="max")
+    yahoo_specs = [s for s in specs if s[1] != "Cripto"]
+    batch = _download_batch([s[2] for s in yahoo_specs], interval="1wk", period="max")
 
     data: Dict[str, dict] = {}
     total = len(specs)
     fallbacks = 0
     for pos, (key, setor, sym, name) in enumerate(specs, start=1):
         try:
-            sub = batch.get(sym)
-            if sub is not None and "Close" in sub.columns:
-                close = sub["Close"]
+            fonte = "Yahoo"
+            if setor == "Cripto":
+                cm_asset = key.lower()
+                try:
+                    close = coinmetrics_weekly_price_series(cm_asset)
+                    if len(close.dropna()) < min_points:
+                        raise RuntimeError(
+                            f"CoinMetrics returned only {len(close.dropna())} weekly points "
+                            f"(need {min_points})"
+                        )
+                    fonte = "CoinMetrics"
+                except Exception as cm_exc:
+                    print(f"  [WARN] drawdown CoinMetrics {cm_asset}: {cm_exc}")
+                    close = yf.Ticker(sym).history(period="max", interval="1wk")["Close"]
+                    fonte = "Yahoo fallback"
+                    fallbacks += 1
             else:
-                # Missing from the batch → single-ticker retry (keeps the chart
-                # icon from vanishing on a transient batch hiccup).
-                close = yf.Ticker(sym).history(period="max", interval="1wk")["Close"]
-                fallbacks += 1
+                sub = batch.get(sym)
+                if sub is not None and "Close" in sub.columns:
+                    close = sub["Close"]
+                else:
+                    # Missing from the batch -> single-ticker retry.
+                    close = yf.Ticker(sym).history(period="max", interval="1wk")["Close"]
+                    fonte = "Yahoo fallback"
+                    fallbacks += 1
 
-            entry = _build_dd_entry(close, key, name, setor, anos, min_points)
+            entry = _build_dd_entry(close, key, name, setor, anos, min_points, fonte)
             if entry is None:
                 print(f"  [skip] {sym}: histórico curto")
                 continue
             data[key] = entry
-            print(f"  [ok] ({pos}/{total}) {sym}: {len(entry['p'])} pts")
+            print(f"  [ok] ({pos}/{total}) {sym}: {len(entry['p'])} pts ({fonte})")
         except Exception as exc:
             print(f"  [WARN] drawdown {sym}: {exc}")
 
@@ -3857,7 +3876,7 @@ def _build_near_trigger_row(c: dict, index: int) -> str:
     is_sell = c["direction"] == "Sell"
     cls = "nt-sell" if is_sell else "nt-buy"
     arrow = "&uarr;" if is_sell else "&darr;"
-    to_label = "OVERBOUGHT" if is_sell else "Buy"
+    to_label = "Overbought" if is_sell else "Buy"
     plural = "" if c["dist"] == 1 else "s"
     return f'''
       <div class="highlight-row wc-row" data-goto="{escape(c["ticker"], quote=True)}" title="Click to locate in the RSI Matrix">
@@ -3923,7 +3942,7 @@ def _build_signal_changes_section(changes: dict, near_triggers: list) -> str:
                 for i, c in enumerate(near_triggers, start=1)),
         "No asset within 4 points of a buy/sell trigger.",
         f"Neutral assets within {NEAR_TRIGGER_MAX} RSI-W points of their own buy/"
-        "sell threshold — buy candidates first, then OVERBOUGHT, closest first.",
+        "sell threshold — buy candidates first, then Overbought, closest first.",
     )
     return f'''
 <section class="desk-highlights wc-section" id="changes" aria-label="Signal changes and watch-zone">{today_card}{week_card}{nt_card}
@@ -3999,7 +4018,7 @@ def generate_html(df: pd.DataFrame, onchain: Dict, deltas: dict | None = None,
         <div class="panel-summary">
           <span class="ps-item ps-green">{s_counts.get("UltraBuy", 0) + s_counts.get("Buy", 0)} opportunities</span>
           <span class="ps-item ps-blue">{s_counts.get("Neutral", 0)} neutral</span>
-          <span class="ps-item ps-red">{s_counts.get("Sell", 0)} OVERBOUGHT</span>
+          <span class="ps-item ps-red">{s_counts.get("Sell", 0)} Overbought</span>
         </div>
         <div class="table-wrap">
           <table class="t-assets">
@@ -4261,7 +4280,7 @@ body{{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:
   <div class="kpi-cell"><div class="kpi-num" style="color:var(--rm-green)">{ub}</div><div class="kpi-label">Extreme asymmetry</div>{_kpi_delta_html("UltraBuy", deltas)}</div>
   <div class="kpi-cell"><div class="kpi-num" style="color:var(--rm-green)">{b}</div><div class="kpi-label">Buy zone</div>{_kpi_delta_html("Buy", deltas)}</div>
   <div class="kpi-cell"><div class="kpi-num" style="color:var(--rm-blue)">{n}</div><div class="kpi-label">Neutral</div>{_kpi_delta_html("Neutral", deltas)}</div>
-  <div class="kpi-cell"><div class="kpi-num" style="color:var(--rm-red)">{s}</div><div class="kpi-label">OVERBOUGHT</div>{_kpi_delta_html("Sell", deltas)}</div>
+  <div class="kpi-cell"><div class="kpi-num" style="color:var(--rm-red)">{s}</div><div class="kpi-label">Overbought</div>{_kpi_delta_html("Sell", deltas)}</div>
 </div>
 
 {signal_changes_html}
@@ -4291,7 +4310,7 @@ body{{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:
       <button class="fbtn" data-filter="UltraBuy">Ultra Buy <span class="fc">{ub}</span></button>
       <button class="fbtn" data-filter="Buy">Buy <span class="fc">{b}</span></button>
       <button class="fbtn" data-filter="Neutral">Neutral <span class="fc">{n}</span></button>
-      <button class="fbtn" data-filter="Sell">OVERBOUGHT <span class="fc">{s}</span></button>
+      <button class="fbtn" data-filter="Sell">Overbought <span class="fc">{s}</span></button>
     </div>
     <div class="filter-group market-filter">
       <label>Filter Market</label>

@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import time
 from datetime import datetime
-from typing import Optional, Tuple, Dict, Callable
+from typing import Optional, Tuple, Dict, Callable, List
 
+import pandas as pd
 import requests
 
 CM_BASE = "https://community-api.coinmetrics.io/v4"
@@ -17,6 +18,135 @@ UA = (
 DEBUG = False  # True = inclui cap/supply no quadro
 
 MvrvSnapshot = Tuple[float, float, float, float, float]
+
+
+def _coinmetrics_request_json(
+    url: str,
+    params: Optional[Dict[str, object]] = None,
+    retries: int = 3,
+    wait_sec: int = 3,
+    timeout: int = 30,
+    verify_ssl: bool = True,
+) -> Dict:
+    last_exc: Optional[Exception] = None
+    for attempt in range(1, retries + 1):
+        try:
+            r = requests.get(
+                url,
+                params=params,
+                headers={"User-Agent": UA, "Accept": "application/json"},
+                timeout=timeout,
+                verify=verify_ssl,
+            )
+        except requests.RequestException as exc:
+            last_exc = exc
+        else:
+            if r.status_code == 200:
+                try:
+                    return r.json()
+                except ValueError as exc:
+                    last_exc = exc
+            elif r.status_code in (408, 429) or 500 <= r.status_code < 600:
+                last_exc = RuntimeError(f"CoinMetrics HTTP {r.status_code}: {r.text[:500]}")
+            else:
+                # Invalid requests and unavailable Community metrics cannot recover
+                # on a later attempt; the caller can immediately use its fallback.
+                raise RuntimeError(f"CoinMetrics HTTP {r.status_code}: {r.text[:500]}")
+
+        if attempt < retries:
+            time.sleep(wait_sec * attempt)
+
+    raise RuntimeError(f"CoinMetrics request failed after {retries} attempts: {last_exc}")
+
+
+def coinmetrics_asset_metric_rows(
+    asset: str,
+    metrics: str,
+    frequency: str = "1d",
+    page_size: int = 10000,
+    retries: int = 3,
+    wait_sec: int = 3,
+    timeout: int = 30,
+    verify_ssl: bool = True,
+) -> List[Dict]:
+    """Fetch all paginated rows from /timeseries/asset-metrics."""
+    url = f"{CM_BASE}/timeseries/asset-metrics"
+    params: Dict[str, object] = {
+        "assets": asset.lower(),
+        "metrics": metrics,
+        "frequency": frequency,
+        "page_size": page_size,
+        "paging_from": "start",
+    }
+    rows: List[Dict] = []
+    next_url: Optional[str] = None
+
+    while True:
+        js = _coinmetrics_request_json(
+            next_url or url,
+            params=None if next_url else params,
+            retries=retries,
+            wait_sec=wait_sec,
+            timeout=timeout,
+            verify_ssl=verify_ssl,
+        )
+        rows.extend(js.get("data", []))
+        next_url = js.get("next_page_url")
+        if not next_url:
+            return rows
+
+
+def coinmetrics_weekly_price_series(
+    asset: str,
+    retries: int = 3,
+    wait_sec: int = 3,
+    timeout: int = 30,
+    verify_ssl: bool = True,
+) -> pd.Series:
+    """Return weekly USD close history for a crypto asset from CoinMetrics.
+
+    PriceUSD is preferred. CapMrktCurUSD / SplyCur is kept as a fallback because
+    those two metrics are broadly documented and match the current price formula.
+    """
+    rows = coinmetrics_asset_metric_rows(
+        asset=asset,
+        metrics="PriceUSD,CapMrktCurUSD,SplyCur",
+        retries=retries,
+        wait_sec=wait_sec,
+        timeout=timeout,
+        verify_ssl=verify_ssl,
+    )
+    if not rows:
+        raise RuntimeError(f"CoinMetrics returned no rows for {asset}")
+
+    df = pd.DataFrame(rows)
+    if "time" not in df.columns:
+        raise RuntimeError(f"CoinMetrics response missing time for {asset}")
+
+    df["time"] = pd.to_datetime(df["time"], utc=True, errors="coerce").dt.tz_convert(None)
+    df = df.dropna(subset=["time"]).copy()
+    for col in ("PriceUSD", "CapMrktCurUSD", "SplyCur"):
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce")
+
+    price = pd.Series(index=df.index, dtype="float64")
+    if "PriceUSD" in df.columns:
+        price = df["PriceUSD"].copy()
+
+    if {"CapMrktCurUSD", "SplyCur"}.issubset(df.columns):
+        implied = df["CapMrktCurUSD"] / df["SplyCur"]
+        price = price.fillna(implied)
+
+    out = (
+        pd.Series(price.values, index=df["time"])
+        .dropna()
+        .sort_index()
+    )
+    out = out[out > 0]
+    if out.empty:
+        raise RuntimeError(f"CoinMetrics returned no usable price history for {asset}")
+
+    return out.resample("W-MON", label="left", closed="left").last().dropna()
 
 
 # ==========================================================
