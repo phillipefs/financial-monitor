@@ -1811,9 +1811,9 @@ body.research-v2.profile-field-v3::after{
 .research-v2.profile-field-v3 .t-assets th:nth-child(1),
 .research-v2.profile-field-v3 .t-assets td:nth-child(1){width:88px}
 .research-v2.profile-field-v3 .t-assets th:nth-child(2),
-.research-v2.profile-field-v3 .t-assets td:nth-child(2){width:220px}
+.research-v2.profile-field-v3 .t-assets td:nth-child(2){width:200px}
 .research-v2.profile-field-v3 .t-assets th:nth-child(3),
-.research-v2.profile-field-v3 .t-assets td:nth-child(3){width:148px}
+.research-v2.profile-field-v3 .t-assets td:nth-child(3){width:132px}
 .research-v2.profile-field-v3 .t-assets th:nth-child(4),
 .research-v2.profile-field-v3 .t-assets td:nth-child(4){width:112px}
 .research-v2.profile-field-v3 .t-assets th:nth-child(5),
@@ -2446,7 +2446,8 @@ DRAWDOWN_SCRIPT = r"""
       '</div><button class="dd-x" aria-label="Close">&times;</button></div>'+
       '<div class="dd-chips">'+
         chip("Current price", moeda+" "+fmtNum(s.pn), "")+
-        chip("Current drawdown", fmtPct(s.cd), s.cd<-15?"neg":"warn")+
+        chip("Current DD · 5Y", fmtPct(s.cd5), s.cd5<-15?"neg":"warn")+
+        chip("Current DD · Historical", fmtPct(s.cd), s.cd<-15?"neg":"warn")+
         chip("Worst drawdown", fmtPct(s.md)+'<small>'+s.mdd+'</small>', "neg")+
         chip("P95", fmtPct(s.p95), "")+
         chip("Underwater", Math.round(s.uw)+"%", "")+
@@ -2877,13 +2878,17 @@ def build_drawdown_data(df: pd.DataFrame, anos: int = 30, min_points: int = 40) 
     the price series + precomputed stats are stored; the browser derives the ATH
     (cummax) and drawdown curve from the prices to keep the payload small.
     """
-    # (normalized_key, setor, yahoo_symbol, name) for each asset row.
+    # (normalized_key, setor, yahoo_symbol, name, rolling_5y_drawdown) for
+    # each asset row. The rolling value is calculated with the RSI snapshot
+    # series and remains intentionally distinct from the long-history DD.
     specs = []
     for _, r in df.iterrows():
         key = str(r["Ticker"])
         setor = str(r.get("Setor", ""))
         yahoo_symbol = str(r.get("Yahoo_Ticker") or _yahoo_symbol(key, setor))
-        specs.append((key, setor, yahoo_symbol, str(r["Name"])))
+        raw_dd_5y = r.get("Drawdown_Pct")
+        dd_5y = None if raw_dd_5y is None or pd.isna(raw_dd_5y) else float(raw_dd_5y)
+        specs.append((key, setor, yahoo_symbol, str(r["Name"]), dd_5y))
 
     yahoo_specs = [s for s in specs if s[1] != "Cripto"]
     batch = _download_batch([s[2] for s in yahoo_specs], interval="1wk", period="max")
@@ -2891,7 +2896,7 @@ def build_drawdown_data(df: pd.DataFrame, anos: int = 30, min_points: int = 40) 
     data: Dict[str, dict] = {}
     total = len(specs)
     fallbacks = 0
-    for pos, (key, setor, sym, name) in enumerate(specs, start=1):
+    for pos, (key, setor, sym, name, dd_5y) in enumerate(specs, start=1):
         try:
             fonte = "Yahoo"
             if setor == "Cripto":
@@ -2923,6 +2928,11 @@ def build_drawdown_data(df: pd.DataFrame, anos: int = 30, min_points: int = 40) 
             if entry is None:
                 print(f"  [skip] {sym}: histórico curto")
                 continue
+            # The table's Drawdown_Pct is intentionally a rolling five-year
+            # measure. Preserve it in the modal payload alongside the long
+            # history drawdown so both perspectives remain visible.
+            if dd_5y is not None and not pd.isna(dd_5y):
+                entry["st"]["cd5"] = round(float(dd_5y), 1)
             data[key] = entry
             print(f"  [ok] ({pos}/{total}) {sym}: {len(entry['p'])} pts ({fonte})")
         except Exception as exc:
@@ -3578,7 +3588,7 @@ def _build_sector_rows(df_sector: pd.DataFrame, market_key: str, dd_data: dict |
             dd_cls = _drawdown_class(drawdown)
             peak_date = _format_peak_date(r.get("Peak_Date"))
             peak_close = _format_price(float(r.get("Peak_Close", r["Weekly_Close"])))
-            peak_meta = f"Top close: {peak_close}"
+            peak_meta = f"5Y peak close: {peak_close}"
             if peak_date:
                 peak_meta += f" | Date: {peak_date}"
             yahoo_url, tv_url = _asset_links(
@@ -4064,7 +4074,7 @@ def generate_html(df: pd.DataFrame, onchain: Dict, deltas: dict | None = None,
                 <th class="th-sort th-r" data-col="3">Price</th>
                 <th class="th-sort th-r" data-col="4">RSI W</th>
                 <th class="th-sort th-r" data-col="5">RSI M</th>
-                <th class="th-sort th-r" data-col="6">DD %</th>
+                <th class="th-sort th-r" data-col="6">DD 5A</th>
                 <th class="th-c">DD Chart</th>
                 <th class="th-sort th-r" data-col="8" title="Compound annual growth rate over the DD Chart history">CAGR</th>
                 <th>Signal</th>

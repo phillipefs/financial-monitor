@@ -426,8 +426,6 @@ assets = [
     {"ticker": "HOOD", "name": "Robinhood", "buy": 30, "sell": 75, "ultra": 40, "setor": "EUA", "industria": "Financials"},
     {"ticker": "COIN", "name": "Coinbase", "buy": 30, "sell": 75, "ultra": 40, "setor": "EUA", "industria": "Financials"},
     {"ticker": "CRCL", "name": "Circle", "buy": 30, "sell": 75, "ultra": 40, "setor": "EUA", "industria": "Financials"},
-    {"ticker": "SPCX", "name": "SpaceX (proxy)", "buy": 30, "sell": 75, "ultra": 40, "setor": "EUA", "industria": "Industrials"},
-
 
     # ETFs
     {"ticker": "XBI", "name": "Biotech ETF", "buy": 32, "sell": 70, "ultra": 40, "setor": "ETF"},
