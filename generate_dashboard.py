@@ -19,6 +19,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 import urllib3
 import pandas as pd
 import yfinance as yf
+from ta.momentum import RSIIndicator
 
 # Disable SSL warnings for corporate proxies.
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -1811,41 +1812,45 @@ body.research-v2.profile-field-v3::after{
 .research-v2.profile-field-v3 .t-assets th:nth-child(1),
 .research-v2.profile-field-v3 .t-assets td:nth-child(1){width:88px}
 .research-v2.profile-field-v3 .t-assets th:nth-child(2),
-.research-v2.profile-field-v3 .t-assets td:nth-child(2){width:200px}
+.research-v2.profile-field-v3 .t-assets td:nth-child(2){width:164px}
 .research-v2.profile-field-v3 .t-assets th:nth-child(3),
-.research-v2.profile-field-v3 .t-assets td:nth-child(3){width:132px}
+.research-v2.profile-field-v3 .t-assets td:nth-child(3){width:88px}
 .research-v2.profile-field-v3 .t-assets th:nth-child(4),
-.research-v2.profile-field-v3 .t-assets td:nth-child(4){width:112px}
+.research-v2.profile-field-v3 .t-assets td:nth-child(4){width:156px}
 .research-v2.profile-field-v3 .t-assets th:nth-child(5),
-.research-v2.profile-field-v3 .t-assets td:nth-child(5),
+.research-v2.profile-field-v3 .t-assets td:nth-child(5){width:108px}
 .research-v2.profile-field-v3 .t-assets th:nth-child(6),
-.research-v2.profile-field-v3 .t-assets td:nth-child(6){width:116px}
+.research-v2.profile-field-v3 .t-assets td:nth-child(6),
 .research-v2.profile-field-v3 .t-assets th:nth-child(7),
-.research-v2.profile-field-v3 .t-assets td:nth-child(7){width:96px}
+.research-v2.profile-field-v3 .t-assets td:nth-child(7){width:105px}
 .research-v2.profile-field-v3 .t-assets th:nth-child(8),
-.research-v2.profile-field-v3 .t-assets td:nth-child(8){width:64px}
+.research-v2.profile-field-v3 .t-assets td:nth-child(8){width:92px}
 .research-v2.profile-field-v3 .t-assets th:nth-child(9),
-.research-v2.profile-field-v3 .t-assets td:nth-child(9){width:88px}
+.research-v2.profile-field-v3 .t-assets td:nth-child(9){width:76px}
 .research-v2.profile-field-v3 .t-assets th:nth-child(10),
-.research-v2.profile-field-v3 .t-assets td:nth-child(10){width:122px}
+.research-v2.profile-field-v3 .t-assets td:nth-child(10){width:92px}
 .research-v2.profile-field-v3 .t-assets th:nth-child(11),
-.research-v2.profile-field-v3 .t-assets td:nth-child(11){width:110px}
-.research-v2.profile-field-v3 .t-assets th:nth-child(4),
+.research-v2.profile-field-v3 .t-assets td:nth-child(11){width:105px}
+.research-v2.profile-field-v3 .t-assets th:nth-child(12),
+.research-v2.profile-field-v3 .t-assets td:nth-child(12){width:105px}
+.research-v2.profile-field-v3 .t-assets th:nth-child(5),
 .research-v2.profile-field-v3 .col-price{
   text-align:right;
 }
-.research-v2.profile-field-v3 .t-assets th:nth-child(5),
 .research-v2.profile-field-v3 .t-assets th:nth-child(6),
 .research-v2.profile-field-v3 .t-assets th:nth-child(7),
-.research-v2.profile-field-v3 .t-assets th:nth-child(9),
+.research-v2.profile-field-v3 .t-assets th:nth-child(8),
+.research-v2.profile-field-v3 .t-assets th:nth-child(10),
 .research-v2.profile-field-v3 .col-rsi,
 .research-v2.profile-field-v3 .col-dd,
 .research-v2.profile-field-v3 .col-cagr{
   text-align:right;
 }
-.research-v2.profile-field-v3 .t-assets th:nth-child(8),
-.research-v2.profile-field-v3 .t-assets th:nth-child(10),
+.research-v2.profile-field-v3 .t-assets th:nth-child(3),
+.research-v2.profile-field-v3 .t-assets th:nth-child(9),
 .research-v2.profile-field-v3 .t-assets th:nth-child(11),
+.research-v2.profile-field-v3 .t-assets th:nth-child(12),
+.research-v2.profile-field-v3 .col-backtest,
 .research-v2.profile-field-v3 .col-chart,
 .research-v2.profile-field-v3 .col-sig,
 .research-v2.profile-field-v3 .col-vol{
@@ -1857,6 +1862,7 @@ body.research-v2.profile-field-v3::after{
   margin-right:0;
 }
 .research-v2.profile-field-v3 .col-chart .dd-ico,
+.research-v2.profile-field-v3 .col-backtest .bt-ico,
 .research-v2.profile-field-v3 .col-sig .signal-badge,
 .research-v2.profile-field-v3 .col-vol .vol-badge{
   margin-left:auto;
@@ -1872,6 +1878,16 @@ body.research-v2.profile-field-v3::after{
 }
 .research-v2.profile-field-v3 .col-sector{
   color:var(--rm-muted);
+}
+.research-v2.profile-field-v3 .t-assets th:nth-child(3),
+.research-v2.profile-field-v3 .col-backtest{
+  padding-left:8px;
+  padding-right:8px;
+}
+.research-v2.profile-field-v3 .t-assets th:nth-child(4),
+.research-v2.profile-field-v3 .col-sector{
+  padding-left:12px;
+  padding-right:8px;
 }
 .research-v2.profile-field-v3 .col-sector .sec-tag{
   margin-left:0;
@@ -2302,6 +2318,7 @@ DRAWDOWN_CSS = """
 .research-v2 .cn-txt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .research-v2 .th-c{text-align:center}
 .research-v2 .col-chart{text-align:center;white-space:nowrap}
+.research-v2 .col-backtest{text-align:center;white-space:nowrap}
 .research-v2 .dd-na{color:var(--rm-dim);opacity:.5}
 /* ===== WEEKLY VOLUME BADGE ===== */
 .research-v2 .col-vol{text-align:center;white-space:nowrap}
@@ -2318,6 +2335,13 @@ DRAWDOWN_CSS = """
   background:linear-gradient(150deg,var(--rm-red),var(--rm-yellow));transform:translateY(-1px)}
 .research-v2.theme-light .dd-ico:hover{color:#fff}
 .research-v2 .dd-ico svg{width:14px;height:14px}
+.research-v2 .bt-ico{width:26px;height:26px;display:inline-grid;place-items:center;cursor:pointer;
+  border:1px solid color-mix(in srgb,var(--rm-cyan) 30%,var(--rm-line));border-radius:7px;
+  background:color-mix(in srgb,var(--rm-cyan) 5%,transparent);color:var(--rm-cyan);padding:0;transition:.16s}
+.research-v2 .bt-ico:hover{color:#061013;border-color:var(--rm-cyan);
+  background:linear-gradient(150deg,var(--rm-cyan),var(--rm-green));transform:translateY(-1px)}
+.research-v2 .bt-ico:focus-visible{outline:2px solid var(--rm-cyan);outline-offset:2px}
+.research-v2 .bt-ico svg{width:14px;height:14px}
 
 .dd-modal{border:none;padding:0;background:transparent;max-width:min(940px,94vw);width:100%;color:var(--rm-text)}
 .dd-modal::backdrop{background:rgba(4,7,11,.66);backdrop-filter:blur(4px)}
@@ -2925,6 +2949,63 @@ DATA_CONTRACT_SCRIPT = r"""
 """
 
 
+BACKTEST_SCRIPT = r"""
+(function(){
+  "use strict";
+  const DATA=window.DD_DATA||{};
+  const esc=v=>String(v==null?"":v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const pct=v=>v==null?"&mdash;":(Number(v)>0?"+":"")+Number(v).toFixed(1)+"%";
+  const px=(v,currency)=>currency+" "+Number(v).toLocaleString("pt-BR",{maximumFractionDigits:4});
+  const tone=v=>v==null?"":(Number(v)>=0?"pos":"neg");
+
+  function reportHtml(a){
+    const bt=a.bt||{entries:[],count:0};
+    const usesHigh=bt.peak_basis==="Weekly high";
+    const rows=bt.entries.map(item=>{
+      const horizonCell=(years)=>{
+        const value=item["return_"+years+"y"];
+        const peak=item["max_return_"+years+"y"];
+        const complete=item["complete_"+years+"y"];
+        const peakMonth=item["peak_month_"+years+"y"];
+        return '<td class="num '+tone(value)+'">'+pct(value)+'<small class="peak">Peak: '+pct(peak)+' &middot; '+esc(peakMonth)+'</small>'+(complete?'':'<small>to date</small>')+'</td>';
+      };
+      const ongoing=!item.complete_5y;
+      return '<tr><td><b>'+esc(item.entry)+'</b></td><td>'+esc(px(item.buy,a.moeda||""))+'</td>'+
+        '<td class="num neg">'+pct(item.entry_drawdown)+(ongoing?'<small>to date</small>':'')+'</td>'+horizonCell(1)+horizonCell(2)+horizonCell(3)+horizonCell(5)+
+        '<td><span class="status '+(ongoing?'live':'done')+'">'+(ongoing?'Ongoing &middot; '+item.weeks_observed+'w':'5y complete')+'</span></td></tr>';
+    }).join("");
+    const empty='<tr><td colspan="8" class="empty">No entries found in this history.</td></tr>';
+    return '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'+
+      '<title>Backtest RSI - '+esc(a.tk)+'</title><style>'+
+      ':root{color-scheme:dark;--bg:#07090b;--surface:#111820;--surface2:#151e28;--line:#263241;--text:#eef3f7;--muted:#9cabb9;--dim:#647181;--cyan:#43d7e8;--green:#35d08f;--red:#f06f68;--yellow:#f1bc4b}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 75% 0,rgba(67,215,232,.09),transparent 30%),var(--bg);color:var(--text);font-family:Segoe UI,Inter,system-ui,sans-serif}.page{max-width:1240px;margin:auto;padding:32px 22px 52px}.eyebrow{font:700 11px ui-monospace,monospace;letter-spacing:1.6px;color:var(--cyan);text-transform:uppercase}.head{display:flex;justify-content:space-between;align-items:flex-start;gap:22px;margin:8px 0 24px}.head h1{font-size:30px;letter-spacing:-.04em;margin:0}.ticker{font:700 12px ui-monospace,monospace;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:4px 8px;margin-left:8px;vertical-align:middle}.meta{text-align:right;color:var(--muted);font-size:12px;line-height:1.7}.cards{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:18px}.card{border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:15px}.card span{display:block;color:var(--dim);font-size:10px;text-transform:uppercase;letter-spacing:.7px}.card b{display:block;font:800 23px ui-monospace,monospace;margin-top:7px}.card small{display:block;color:var(--dim);font-size:10px;margin-top:5px}.card .pos{color:var(--green)}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:11px;background:var(--surface)}table{width:100%;border-collapse:collapse;min-width:980px}th{text-align:left;color:var(--dim);font-size:10px;text-transform:uppercase;letter-spacing:.65px;background:#0d131a;padding:12px 14px;border-bottom:1px solid var(--line)}td{padding:13px 14px;border-bottom:1px solid rgba(38,50,65,.72);font-size:13px;font-variant-numeric:tabular-nums}tbody tr:last-child td{border-bottom:0}tbody tr:hover{background:rgba(67,215,232,.035)}.num{font-weight:800;font-family:ui-monospace,monospace}.num small{display:block;color:var(--dim);font:600 9px Segoe UI,system-ui,sans-serif;margin-top:3px;text-transform:uppercase}.pos{color:var(--green)}.neg{color:var(--red)}.status{display:inline-flex;padding:4px 7px;border:1px solid;border-radius:5px;font:700 10px ui-monospace,monospace;text-transform:uppercase}.done{color:var(--green);border-color:rgba(53,208,143,.3);background:rgba(53,208,143,.06)}.live{color:var(--yellow);border-color:rgba(241,188,75,.3);background:rgba(241,188,75,.06)}.empty{text-align:center;color:var(--muted);padding:38px}.method{margin-top:18px;border-left:2px solid var(--cyan);background:rgba(67,215,232,.04);padding:13px 15px;color:var(--muted);font-size:12px;line-height:1.6}.method b{color:var(--text)}@media(max-width:820px){.page{padding:23px 14px}.head{display:block}.meta{text-align:left;margin-top:10px}.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.head h1{font-size:25px}}</style></head><body><main class="page">'+
+      '<style>.page{max-width:1420px}.cards{grid-template-columns:repeat(6,minmax(0,1fr))}table{min-width:1120px}.num small.peak{color:var(--green)}@media(max-width:980px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}}</style>'+
+      '<div class="eyebrow">Financial Monitor Research &middot; RSI Backtest</div><div class="head"><div><h1>'+esc(a.name)+' <span class="ticker">'+esc(a.tk)+'</span></h1></div><div class="meta">History: '+esc(a.start)+' to '+esc(a.as_of)+' &middot; '+esc(a.years)+' years<br>Source: '+esc(a.fonte||"Yahoo")+' &middot; '+esc(a.adjustment||"")+'</div></div>'+
+      '<section class="cards"><div class="card"><span>Entries found</span><b>'+bt.count+'</b></div><div class="card"><span>Average entry drawdown</span><b class="neg">'+pct(bt.avg_entry_drawdown)+'</b><small>5y completed samples</small></div><div class="card"><span>Average return &middot; 1y</span><b class="'+tone(bt.avg_return_1y)+'">'+pct(bt.avg_return_1y)+'</b><small>n = '+bt.completed_1y+'</small></div><div class="card"><span>Average return &middot; 2y</span><b class="'+tone(bt.avg_return_2y)+'">'+pct(bt.avg_return_2y)+'</b><small>n = '+bt.completed_2y+'</small></div><div class="card"><span>Average return &middot; 3y</span><b class="'+tone(bt.avg_return_3y)+'">'+pct(bt.avg_return_3y)+'</b><small>n = '+bt.completed_3y+'</small></div><div class="card"><span>Average return &middot; 5y</span><b class="'+tone(bt.avg_return_5y)+'">'+pct(bt.avg_return_5y)+'</b><small>n = '+bt.completed_5y+'</small></div></section>'+
+      '<div class="table-wrap"><table><thead><tr><th>Entry</th><th>Buy Price</th><th>Entry Drawdown</th><th>Return 1Y</th><th>Return 2Y</th><th>Return 3Y</th><th>Return 5Y</th><th>Status</th></tr></thead><tbody>'+(rows||empty)+'</tbody></table></div>'+
+      '<div class="method"><b>Rule:</b> an entry occurs in the first week when rounded weekly RSI(14) falls to or below this asset-specific buy threshold ('+bt.threshold+'). Consecutive weeks below the threshold do not create duplicate entries. Buy Price uses the same adjusted weekly price base used by the table Price / Current Price. Return is calculated from Buy Price to the adjusted weekly close at the end of each 1, 2, 3 and 5-year horizon; an incomplete horizon uses the latest available close and is marked &quot;to date&quot;. The secondary Peak line shows the maximum reached using '+(usesHigh?'the highest adjusted weekly high':'the highest adjusted weekly close available')+' and its month. Average Return uses only completed horizons and their closing returns, never their peaks. Entry Drawdown is the maximum adverse excursion from Buy Price, using '+(bt.drawdown_basis==="Weekly low"?'the lowest adjusted weekly low':'the lowest adjusted weekly close available')+' after entry and before the best 5-year peak.</div>'+
+      '</main></body></html>';
+  }
+
+  function openReport(key){
+    const a=DATA[key]; if(!a||!a.bt) return;
+    const popup=window.open(
+      "",
+      "rsiBacktest_"+String(key).replace(/[^a-z0-9]/gi,"_"),
+      "popup=yes,width=1180,height=760,left=80,top=60,resizable=yes,scrollbars=yes"
+    );
+    if(!popup){ window.alert("The browser blocked the backtest window."); return; }
+    popup.opener=null;
+    popup.document.open(); popup.document.write(reportHtml(a)); popup.document.close();
+  }
+  document.addEventListener("click",function(e){
+    const button=e.target.closest&&e.target.closest(".bt-ico");
+    if(!button)return;
+    e.preventDefault();e.stopPropagation();openReport(button.getAttribute("data-bt"));
+  },true);
+})();
+"""
+
+
 # ==============================================================
 # DATA FETCHING
 # ==============================================================
@@ -2940,6 +3021,12 @@ _DD_ICON = (
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" '
     'stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/>'
     '<path d="M7 14l3.5-4.5 3 2.5L20 7"/></svg>'
+)
+_BT_ICON = (
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" '
+    'stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5"/>'
+    '<path d="M4 19h16"/><path d="m7 15 4-4 3 2 5-6"/>'
+    '<path d="M16 7h3v3"/></svg>'
 )
 _MONTH_ABBR = ["", "Jan", "Feb", "Mar", "Apr", "May", "Jun",
                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
@@ -3001,8 +3088,133 @@ def _trim_brazilian_adjustment_breaks(close: pd.Series, key: str) -> pd.Series:
     return close
 
 
+def _build_rsi_backtest(close: pd.Series, buy_threshold: int,
+                        high: Optional[pd.Series] = None,
+                        low: Optional[pd.Series] = None) -> dict:
+    """Backtest entries when weekly RSI first falls into the asset buy zone.
+
+    Consecutive weeks inside the zone are one entry. The entry price is that
+    signal week's adjusted close. Return is measured at each horizon's final
+    weekly close, while maximum favorable excursion remains secondary context
+    over independent 1, 2, 3 and 5-year horizons. Maximum adverse excursion
+    uses the lowest weekly low (or close when low is unavailable) before the
+    best 5-year peak. In-progress horizons use the latest close but do not
+    affect completed averages.
+    """
+    rsi = RSIIndicator(close=close.astype(float), window=14).rsi()
+    # The live signal rounds RSI to the nearest integer before comparing it with
+    # the per-asset threshold. RSI is positive, so floor(x + .5) is equivalent.
+    rounded = rsi.map(lambda value: math.floor(float(value) + 0.5) if pd.notna(value) else math.nan)
+    in_buy_zone = rounded <= int(buy_threshold)
+    entries_mask = in_buy_zone & ~in_buy_zone.shift(1, fill_value=False) & rounded.shift(1).notna()
+
+    peak_series = close
+    peak_basis = "Weekly close"
+    if high is not None:
+        aligned_high = high.reindex(close.index).astype(float)
+        if aligned_high.notna().any():
+            peak_series = aligned_high.fillna(close)
+            peak_basis = "Weekly high"
+
+    drawdown_series = close
+    drawdown_basis = "Weekly close"
+    if low is not None:
+        aligned_low = low.reindex(close.index).astype(float)
+        if aligned_low.notna().any():
+            drawdown_series = aligned_low.fillna(close)
+            drawdown_basis = "Weekly low"
+
+    observations = []
+    last_date = pd.Timestamp(close.index[-1])
+    for entry_date in rounded.index[entries_mask]:
+        entry_date = pd.Timestamp(entry_date)
+        entry_price = float(close.loc[entry_date])
+        observation = {
+            "entry": entry_date.strftime("%Y-%m"),
+            "entry_date": entry_date.strftime("%Y-%m-%d"),
+            "buy": _round_px(entry_price),
+            "weeks_observed": min(int((last_date - entry_date).days // 7), 260),
+        }
+        peak_date_5y = None
+        for years in (1, 2, 3, 5):
+            horizon_end = entry_date + pd.DateOffset(years=years)
+            complete = bool(last_date >= horizon_end)
+            path_close = close[
+                (close.index > entry_date) & (close.index <= horizon_end)
+            ]
+            path_peak = peak_series[
+                (peak_series.index > entry_date) & (peak_series.index <= horizon_end)
+            ]
+            observed_peak = float(path_peak.max()) if not path_peak.empty else entry_price
+            peak_price = max(entry_price, observed_peak)
+            peak_date = (
+                pd.Timestamp(path_peak.idxmax())
+                if not path_peak.empty and observed_peak > entry_price
+                else entry_date
+            )
+            if years == 5 and observed_peak > entry_price:
+                peak_date_5y = peak_date
+            observation[f"max_return_{years}y"] = round(
+                (peak_price / entry_price - 1.0) * 100.0, 1
+            )
+            observation[f"peak_month_{years}y"] = peak_date.strftime("%Y-%m")
+            terminal_price = (
+                float(path_close.iloc[-1])
+                if complete and not path_close.empty
+                else float(close.iloc[-1])
+            )
+            observation[f"return_{years}y"] = round(
+                (terminal_price / entry_price - 1.0) * 100.0, 1
+            )
+            observation[f"complete_{years}y"] = complete
+
+        drawdown_end = peak_date_5y or min(entry_date + pd.DateOffset(years=5), last_date)
+        path_drawdown = drawdown_series[
+            (drawdown_series.index > entry_date) & (drawdown_series.index <= drawdown_end)
+        ]
+        trough_price = min(entry_price, float(path_drawdown.min())) if not path_drawdown.empty else entry_price
+        observation["entry_drawdown"] = round(
+            (trough_price / entry_price - 1.0) * 100.0, 1
+        )
+        observations.append(observation)
+
+    completed_counts = {}
+    average_returns = {}
+    for years in (1, 2, 3, 5):
+        completed = [item for item in observations if item[f"complete_{years}y"]]
+        completed_counts[years] = len(completed)
+        average_returns[years] = (
+            round(sum(item[f"return_{years}y"] for item in completed) / len(completed), 1)
+            if completed else None
+        )
+    completed_5y = [item for item in observations if item["complete_5y"]]
+    avg_entry_drawdown = (
+        round(sum(item["entry_drawdown"] for item in completed_5y) / len(completed_5y), 1)
+        if completed_5y else None
+    )
+    return {
+        "threshold": int(buy_threshold),
+        "count": len(observations),
+        "completed_1y": completed_counts[1],
+        "completed_2y": completed_counts[2],
+        "completed_3y": completed_counts[3],
+        "completed_5y": completed_counts[5],
+        "avg_return_1y": average_returns[1],
+        "avg_return_2y": average_returns[2],
+        "avg_return_3y": average_returns[3],
+        "avg_return_5y": average_returns[5],
+        "avg_entry_drawdown": avg_entry_drawdown,
+        "peak_basis": peak_basis,
+        "drawdown_basis": drawdown_basis,
+        "entries": observations,
+    }
+
+
 def _build_dd_entry(close: pd.Series, key: str, name: str, setor: str,
-                    anos: int, min_points: int, fonte: str = "Yahoo") -> Optional[dict]:
+                    anos: int, min_points: int, fonte: str = "Yahoo",
+                    buy_threshold: int = 30,
+                    high: Optional[pd.Series] = None,
+                    low: Optional[pd.Series] = None) -> Optional[dict]:
     """Build one drawdown payload entry from a raw weekly Close series.
 
     Returns ``None`` when the history is too short. Pure computation — shared by
@@ -3047,6 +3259,7 @@ def _build_dd_entry(close: pd.Series, key: str, name: str, setor: str,
         "requested_years": int(anos),
         "adjustment": adjustment,
         "p": [_round_px(v) for v in close.values],
+        "bt": _build_rsi_backtest(close, buy_threshold, high=high, low=low),
         "st": {
             "pn": round(float(close.iloc[-1]), 2),
             "cd": round(cur_dd, 1),
@@ -3070,7 +3283,8 @@ def build_drawdown_data(df: pd.DataFrame, anos: int = 30, min_points: int = 40) 
     the price series + precomputed stats are stored; the browser derives the ATH
     (cummax) and drawdown curve from the prices to keep the payload small.
     """
-    # (normalized_key, setor, yahoo_symbol, name, rolling_5y_drawdown) for
+    # (normalized_key, setor, yahoo_symbol, name, rolling_5y_drawdown,
+    # buy_threshold) for
     # each asset row. The rolling value is calculated with the RSI snapshot
     # series and remains intentionally distinct from the long-history DD.
     specs = []
@@ -3080,7 +3294,10 @@ def build_drawdown_data(df: pd.DataFrame, anos: int = 30, min_points: int = 40) 
         yahoo_symbol = str(r.get("Yahoo_Ticker") or _yahoo_symbol(key, setor))
         raw_dd_5y = r.get("Drawdown_Pct")
         dd_5y = None if raw_dd_5y is None or pd.isna(raw_dd_5y) else float(raw_dd_5y)
-        specs.append((key, setor, yahoo_symbol, str(r["Name"]), dd_5y))
+        specs.append((
+            key, setor, yahoo_symbol, str(r["Name"]), dd_5y,
+            int(r.get("Buy_Threshold", 30)),
+        ))
 
     yahoo_specs = [s for s in specs if s[1] != "Cripto"]
     batch = _download_batch([s[2] for s in yahoo_specs], interval="1wk", period="max")
@@ -3088,9 +3305,11 @@ def build_drawdown_data(df: pd.DataFrame, anos: int = 30, min_points: int = 40) 
     data: Dict[str, dict] = {}
     total = len(specs)
     fallbacks = 0
-    for pos, (key, setor, sym, name, dd_5y) in enumerate(specs, start=1):
+    for pos, (key, setor, sym, name, dd_5y, buy_threshold) in enumerate(specs, start=1):
         try:
             fonte = "Yahoo"
+            high = None
+            low = None
             if setor == "Cripto":
                 cm_asset = key.lower()
                 try:
@@ -3103,20 +3322,31 @@ def build_drawdown_data(df: pd.DataFrame, anos: int = 30, min_points: int = 40) 
                     fonte = "CoinMetrics"
                 except Exception as cm_exc:
                     print(f"  [WARN] drawdown CoinMetrics {cm_asset}: {cm_exc}")
-                    close = yf.Ticker(sym).history(period="max", interval="1wk")["Close"]
+                    history = yf.Ticker(sym).history(period="max", interval="1wk")
+                    close = history["Close"]
+                    high = history.get("High")
+                    low = history.get("Low")
                     fonte = "Yahoo fallback"
                     fallbacks += 1
             else:
                 sub = batch.get(sym)
                 if sub is not None and "Close" in sub.columns:
                     close = sub["Close"]
+                    high = sub.get("High")
+                    low = sub.get("Low")
                 else:
                     # Missing from the batch -> single-ticker retry.
-                    close = yf.Ticker(sym).history(period="max", interval="1wk")["Close"]
+                    history = yf.Ticker(sym).history(period="max", interval="1wk")
+                    close = history["Close"]
+                    high = history.get("High")
+                    low = history.get("Low")
                     fonte = "Yahoo fallback"
                     fallbacks += 1
 
-            entry = _build_dd_entry(close, key, name, setor, anos, min_points, fonte)
+            entry = _build_dd_entry(
+                close, key, name, setor, anos, min_points, fonte, buy_threshold,
+                high=high, low=low,
+            )
             if entry is None:
                 print(f"  [skip] {sym}: histórico curto")
                 continue
@@ -3809,8 +4039,14 @@ def _build_sector_rows(df_sector: pd.DataFrame, market_key: str, dd_data: dict |
                     f'title="Historical drawdown" aria-label="Historical drawdown of {escape(str(r["Name"]), quote=True)}">'
                     f'{_DD_ICON}</button>'
                 )
+                backtest_cell = (
+                    f'<button class="bt-ico" type="button" data-bt="{escape(tkey, quote=True)}" '
+                    f'title="Open RSI backtest" aria-label="Open RSI backtest for {escape(str(r["Name"]), quote=True)} in a new window">'
+                    f'{_BT_ICON}</button>'
+                )
             else:
                 chart_cell = '<span class="dd-na">—</span>'
+                backtest_cell = '<span class="dd-na">—</span>'
             industria = str(r.get("Industria", "")) if show_sector else ""
             sector_attr = f' data-sector="{escape(industria, quote=True)}"' if show_sector else ""
             name_inner = f'<span class="cn-txt">{escape(str(r["Name"]))}</span>'
@@ -3820,6 +4056,7 @@ def _build_sector_rows(df_sector: pd.DataFrame, market_key: str, dd_data: dict |
             <tr class="asset-row" data-signal="{r['Signal']}" data-market="{escape(market_key)}"{sector_attr} data-ticker="{escape(str(r['Ticker']).lower())}" data-name="{escape(str(r['Name']).lower())}" data-peak-close="{escape(peak_close, quote=True)}" data-peak-date="{escape(peak_date, quote=True)}" data-dd="{escape(_format_percent(drawdown), quote=True)}" data-yahoo="{escape(yahoo_url, quote=True)}" data-tv="{escape(tv_url or '', quote=True)}">
               <td class="col-tk"><span class="tk-badge">{escape(str(r['Ticker']))}</span></td>
               <td class="col-name"><div class="name-cell">{name_inner}</div></td>
+              <td class="col-backtest">{backtest_cell}</td>
               <td class="col-sector" data-sort="{escape(sector_sort, quote=True)}">{sector_html}</td>
               <td class="col-price">{_format_price(r['Weekly_Close'])}</td>
               <td class="col-rsi">{_rsi_meter(rsi_w)}</td>
@@ -4470,15 +4707,16 @@ def generate_html(df: pd.DataFrame, onchain: Dict, deltas: dict | None = None,
               <tr>
                 <th class="th-sort" data-col="0">Ticker</th>
                 <th class="th-sort" data-col="1">Name</th>
-                <th class="th-sort" data-col="2">Sector</th>
-                <th class="th-sort th-r" data-col="3">Price</th>
-                <th class="th-sort th-r" data-col="4">RSI W</th>
-                <th class="th-sort th-r" data-col="5">RSI M</th>
-                <th class="th-sort th-r" data-col="6">DD 5A</th>
+                <th class="th-c">Backtest</th>
+                <th class="th-sort" data-col="3">Sector</th>
+                <th class="th-sort th-r" data-col="4">Price</th>
+                <th class="th-sort th-r" data-col="5">RSI W</th>
+                <th class="th-sort th-r" data-col="6">RSI M</th>
+                <th class="th-sort th-r" data-col="7">DD 5A</th>
                 <th class="th-c">DD Chart</th>
-                <th class="th-sort th-r" data-col="8" title="Compound annual growth rate over the DD Chart history">CAGR</th>
+                <th class="th-sort th-r" data-col="9" title="Compound annual growth rate over the DD Chart history">CAGR</th>
                 <th>Signal</th>
-                <th class="th-sort th-c" data-col="10">Volume</th>
+                <th class="th-sort th-c" data-col="11">Volume</th>
               </tr>
             </thead>
             <tbody>{rows}
@@ -4787,6 +5025,9 @@ body{{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:
 </script>
 <script>
 {DRAWDOWN_SCRIPT}
+</script>
+<script>
+{BACKTEST_SCRIPT}
 </script>
 <script>
 {SIGNAL_CHANGES_SCRIPT}
