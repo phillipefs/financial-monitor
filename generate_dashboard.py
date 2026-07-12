@@ -2231,7 +2231,7 @@ RESEARCH_V3_SCRIPT = r"""
 
   const navLinks = Array.prototype.slice.call(document.querySelectorAll('.v2nav-link'));
   const navTargets = navLinks
-    .filter(function(link){ return !link.hasAttribute('data-contract-tab'); })
+    .filter(function(link){ return !link.hasAttribute('data-contract-tab') && !link.hasAttribute('data-backtest-tab'); })
     .map(function(link){ return document.querySelector(link.getAttribute('href')); })
     .filter(Boolean);
   function targetTop(el){ return el.getBoundingClientRect().top + window.scrollY; }
@@ -2239,6 +2239,12 @@ RESEARCH_V3_SCRIPT = r"""
     if(document.body.classList.contains('data-contract-open')){
       navLinks.forEach(function(link){
         link.classList.toggle('active', link.hasAttribute('data-contract-tab'));
+      });
+      return;
+    }
+    if(document.body.classList.contains('backtest-open')){
+      navLinks.forEach(function(link){
+        link.classList.toggle('active', link.hasAttribute('data-backtest-tab'));
       });
       return;
     }
@@ -2950,6 +2956,375 @@ DATA_CONTRACT_SCRIPT = r"""
 """
 
 
+BACKTEST_RESULTS_CSS = r"""
+/* ===== BACKTEST RESULTS (consolidated ranking board) ===== */
+.research-v2.profile-field-v3 .backtest-board{
+  max-width:1320px;margin:20px auto 0;padding:0 clamp(16px,3vw,34px);
+}
+body.research-v2.profile-field-v3:not(.backtest-open) .backtest-board{display:none}
+body.research-v2.profile-field-v3.backtest-open .executive-board,
+body.research-v2.profile-field-v3.backtest-open .kpi-strip,
+body.research-v2.profile-field-v3.backtest-open .desk-highlights,
+body.research-v2.profile-field-v3.backtest-open .main,
+body.research-v2.profile-field-v3.backtest-open .footer{display:none!important}
+body.research-v2.profile-field-v3.backtest-open .backtest-board{
+  display:block;min-height:calc(100vh - var(--chrome-h,118px));padding-top:28px;padding-bottom:42px;
+}
+.research-v2.profile-field-v3 .btb-stats{grid-template-columns:repeat(7,minmax(0,1fr))}
+@media(max-width:960px){
+  .research-v2.profile-field-v3 .btb-stats{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:560px){
+  .research-v2.profile-field-v3 .btb-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+.research-v2.profile-field-v3 .btb-filters{display:flex;flex-wrap:wrap;gap:6px;padding:16px 22px 0}
+.research-v2.profile-field-v3 .btb-fbtn{
+  border:1px solid var(--rm-line);border-radius:999px;background:transparent;color:var(--rm-muted);
+  cursor:pointer;font-size:.68rem;font-weight:800;padding:6px 12px;text-transform:uppercase;
+}
+.research-v2.profile-field-v3 .btb-fbtn .fc{color:var(--rm-dim);font-family:var(--mono);margin-left:4px}
+.research-v2.profile-field-v3 .btb-fbtn:hover{border-color:rgba(67,215,232,.4)}
+.research-v2.profile-field-v3 .btb-fbtn.active{border-color:rgba(67,215,232,.5);background:rgba(67,215,232,.10);color:var(--rm-cyan)}
+.research-v2.profile-field-v3 .btb-fbtn.active .fc{color:var(--rm-cyan)}
+.research-v2.profile-field-v3 .btb-table{min-width:1220px}
+.research-v2.profile-field-v3 .btb-table th[data-sort]{cursor:pointer;user-select:none;white-space:nowrap}
+.research-v2.profile-field-v3 .btb-table th[data-sort]:hover{color:var(--rm-text)}
+.research-v2.profile-field-v3 .btb-table th[data-sort]::after{content:"\2195";margin-left:5px;opacity:.35}
+.research-v2.profile-field-v3 .btb-table th.is-desc::after{content:"\2193";color:var(--rm-cyan);opacity:1}
+.research-v2.profile-field-v3 .btb-table th.is-asc::after{content:"\2191";color:var(--rm-cyan);opacity:1}
+.research-v2.profile-field-v3 .btb-table td{vertical-align:middle}
+.research-v2.profile-field-v3 .btb-row{cursor:pointer}
+.research-v2.profile-field-v3 .btb-row:hover td{background:rgba(67,215,232,.035)}
+.research-v2.profile-field-v3 .btb-rank{font-family:var(--mono);font-size:.8rem;font-weight:800;color:var(--rm-dim);white-space:nowrap}
+.research-v2.profile-field-v3 .btb-row.is-top .btb-rank{color:var(--rm-cyan)}
+.research-v2.profile-field-v3 .btb-asset{min-width:170px}
+.research-v2.profile-field-v3 .btb-asset b{display:block;color:var(--rm-text);font-size:.84rem;line-height:1.25}
+.research-v2.profile-field-v3 .btb-num{
+  font-family:var(--mono);font-size:.86rem;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--rm-text);
+}
+.research-v2.profile-field-v3 .btb-num.pos{color:var(--rm-green)}
+.research-v2.profile-field-v3 .btb-num.neg{color:var(--rm-red)}
+.research-v2.profile-field-v3 .btb-num.warn{color:var(--rm-yellow)}
+.research-v2.profile-field-v3 .btb-num.na{color:var(--rm-dim);font-weight:600}
+.research-v2.profile-field-v3 .btb-sub{display:block;margin-top:3px;color:var(--rm-dim);font-size:.64rem;font-weight:700;white-space:nowrap}
+.research-v2.profile-field-v3 .btb-sub.warn{color:var(--rm-yellow)}
+.research-v2.profile-field-v3 .btb-open{
+  display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;padding:0;
+  border:1px solid var(--rm-line);border-radius:8px;background:rgba(67,215,232,.06);color:var(--rm-cyan);cursor:pointer;
+}
+.research-v2.profile-field-v3 .btb-open svg{width:16px;height:16px}
+.research-v2.profile-field-v3 .btb-open:hover{border-color:rgba(67,215,232,.5);background:rgba(67,215,232,.14)}
+.research-v2.profile-field-v3 .btb-empty{padding:30px;text-align:center;color:var(--rm-muted)}
+@media(max-width:560px){
+  .research-v2.profile-field-v3 .btb-filters{padding-left:14px;padding-right:14px}
+}
+"""
+
+
+BACKTEST_RESULTS_SCRIPT = r"""
+(function(){
+  "use strict";
+  var board=document.getElementById('backtest-results');
+  var tab=document.querySelector('[data-backtest-tab]');
+  if(!board||!tab)return;
+  var DATA=window.DD_DATA||{};
+  var navLinks=Array.prototype.slice.call(document.querySelectorAll('.v2nav-link'));
+  var mainLinks=navLinks.filter(function(link){ return !link.hasAttribute('data-backtest-tab'); });
+  var search=document.getElementById('globalSearch');
+  var normalPlaceholder=search?search.getAttribute('placeholder'):'';
+  var ICON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V5"/><path d="M4 19h16"/><path d="m7 15 4-4 3 2 5-6"/><path d="M16 7h3v3"/></svg>';
+
+  var esc=function(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});};
+  var num=function(v){return (v==null||isNaN(v))?null:Number(v);};
+  var fmtPct=function(v,d){return v==null?'&mdash;':((v>0?'+':'')+v.toFixed(d==null?1:d)+'%');};
+  var tone=function(v){return v==null?'na':(v>0?'pos':(v<0?'neg':''));};
+  var median=function(arr){
+    if(!arr.length)return null;
+    var s=arr.slice().sort(function(a,b){return a-b;});
+    var mid=Math.floor(s.length/2);
+    return s.length%2?s[mid]:(s[mid-1]+s[mid])/2;
+  };
+
+  var records=Object.keys(DATA).map(function(key){
+    var a=DATA[key],bt=a.bt||{};
+    var base=bt.base_12m||null;
+    var avg1=num(bt.avg_return_1y);
+    var edge=(avg1!=null&&base&&base.avg!=null)?Math.round((avg1-base.avg)*10)/10:null;
+    var entries=bt.entries||[];
+    var yearsV=num(a.years);
+    /* Entry-level 1Y returns so the board can pool a true average across every
+       entry (trade-weighted), instead of averaging per-asset averages. Matches
+       avg_return_1y semantics: in-progress entries use the latest close. */
+    var ret1sum=0,ret1n=0;
+    entries.forEach(function(e){
+      var r=num(e.return_1y);
+      if(r!=null){ret1sum+=r;ret1n++;}
+    });
+    return {
+      key:key,name:String(a.name||key),tk:String(a.tk||key),grupo:String(a.grupo||''),
+      years:yearsV,rate:(yearsV&&yearsV>0)?(bt.count||0)/yearsV:null,
+      threshold:(bt.threshold==null?null:bt.threshold),
+      count:bt.count||0,ret1sum:ret1sum,ret1n:ret1n,
+      hit:num(bt.positive_rate_1y),hitN:bt.positive_count_1y||0,hitD:bt.completed_1y||0,
+      avg1:avg1,avg2:num(bt.avg_return_2y),avg3:num(bt.avg_return_3y),avg5:num(bt.avg_return_5y),
+      rc1:bt.return_count_1y||0,rc2:bt.return_count_2y||0,rc3:bt.return_count_3y||0,rc5:bt.return_count_5y||0,
+      cd1:bt.completed_1y||0,cd2:bt.completed_2y||0,cd3:bt.completed_3y||0,cd5:bt.completed_5y||0,
+      mae:num(bt.avg_mae_1y),edge:edge,
+      last:entries.length?String(entries[entries.length-1].entry):null
+    };
+  });
+
+  /* Best asset first: hit rate, then average return 1y -> 5y (user rule). Nulls last. */
+  function cmpDesc(x,y){
+    if(x==null&&y==null)return 0;
+    if(x==null)return 1;
+    if(y==null)return -1;
+    return y-x;
+  }
+  function defaultCmp(a,b){
+    return cmpDesc(a.hit,b.hit)||cmpDesc(a.avg1,b.avg1)||cmpDesc(a.avg2,b.avg2)||
+      cmpDesc(a.avg3,b.avg3)||cmpDesc(a.avg5,b.avg5)||cmpDesc(a.count,b.count)||
+      a.name.localeCompare(b.name);
+  }
+  records.sort(defaultCmp);
+  records.forEach(function(r,i){r.rank=i+1;});
+  /* Rank restarts at 1 inside each market so filtered views read 1..n. */
+  var byGroup={};
+  records.forEach(function(r){
+    if(!r.grupo)return;
+    (byGroup[r.grupo]=byGroup[r.grupo]||[]).push(r);
+  });
+  Object.keys(byGroup).forEach(function(g){
+    byGroup[g].forEach(function(r,i){r.grank=i+1;});
+  });
+  function rankOf(r){return activeGroup?(r.grank||r.rank):r.rank;}
+
+  var sortKey='rank',sortDir='asc';
+  var ASC_DEFAULT={rank:true,name:true};
+  function keyCmp(a,b){
+    if(sortKey==='rank')return sortDir==='asc'?rankOf(a)-rankOf(b):rankOf(b)-rankOf(a);
+    if(sortKey==='name')return sortDir==='asc'?a.name.localeCompare(b.name):b.name.localeCompare(a.name);
+    var x=a[sortKey],y=b[sortKey];
+    if(sortKey==='last'){
+      if(!x&&!y)return defaultCmp(a,b);
+      if(!x)return 1;
+      if(!y)return -1;
+      return (sortDir==='asc'?x.localeCompare(y):y.localeCompare(x))||defaultCmp(a,b);
+    }
+    if(x==null&&y==null)return defaultCmp(a,b);
+    if(x==null)return 1;
+    if(y==null)return -1;
+    return (sortDir==='asc'?x-y:y-x)||defaultCmp(a,b);
+  }
+
+  function sample(total,completed){
+    var live=Math.max(0,(total||0)-(completed||0));
+    return live?(total+' entries incl. '+live+' ongoing'):(total+' entries');
+  }
+  function avgCell(v,total,completed,label){
+    return '<td><span class="btb-num '+tone(v)+'" title="'+esc('Average '+label+' return · '+sample(total,completed))+'">'+fmtPct(v)+'</span></td>';
+  }
+  function rowHtml(r){
+    var hitCls,hitSub,subCls='';
+    if(r.hitD>0){
+      hitCls=r.hit>=60?'pos':(r.hit>=45?'warn':'neg');
+      hitSub=r.hitN+' of '+r.hitD+' closed';
+      if(r.hitD<5){subCls=' warn';hitSub+=' · small sample';}
+    }else{
+      hitCls='na';
+      hitSub=r.count>0?'no closed 1Y yet':'no entries';
+    }
+    var searchText=(r.tk+' '+r.name+' '+r.grupo).toLowerCase();
+    var rk=rankOf(r);
+    return '<tr class="btb-row'+(rk<=3?' is-top':'')+'" data-key="'+esc(r.key)+'" data-grupo="'+esc(r.grupo)+'" data-search="'+esc(searchText)+'">'+
+      '<td class="btb-rank">'+rk+'</td>'+
+      '<td class="btb-asset"><b>'+esc(r.name)+'</b><span class="btb-sub">'+esc(r.tk)+(r.grupo?' &middot; '+esc(r.grupo):'')+'</span></td>'+
+      '<td><span class="btb-num">'+(r.years==null?'&mdash;':r.years.toFixed(1)+'y')+'</span></td>'+
+      '<td><span class="btb-num">'+r.count+'</span><span class="btb-sub">RSI &le; '+(r.threshold==null?'&mdash;':r.threshold)+'</span></td>'+
+      '<td><span class="btb-num '+hitCls+'">'+(r.hit==null?'&mdash;':r.hit.toFixed(0)+'%')+'</span><span class="btb-sub'+subCls+'">'+hitSub+'</span></td>'+
+      avgCell(r.avg1,r.rc1,r.cd1,'1-year')+
+      avgCell(r.avg2,r.rc2,r.cd2,'2-year')+
+      avgCell(r.avg3,r.rc3,r.cd3,'3-year')+
+      avgCell(r.avg5,r.rc5,r.cd5,'5-year')+
+      '<td><span class="btb-num '+(r.mae==null?'na':(r.mae<0?'neg':''))+'" title="Average worst loss vs entry within the first year (completed entries)">'+fmtPct(r.mae)+'</span></td>'+
+      '<td><span class="btb-num '+tone(r.edge)+'" title="Average 1Y return after RSI entries minus the 12-month base rate of any week in the same history">'+(r.edge==null?'&mdash;':(r.edge>0?'+':'')+r.edge.toFixed(1)+' pp')+'</span></td>'+
+      '<td><span class="btb-num">'+(r.last?esc(r.last):'&mdash;')+'</span></td>'+
+      '<td><button class="bt-ico btb-open" type="button" data-bt="'+esc(r.key)+'" title="Open the full RSI backtest report" aria-label="Open RSI backtest report for '+esc(r.name)+'">'+ICON+'</button></td>'+
+      '</tr>';
+  }
+
+  var HEADERS=[
+    ['rank','#','Frozen rank: 1Y hit rate, then average 1Y/2Y/3Y/5Y returns'],
+    ['name','Asset',''],
+    ['years','History','Weekly history used by the backtest'],
+    ['count','Entries','Number of RSI buy-zone entries'],
+    ['hit','Hit 1Y','Share of completed entries positive one year later'],
+    ['avg1','Avg 1Y','Average 1-year return (in-progress entries at latest close)'],
+    ['avg2','Avg 2Y',''],
+    ['avg3','Avg 3Y',''],
+    ['avg5','Avg 5Y',''],
+    ['mae','Avg MAE 1Y','Average worst loss vs entry within the first year (across completed entries)'],
+    ['edge','Edge 1Y','Average 1Y return minus the 12-month base rate of the same history'],
+    ['last','Last entry','Most recent RSI entry'],
+    ['','','']
+  ];
+
+  var tbody=null,tableEl=null,statsEl=null,activeGroup='';
+  /* KPIs follow the active market filter: they describe the visible universe. */
+  function statsChips(){
+    var subset=activeGroup?records.filter(function(r){return r.grupo===activeGroup;}):records;
+    var totalEntries=subset.reduce(function(acc,r){return acc+r.count;},0);
+    var rates=subset.map(function(r){return r.rate;}).filter(function(v){return v!=null;});
+    var perYear=rates.length?rates.reduce(function(acc,v){return acc+v;},0):null;
+    var perAsset=(perYear!=null&&rates.length)?perYear/rates.length:null;
+    var perYearTitle='Expected RSI entries per year across the current filter: sum of each asset&#39;s entries divided by its own history length'+
+      (perAsset!=null?(' (~'+perAsset.toFixed(1)+' per asset per year)'):'');
+    /* System win rate: pooled across every completed 1Y entry (trade-weighted),
+       not the median of each asset's own hit rate (which weights a 1-entry
+       asset the same as a 20-entry asset). */
+    var hitNsum=subset.reduce(function(acc,r){return acc+(r.hitN||0);},0);
+    var hitDsum=subset.reduce(function(acc,r){return acc+(r.hitD||0);},0);
+    var winRate=hitDsum>0?(100*hitNsum/hitDsum):null;
+    var winRateTitle='System win rate: '+hitNsum+' of '+hitDsum+' completed 1Y entries closed positive, pooled across '+
+      (activeGroup||'all markets')+'. Trade-weighted, not asset-weighted &mdash; differs from averaging each asset&#39;s own Hit 1Y equally.';
+    var perfect=subset.filter(function(r){return r.hitD>0&&r.hit===100;}).length;
+    var edges=subset.map(function(r){return r.edge;}).filter(function(v){return v!=null;});
+    var edgePos=edges.filter(function(v){return v>0;}).length;
+    /* Average 1Y return pooled across every entry (trade-weighted), i.e. how
+       much a typical entry returned holding one year. Not the median of each
+       asset's own average. */
+    var retSum=subset.reduce(function(acc,r){return acc+(r.ret1sum||0);},0);
+    var retN=subset.reduce(function(acc,r){return acc+(r.ret1n||0);},0);
+    var avgRet1=retN>0?(retSum/retN):null;
+    var avgRet1Title='Average 1-year return across all '+retN+' RSI entries in '+
+      (activeGroup||'all markets')+', pooled by entry (in-progress entries use the latest close). '+
+      'Trade-weighted, not the median of each asset&#39;s own average.';
+    return '<div class="dq-stat is-info"><strong>'+subset.length+'</strong><span>Assets analyzed</span></div>'+
+      '<div class="dq-stat"><strong>'+totalEntries+'</strong><span>RSI entries</span></div>'+
+      '<div class="dq-stat" title="'+perYearTitle+'"><strong>'+(perYear==null?'&mdash;':(perYear>=100?perYear.toFixed(0):perYear.toFixed(1)))+'</strong><span>Entries / year</span></div>'+
+      '<div class="dq-stat '+(winRate!=null&&winRate>=60?'is-ok':'is-warn')+'" title="'+winRateTitle+'"><strong>'+(winRate==null?'&mdash;':winRate.toFixed(0)+'%')+'</strong><span>Win rate 1Y</span></div>'+
+      '<div class="dq-stat is-ok"><strong>'+perfect+'</strong><span>100% hit assets</span></div>'+
+      '<div class="dq-stat '+(avgRet1!=null&&avgRet1>0?'is-ok':'is-warn')+'" title="'+avgRet1Title+'"><strong>'+(avgRet1==null?'&mdash;':fmtPct(avgRet1))+'</strong><span>Average 1Y return</span></div>'+
+      '<div class="dq-stat is-info"><strong>'+edgePos+'/'+edges.length+'</strong><span>Positive edge 1Y</span></div>';
+  }
+  function updateStats(){if(statsEl)statsEl.innerHTML=statsChips();}
+  function renderRows(){
+    if(!tbody)return;
+    var sorted=records.slice().sort(keyCmp);
+    tbody.innerHTML=sorted.map(rowHtml).join('')||'<tr><td colspan="13" class="btb-empty">No backtest data available in this run.</td></tr>';
+    if(tableEl){
+      Array.prototype.forEach.call(tableEl.querySelectorAll('th[data-sort]'),function(th){
+        var active=th.getAttribute('data-sort')===sortKey;
+        th.classList.toggle('is-asc',active&&sortDir==='asc');
+        th.classList.toggle('is-desc',active&&sortDir==='desc');
+        if(active)th.setAttribute('aria-sort',sortDir==='asc'?'ascending':'descending');
+        else th.removeAttribute('aria-sort');
+      });
+    }
+    applyFilters();
+  }
+  function applyFilters(){
+    if(!tbody)return;
+    var query=search&&document.body.classList.contains('backtest-open')?search.value.trim().toLowerCase():'';
+    Array.prototype.forEach.call(tbody.querySelectorAll('tr.btb-row'),function(row){
+      var okGroup=!activeGroup||row.getAttribute('data-grupo')===activeGroup;
+      var okQuery=!query||(row.getAttribute('data-search')||'').indexOf(query)!==-1;
+      row.hidden=!(okGroup&&okQuery);
+    });
+  }
+
+  function renderBoard(){
+    var groups={};
+    records.forEach(function(r){if(r.grupo)groups[r.grupo]=(groups[r.grupo]||0)+1;});
+    var groupNames=Object.keys(groups).sort(function(a,b){return groups[b]-groups[a]||a.localeCompare(b);});
+    var filterHtml='<button class="btb-fbtn active" type="button" data-group="">All <span class="fc">'+records.length+'</span></button>'+
+      groupNames.map(function(g){
+        return '<button class="btb-fbtn" type="button" data-group="'+esc(g)+'">'+esc(g)+' <span class="fc">'+groups[g]+'</span></button>';
+      }).join('');
+
+    var headHtml=HEADERS.map(function(h){
+      return h[0]
+        ?'<th data-sort="'+h[0]+'"'+(h[2]?' title="'+esc(h[2])+'"':'')+'>'+h[1]+'</th>'
+        :'<th>'+h[1]+'</th>';
+    }).join('');
+
+    board.innerHTML=
+      '<div class="dq-shell">'+
+        '<div class="dq-head">'+
+          '<div>'+
+            '<div class="eyebrow">RSI backtest &middot; consolidated</div>'+
+            '<h2>Which assets historically rewarded buying their RSI zone.</h2>'+
+            '<p>Every asset&#39;s weekly RSI(14) buy-zone entries measured over 1&ndash;5 year holding windows, from the same data behind each asset&#39;s backtest report. Default ranking: 1Y hit rate, then average 1Y&rarr;5Y returns; with a market filter both the KPIs and the rank restart inside that market. Click a column header to re-sort; click a row to open the per-entry report.</p>'+
+          '</div>'+
+        '</div>'+
+        '<div class="dq-stats btb-stats" aria-label="Backtest summary">'+statsChips()+'</div>'+
+        '<div class="btb-filters" role="group" aria-label="Filter by market">'+filterHtml+'</div>'+
+        '<div class="dq-table-wrap"><table class="dq-table btb-table">'+
+          '<thead><tr>'+headHtml+'</tr></thead><tbody></tbody>'+
+        '</table></div>'+
+      '</div>';
+
+    tableEl=board.querySelector('.btb-table');
+    tbody=tableEl.querySelector('tbody');
+    statsEl=board.querySelector('.btb-stats');
+    renderRows();
+
+    board.addEventListener('click',function(ev){
+      var fbtn=ev.target.closest&&ev.target.closest('.btb-fbtn');
+      if(fbtn){
+        activeGroup=fbtn.getAttribute('data-group')||'';
+        Array.prototype.forEach.call(board.querySelectorAll('.btb-fbtn'),function(b){b.classList.toggle('active',b===fbtn);});
+        renderRows();
+        updateStats();
+        return;
+      }
+      var th=ev.target.closest&&ev.target.closest('th[data-sort]');
+      if(th){
+        var key=th.getAttribute('data-sort');
+        if(key===sortKey)sortDir=sortDir==='asc'?'desc':'asc';
+        else{sortKey=key;sortDir=ASC_DEFAULT[key]?'asc':'desc';}
+        renderRows();
+        return;
+      }
+      /* .bt-ico clicks are handled (and stopped) by the backtest modal's capture listener */
+      var row=ev.target.closest&&ev.target.closest('tr.btb-row');
+      if(row){
+        var open=row.querySelector('.bt-ico');
+        if(open)open.click();
+      }
+    });
+  }
+
+  function setActive(link){
+    navLinks.forEach(function(item){item.classList.toggle('active',item===link);});
+  }
+  var rendered=false;
+  function openBoard(){
+    if(!rendered){renderBoard();rendered=true;}
+    document.body.classList.remove('data-contract-open');
+    document.body.classList.add('backtest-open');
+    setActive(tab);
+    if(search)search.setAttribute('placeholder','Search ticker, name, or market');
+    applyFilters();
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+  function closeBoard(){
+    if(!document.body.classList.contains('backtest-open'))return;
+    document.body.classList.remove('backtest-open');
+    /* The Data Contract handler may already have claimed the search box. */
+    if(search&&!document.body.classList.contains('data-contract-open')){
+      search.setAttribute('placeholder',normalPlaceholder);
+    }
+  }
+  tab.addEventListener('click',function(ev){ev.preventDefault();openBoard();});
+  mainLinks.forEach(function(link){link.addEventListener('click',closeBoard);});
+  if(search)search.addEventListener('input',function(){
+    if(document.body.classList.contains('backtest-open'))applyFilters();
+  });
+})();
+"""
+
+
 BACKTEST_CSS = """
 /* ===== BACKTEST (RSI backtest modal) ===== */
 .btr-modal{border:none;padding:0;background:transparent;max-width:min(1300px,96vw);width:100%;color:var(--rm-text)}
@@ -3644,6 +4019,7 @@ def _build_dd_entry(close: pd.Series, key: str, name: str, setor: str,
         "tk": key,
         "moeda": _dd_currency(setor),
         "fonte": fonte,
+        "grupo": setor,
         "years": round(years, 1),
         "start": close.index[0].strftime("%Y-%m-%d"),
         "as_of": as_of.strftime("%Y-%m-%d"),
@@ -5310,6 +5686,7 @@ body{{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:
 {BACKTEST_CSS}
 {SIGNAL_CHANGES_CSS}
 {DATA_CONTRACT_CSS}
+{BACKTEST_RESULTS_CSS}
 </style>
 </head>
 <body class="research-v2 profile-field-v3">
@@ -5337,6 +5714,7 @@ body{{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:
   <a href="#onchain" class="v2nav-link">On-Chain</a>
   <a href="#sectors" class="v2nav-link">Sector Pulse</a>
   <a href="#matrix" class="v2nav-link">RSI Matrix</a>
+  <a href="#backtest-results" class="v2nav-link" data-backtest-tab="true">Backtest Results</a>
   <a href="#data-contract" class="v2nav-link" data-contract-tab="true">Data Contract</a>
 </nav>
 
@@ -5357,6 +5735,9 @@ body{{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:
 </section>
 
 {data_contract_html}
+
+<!-- BACKTEST RESULTS (rendered client-side from DD_DATA on first open) -->
+<section class="backtest-board" id="backtest-results" aria-label="Consolidated RSI backtest results"></section>
 
 <!-- KPI STRIP -->
 <div class="kpi-strip" aria-label="Key indicators">
@@ -5431,6 +5812,9 @@ body{{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:
 </script>
 <script>
 {DATA_CONTRACT_SCRIPT}
+</script>
+<script>
+{BACKTEST_RESULTS_SCRIPT}
 </script>
 </body>
 </html>'''
