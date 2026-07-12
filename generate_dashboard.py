@@ -8,6 +8,7 @@ from __future__ import annotations
 import json
 import math
 import os
+import statistics
 import sys
 from datetime import date, datetime, timedelta, timezone
 from html import escape
@@ -1881,8 +1882,8 @@ body.research-v2.profile-field-v3::after{
 }
 .research-v2.profile-field-v3 .t-assets th:nth-child(3),
 .research-v2.profile-field-v3 .col-backtest{
-  padding-left:8px;
-  padding-right:8px;
+  padding-left:2px;
+  padding-right:22px;
 }
 .research-v2.profile-field-v3 .t-assets th:nth-child(4),
 .research-v2.profile-field-v3 .col-sector{
@@ -2949,58 +2950,320 @@ DATA_CONTRACT_SCRIPT = r"""
 """
 
 
+BACKTEST_CSS = """
+/* ===== BACKTEST (RSI backtest modal) ===== */
+.btr-modal{border:none;padding:0;background:transparent;max-width:min(1300px,96vw);width:100%;color:var(--rm-text)}
+.btr-modal::backdrop{background:rgba(4,7,11,.7);backdrop-filter:blur(4px)}
+.btr-card{position:relative;border-radius:16px;background:var(--rm-surface);border:1px solid var(--rm-line);box-shadow:var(--rm-shadow);font-family:"Segoe UI",Inter,system-ui,-apple-system,sans-serif;max-height:92vh;overflow:auto}
+.btr-accent{position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--rm-cyan),var(--rm-green) 55%,transparent)}
+.btr-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:18px 20px 8px}
+.btr-title{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;min-width:0}
+.btr-title .nm{font-size:1.25rem;font-weight:800;letter-spacing:-.01em;color:#fff}
+.btr-title .tk{font:700 .72rem ui-monospace,Consolas,monospace;color:var(--rm-muted);border:1px solid var(--rm-line);border-radius:6px;padding:3px 8px}
+.btr-title .src{flex-basis:100%;font-size:.78rem;color:var(--rm-dim)}
+.btr-x{flex:none;cursor:pointer;width:32px;height:32px;border-radius:8px;border:1px solid var(--rm-line);background:transparent;color:var(--rm-muted);font-size:1.2rem;line-height:1;display:grid;place-items:center}
+.btr-x:hover{color:var(--rm-text);border-color:var(--rm-red)}
+.btr-chips{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:8px;padding:6px 20px 2px}
+.btr-chip{border:1px solid var(--rm-line);background:rgba(255,255,255,.02);border-radius:10px;padding:9px 12px}
+.btr-chip .k{display:block;font-size:.64rem;text-transform:uppercase;letter-spacing:.06em;color:var(--rm-dim);margin-bottom:3px;white-space:nowrap}
+.btr-chip .v{display:block;font:800 1.16rem ui-monospace,Consolas,monospace;font-variant-numeric:tabular-nums}
+.btr-chip .s{display:block;font-size:.68rem;color:var(--rm-dim);margin-top:3px}
+.btr-chip .v.pos{color:var(--rm-green)}.btr-chip .v.neg{color:var(--rm-red)}.btr-chip .v.warn{color:var(--rm-yellow)}
+.btr-subchips{display:flex;flex-wrap:wrap;gap:6px 10px;padding:8px 20px 2px}
+.btr-schip{font-size:.86rem;color:var(--rm-muted);border:1px solid var(--rm-line);border-radius:999px;padding:5px 12px;background:rgba(255,255,255,.015)}
+.btr-schip b{color:var(--rm-dim);font-weight:600}
+.btr-schip .pos{color:var(--rm-green)}.btr-schip .neg{color:var(--rm-red)}
+.btr-schip em{font-style:normal;color:var(--rm-dim);font-size:.9em}
+.btr-plot{padding:10px 20px 0}
+.btr-plot h4{margin:6px 0;font-size:.66rem;letter-spacing:.07em;text-transform:uppercase;color:var(--rm-dim);font-weight:700}
+.btr-chart{width:100%;height:auto;display:block}
+.btr-chart .gl{stroke:var(--rm-line);stroke-width:1;opacity:.55}
+.btr-chart .ax{fill:var(--rm-dim);font:600 11px ui-monospace,Consolas,monospace}
+.btr-chart .pl{fill:none;stroke:var(--rm-cyan);stroke-width:1.6;opacity:.9}
+.btr-chart .mk{stroke:#0b1016;stroke-width:1.4;cursor:pointer}
+.btr-chart .mk.on{stroke:#fff;stroke-width:2}
+.btr-chart .mk.sel{stroke:#fff;stroke-width:2.4}
+.btr-legend{display:flex;flex-wrap:wrap;gap:8px 16px;margin:2px 0 4px;font-size:.7rem;color:var(--rm-muted)}
+.btr-legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}
+.btr-twrap{margin:10px 20px;border:1px solid var(--rm-line);border-radius:10px;overflow:auto;background:rgba(255,255,255,.012)}
+.btr-twrap table{width:100%;border-collapse:collapse;min-width:1080px}
+.btr-twrap th{position:sticky;top:0;text-align:left;color:var(--rm-dim);font-size:.64rem;text-transform:uppercase;letter-spacing:.06em;background:#0c1219;padding:11px 12px;border-bottom:1px solid var(--rm-line);z-index:2}
+.btr-twrap th em{font-style:normal;text-transform:none;letter-spacing:0;opacity:.8}
+.btr-twrap td{padding:11px 12px;border-bottom:1px solid color-mix(in srgb,var(--rm-line) 70%,transparent);font-size:.86rem;vertical-align:top}
+.btr-twrap tbody tr:last-child td{border-bottom:0}
+.btr-twrap tbody tr{cursor:pointer}
+.btr-twrap tbody tr:hover{background:rgba(38,208,232,.045)}
+.btr-twrap tbody tr.sel{background:rgba(38,208,232,.10)}
+.btr-twrap tbody tr.sel td:first-child{box-shadow:inset 3px 0 0 var(--rm-cyan)}
+.btr-e b{font:700 .9rem ui-monospace,Consolas,monospace;color:var(--rm-text)}
+.btr-e small{display:block;margin-top:3px;font:700 .62rem ui-monospace,Consolas,monospace;text-transform:uppercase}
+.btr-e small.done{color:var(--rm-green)}.btr-e small.live{color:var(--rm-yellow)}
+.btr-buy{font:600 .8rem ui-monospace,Consolas,monospace;color:var(--rm-muted);white-space:nowrap}
+.btr-h{min-width:132px}
+.btr-mae .cl{display:block;font:800 .95rem ui-monospace,Consolas,monospace;font-variant-numeric:tabular-nums}
+.btr-mae .cl.neg{color:var(--rm-red)}
+.btr-h .ln{display:flex;align-items:baseline;gap:6px;white-space:nowrap}
+.btr-h .ln em{font:700 .62rem/1 "Segoe UI",Inter,system-ui,sans-serif;font-style:normal;text-transform:uppercase;letter-spacing:.05em;color:var(--rm-dim);min-width:40px}
+.btr-h .ln i{font-style:normal;color:var(--rm-dim)}
+.btr-h .ln1 b{font:800 1rem ui-monospace,Consolas,monospace;font-variant-numeric:tabular-nums}
+.btr-h .ln1 b.pos{color:var(--rm-green)}
+.btr-h .ln1 b.neg{color:var(--rm-red)}
+.btr-h .ln1 b.live{color:var(--rm-yellow)}
+.btr-h .ln1 i{font-size:.72rem}
+.btr-h .ln2{margin-top:3px}
+.btr-h .ln2 b{font:700 .8rem ui-monospace,Consolas,monospace;color:var(--rm-green);font-variant-numeric:tabular-nums}
+.btr-h .ln2 i{font-size:.7rem}
+.btr-h .npk{font-size:.7rem;color:var(--rm-dim);font-style:italic}
+.btr-skip{color:var(--rm-dim);text-align:center;font-size:.85rem}
+.btr-bb{position:relative;display:block;height:7px;margin-top:6px;background:rgba(255,255,255,.055);border-radius:4px;overflow:hidden;min-width:100px}
+.btr-bb i{position:absolute;top:0;bottom:0}
+.btr-bb .bbk{background:color-mix(in srgb,var(--rm-green) 26%,transparent)}
+.btr-bb .bcl.pos{background:var(--rm-green)}
+.btr-bb .bcl.neg{background:var(--rm-red)}
+.btr-bb .bcl.live{background:var(--rm-yellow)}
+.btr-bb .bz{width:1px;background:rgba(255,255,255,.5)}
+.btr-bb.mae{max-width:64px;margin-top:4px;min-width:0}
+.btr-emptyrow{text-align:center;color:var(--rm-muted);padding:30px}
+.btr-method{margin:4px 20px 18px;border-left:2px solid var(--rm-cyan);background:rgba(38,208,232,.05);padding:12px 15px;color:var(--rm-muted);font-size:.78rem;line-height:1.65;border-radius:0 8px 8px 0}
+.btr-method b{color:var(--rm-text)}
+.btr-tip{position:fixed;z-index:4000;pointer-events:none;opacity:0;transition:opacity .12s;background:#0d141c;border:1px solid var(--rm-line);border-radius:8px;padding:9px 11px;font:600 .76rem/1.5 ui-monospace,Consolas,monospace;color:var(--rm-text);box-shadow:0 8px 24px rgba(0,0,0,.5);max-width:300px}
+@media(max-width:760px){
+.btr-chips{grid-template-columns:repeat(2,minmax(0,1fr))}
+.btr-head{flex-wrap:wrap;padding:14px 12px 6px}
+.btr-modal{max-width:100vw}
+.btr-card{max-height:94vh;max-height:94dvh}
+.btr-chips,.btr-subchips{padding-left:12px;padding-right:12px}
+.btr-plot{padding:8px 12px 0}
+.btr-twrap{margin:10px 12px}
+.btr-method{margin:4px 12px 16px}
+.btr-chip .v{font-size:1.06rem}
+.btr-twrap td{padding:10px}
+.btr-title .nm{font-size:1.12rem}
+}
+"""
+
+
 BACKTEST_SCRIPT = r"""
 (function(){
   "use strict";
   const DATA=window.DD_DATA||{};
+  if(!Object.keys(DATA).length)return;
+  const HOR=[1,2,3,5];
   const esc=v=>String(v==null?"":v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-  const pct=v=>v==null?"&mdash;":(Number(v)>0?"+":"")+Number(v).toFixed(1)+"%";
-  const px=(v,currency)=>currency+" "+Number(v).toLocaleString("pt-BR",{maximumFractionDigits:4});
-  const tone=v=>v==null?"":(Number(v)>=0?"pos":"neg");
+  const pct=(v,d)=>(v==null||isNaN(v))?"&mdash;":((v>0?"+":"")+Number(v).toFixed(d==null?1:d)+"%");
+  const pctT=(v,d)=>(v==null||isNaN(v))?"—":((v>0?"+":"")+Number(v).toFixed(d==null?1:d)+"%");
+  const money=(v,cur)=>(cur?cur+" ":"")+Number(v).toLocaleString("pt-BR",{maximumFractionDigits:4});
+  const tone=v=>v==null?"":(v>=0?"pos":"neg");
+  const giveBack=(close,peak)=>((1+close/100)/(1+peak/100)-1)*100;
+  const fmtPx=v=>{
+    if(v>=1000)return (v/1000).toLocaleString("en-US",{maximumFractionDigits:1})+"k";
+    if(v>=100)return v.toFixed(0);
+    if(v>=1)return v.toFixed(1);
+    return v.toFixed(3);
+  };
 
-  function reportHtml(a){
-    const bt=a.bt||{entries:[],count:0};
-    const usesHigh=bt.peak_basis==="Weekly high";
-    const rows=bt.entries.map(item=>{
-      const horizonCell=(years)=>{
-        const value=item["return_"+years+"y"];
-        const peak=item["max_return_"+years+"y"];
-        const complete=item["complete_"+years+"y"];
-        const peakMonth=item["peak_month_"+years+"y"];
-        return '<td class="num '+tone(value)+'">'+pct(value)+'<small class="peak">Peak: '+pct(peak)+' &middot; '+esc(peakMonth)+'</small>'+(complete?'':'<small>to date</small>')+'</td>';
-      };
-      const ongoing=!item.complete_5y;
-      return '<tr><td><b>'+esc(item.entry)+'</b></td><td>'+esc(px(item.buy,a.moeda||""))+'</td>'+
-        '<td class="num neg">'+pct(item.entry_drawdown)+(ongoing?'<small>to date</small>':'')+'</td>'+horizonCell(1)+horizonCell(2)+horizonCell(3)+horizonCell(5)+
-        '<td><span class="status '+(ongoing?'live':'done')+'">'+(ongoing?'Ongoing &middot; '+item.weeks_observed+'w':'5y complete')+'</span></td></tr>';
+  function bullet(close,peak,liveCls){
+    const hi=Math.max(peak||0,close,0.0001),lo=Math.min(0,close);
+    const span=(hi-lo)||1;
+    const X=v=>(v-lo)/span*100;
+    const z=X(0);
+    let h="";
+    if(peak>0)h+='<i class="bbk" style="left:'+z.toFixed(2)+'%;width:'+(X(peak)-z).toFixed(2)+'%"></i>';
+    if(close>=0){const w=Math.max(X(Math.min(close,hi))-z,close>0?1:0);h+='<i class="bcl '+(liveCls||"pos")+'" style="left:'+z.toFixed(2)+'%;width:'+w.toFixed(2)+'%"></i>';}
+    else h+='<i class="bcl '+(liveCls||"neg")+'" style="left:'+X(close).toFixed(2)+'%;width:'+(z-X(close)).toFixed(2)+'%"></i>';
+    h+='<i class="bz" style="left:'+z.toFixed(2)+'%"></i>';
+    return '<span class="btr-bb">'+h+'</span>';
+  }
+
+  function horizonCell(e,y,state){
+    const complete=e["complete_"+y+"y"];
+    if(!complete&&state.soFarShown)return '<td class="btr-h btr-skip" title="Horizon not completed yet — same value as shown to the left">·</td>';
+    const close=e["return_"+y+"y"],peak=e["max_return_"+y+"y"],pm=e["peak_month_"+y+"y"];
+    const cm=e["close_month_"+y+"y"]||"";
+    const gb=giveBack(close,peak);
+    const peakLn=peak>0
+      ?'<span class="ln ln2"><em>peak</em><b>'+pct(peak)+'</b><i>· '+esc(pm)+'</i></span>'
+      :'<span class="ln ln2"><em>peak</em><i class="npk">never above entry</i></span>';
+    const ttl="Horizon "+y+"y — close "+pctT(close)+(cm?(" in "+cm):"")+
+      (peak>0?(" · peak "+pctT(peak)+" in "+pm+" · gave back "+pctT(gb)+" from peak to close"):" · never traded above the entry price")+
+      (complete?"":" · horizon still running (value so far)");
+    if(!complete){
+      state.soFarShown=true;
+      return '<td class="btr-h" title="'+esc(ttl)+'"><span class="ln ln1"><em>so far</em><b class="live">'+pct(close)+'</b><i>· '+esc(cm)+' ('+e.weeks_observed+'w)</i></span>'+peakLn+bullet(close,peak,"live")+'</td>';
+    }
+    return '<td class="btr-h" title="'+esc(ttl)+'"><span class="ln ln1"><em>close</em><b class="'+tone(close)+'">'+pct(close)+'</b><i>· '+esc(cm)+'</i></span>'+peakLn+bullet(close,peak)+'</td>';
+  }
+
+  function entryRows(a){
+    const bt=a.bt,list=(bt.entries||[]).map((e,i)=>Object.assign({_i:i},e));
+    let maeMin=-1;
+    list.forEach(e=>{if(typeof e.entry_drawdown==="number"&&e.entry_drawdown<maeMin)maeMin=e.entry_drawdown;});
+    return list.slice().reverse().map(e=>{
+      const state={soFarShown:false};
+      const cells=HOR.map(y=>horizonCell(e,y,state)).join("");
+      const ongoing=!e.complete_5y;
+      const maeW=Math.max(0,Math.min(100,(e.entry_drawdown||0)/maeMin*100));
+      return '<tr data-i="'+e._i+'">'+
+        '<td class="btr-e"><b>'+esc(e.entry)+'</b><small class="'+(ongoing?"live":"done")+'">'+(ongoing?("ongoing · "+e.weeks_observed+"w"):"5y complete")+'</small></td>'+
+        '<td class="btr-buy">'+esc(money(e.buy,a.moeda))+'</td>'+
+        '<td class="btr-mae" title="Maximum adverse excursion: worst dip from entry before the best 5y peak ('+esc(bt.drawdown_basis||"")+')"><span class="cl neg">'+pct(e.entry_drawdown)+'</span><span class="btr-bb mae"><i class="bcl neg" style="left:'+(100-maeW).toFixed(2)+'%;width:'+maeW.toFixed(2)+'%"></i></span></td>'+
+        cells+'</tr>';
     }).join("");
-    const empty='<tr><td colspan="8" class="empty">No entries found in this history.</td></tr>';
-    return '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'+
-      '<title>Backtest RSI - '+esc(a.tk)+'</title><style>'+
-      ':root{color-scheme:dark;--bg:#07090b;--surface:#111820;--surface2:#151e28;--line:#263241;--text:#eef3f7;--muted:#9cabb9;--dim:#647181;--cyan:#43d7e8;--green:#35d08f;--red:#f06f68;--yellow:#f1bc4b}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 75% 0,rgba(67,215,232,.09),transparent 30%),var(--bg);color:var(--text);font-family:Segoe UI,Inter,system-ui,sans-serif}.page{max-width:1240px;margin:auto;padding:32px 22px 52px}.eyebrow{font:700 11px ui-monospace,monospace;letter-spacing:1.6px;color:var(--cyan);text-transform:uppercase}.head{display:flex;justify-content:space-between;align-items:flex-start;gap:22px;margin:8px 0 24px}.head h1{font-size:30px;letter-spacing:-.04em;margin:0}.ticker{font:700 12px ui-monospace,monospace;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:4px 8px;margin-left:8px;vertical-align:middle}.meta{text-align:right;color:var(--muted);font-size:12px;line-height:1.7}.cards{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:18px}.card{border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:15px}.card span{display:block;color:var(--dim);font-size:10px;text-transform:uppercase;letter-spacing:.7px}.card b{display:block;font:800 23px ui-monospace,monospace;margin-top:7px}.card small{display:block;color:var(--dim);font-size:10px;margin-top:5px}.card .pos{color:var(--green)}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:11px;background:var(--surface)}table{width:100%;border-collapse:collapse;min-width:980px}th{text-align:left;color:var(--dim);font-size:10px;text-transform:uppercase;letter-spacing:.65px;background:#0d131a;padding:12px 14px;border-bottom:1px solid var(--line)}td{padding:13px 14px;border-bottom:1px solid rgba(38,50,65,.72);font-size:13px;font-variant-numeric:tabular-nums}tbody tr:last-child td{border-bottom:0}tbody tr:hover{background:rgba(67,215,232,.035)}.num{font-weight:800;font-family:ui-monospace,monospace}.num small{display:block;color:var(--dim);font:600 9px Segoe UI,system-ui,sans-serif;margin-top:3px;text-transform:uppercase}.pos{color:var(--green)}.neg{color:var(--red)}.status{display:inline-flex;padding:4px 7px;border:1px solid;border-radius:5px;font:700 10px ui-monospace,monospace;text-transform:uppercase}.done{color:var(--green);border-color:rgba(53,208,143,.3);background:rgba(53,208,143,.06)}.live{color:var(--yellow);border-color:rgba(241,188,75,.3);background:rgba(241,188,75,.06)}.empty{text-align:center;color:var(--muted);padding:38px}.method{margin-top:18px;border-left:2px solid var(--cyan);background:rgba(67,215,232,.04);padding:13px 15px;color:var(--muted);font-size:12px;line-height:1.6}.method b{color:var(--text)}@media(max-width:820px){.page{padding:23px 14px}.head{display:block}.meta{text-align:left;margin-top:10px}.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.head h1{font-size:25px}}</style></head><body><main class="page">'+
-      '<style>.page{max-width:1420px}.cards{grid-template-columns:repeat(6,minmax(0,1fr))}table{min-width:1120px}.num small.peak{color:var(--green)}@media(max-width:980px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}}</style>'+
-      '<div class="eyebrow">Financial Monitor Research &middot; RSI Backtest</div><div class="head"><div><h1>'+esc(a.name)+' <span class="ticker">'+esc(a.tk)+'</span></h1></div><div class="meta">History: '+esc(a.start)+' to '+esc(a.as_of)+' &middot; '+esc(a.years)+' years<br>Source: '+esc(a.fonte||"Yahoo")+' &middot; '+esc(a.adjustment||"")+'</div></div>'+
-      '<section class="cards"><div class="card"><span>Entries found</span><b>'+bt.count+'</b></div><div class="card"><span>Average entry drawdown</span><b class="neg">'+pct(bt.avg_entry_drawdown)+'</b><small>5y completed samples</small></div><div class="card"><span>Average return &middot; 1y</span><b class="'+tone(bt.avg_return_1y)+'">'+pct(bt.avg_return_1y)+'</b><small>n = '+bt.completed_1y+'</small></div><div class="card"><span>Average return &middot; 2y</span><b class="'+tone(bt.avg_return_2y)+'">'+pct(bt.avg_return_2y)+'</b><small>n = '+bt.completed_2y+'</small></div><div class="card"><span>Average return &middot; 3y</span><b class="'+tone(bt.avg_return_3y)+'">'+pct(bt.avg_return_3y)+'</b><small>n = '+bt.completed_3y+'</small></div><div class="card"><span>Average return &middot; 5y</span><b class="'+tone(bt.avg_return_5y)+'">'+pct(bt.avg_return_5y)+'</b><small>n = '+bt.completed_5y+'</small></div></section>'+
-      '<div class="table-wrap"><table><thead><tr><th>Entry</th><th>Buy Price</th><th>Entry Drawdown</th><th>Return 1Y</th><th>Return 2Y</th><th>Return 3Y</th><th>Return 5Y</th><th>Status</th></tr></thead><tbody>'+(rows||empty)+'</tbody></table></div>'+
-      '<div class="method"><b>Rule:</b> an entry occurs in the first week when rounded weekly RSI(14) falls to or below this asset-specific buy threshold ('+bt.threshold+'). Consecutive weeks below the threshold do not create duplicate entries. Buy Price uses the same adjusted weekly price base used by the table Price / Current Price. Return is calculated from Buy Price to the adjusted weekly close at the end of each 1, 2, 3 and 5-year horizon; an incomplete horizon uses the latest available close and is marked &quot;to date&quot;. The secondary Peak line shows the maximum reached using '+(usesHigh?'the highest adjusted weekly high':'the highest adjusted weekly close available')+' and its month. Average Return uses only completed horizons and their closing returns, never their peaks. Entry Drawdown is the maximum adverse excursion from Buy Price, using '+(bt.drawdown_basis==="Weekly low"?'the lowest adjusted weekly low':'the lowest adjusted weekly close available')+' after entry and before the best 5-year peak.</div>'+
-      '</main></body></html>';
+  }
+
+  function chip(k,v,cls,sub){return '<div class="btr-chip"><span class="k">'+k+'</span><span class="v '+(cls||"")+'">'+v+'</span>'+(sub?'<span class="s">'+sub+'</span>':'')+'</div>';}
+  function schip(k,v,cls){return '<span class="btr-schip"><b>'+k+':</b> <span class="'+(cls||"")+'">'+v+'</span></span>';}
+
+  function kpis(a){
+    const bt=a.bt,base=bt.base_12m||null;
+    const edge=(bt.avg_return_1y!=null&&base)?(bt.avg_return_1y-base.avg):null;
+    const wr=bt.win_rate_1y;
+    const wrCls=wr==null?"":(wr>=60?"pos":(wr>=45?"warn":"neg"));
+    let h="";
+    h+=chip("Entries","<b>"+bt.count+"</b>","","weekly RSI(14) &le; "+bt.threshold);
+    h+=chip("Win rate · 1y",pct(wr,0).replace("+",""),wrCls,bt.completed_1y?("n = "+bt.completed_1y+" completed"):"no completed 1y yet");
+    h+=chip("Close · 1y median",pct(bt.med_return_1y),tone(bt.med_return_1y),"avg "+pct(bt.avg_return_1y));
+    h+=chip("Peak · 1y median",pct(bt.med_peak_1y),"pos",(bt.med_months_to_peak_1y!=null?("avg "+pct(bt.avg_peak_1y)+" · ~"+Math.round(bt.med_months_to_peak_1y)+"m to peak"):("avg "+pct(bt.avg_peak_1y))));
+    h+=chip("Give-back · 1y median",pct(bt.med_give_back_1y),"neg","peak &rarr; close, inside year 1");
+    h+=chip("Edge vs any week",edge==null?"&mdash;":((edge>0?"+":"")+edge.toFixed(1)+" pp"),tone(edge),base?("12m base rate: avg "+pct(base.avg)+" · med "+pct(base.med)):"history too short");
+    return h;
+  }
+  function subChips(a){
+    const bt=a.bt;
+    let h="";
+    h+=schip("Avg MAE entry&rarr;5y peak",pct(bt.avg_entry_drawdown),"neg");
+    h+=schip("Avg close 2y",pct(bt.avg_return_2y)+" <em>n="+bt.completed_2y+"</em>",tone(bt.avg_return_2y));
+    h+=schip("Avg close 3y",pct(bt.avg_return_3y)+" <em>n="+bt.completed_3y+"</em>",tone(bt.avg_return_3y));
+    h+=schip("Avg close 5y",pct(bt.avg_return_5y)+" <em>n="+bt.completed_5y+"</em>",tone(bt.avg_return_5y));
+    h+=schip("Peak basis",esc(bt.peak_basis||"—"),"");
+    h+=schip("Drawdown basis",esc(bt.drawdown_basis||"—"),"");
+    return h;
+  }
+
+  function drawChart(host,a){
+    const p=a.p||[],n=p.length;
+    if(n<2){host.innerHTML="";return;}
+    const W=1000,H=232,PADL=58,PADR=16,PADT=12,PADB=26;
+    const wk=7*86400000,baseMs=Date.parse(a.start+"T00:00:00");
+    const xOf=i=>PADL+i/(n-1)*(W-PADL-PADR);
+    let lo=Infinity,hi=-Infinity;
+    for(let i=0;i<n;i++){const l=Math.log(p[i]);if(l<lo)lo=l;if(l>hi)hi=l;}
+    const pad=(hi-lo)*0.08||0.1;
+    const yOf=v=>PADT+((hi+pad)-Math.log(v))/((hi+pad)-(lo-pad))*(H-PADT-PADB);
+    let grid="";
+    for(let k=1;k<=4;k++){
+      const lv=Math.exp(lo+k*(hi-lo)/4),gy=yOf(lv).toFixed(1);
+      grid+='<line class="gl" x1="'+PADL+'" x2="'+(W-PADR)+'" y1="'+gy+'" y2="'+gy+'"/>'+
+        '<text class="ax" x="'+(PADL-7)+'" y="'+(Number(gy)+3.5)+'" text-anchor="end">'+fmtPx(lv)+'</text>';
+    }
+    let ticks=[],lastY=null;
+    for(let i=0;i<n;i++){const yr=new Date(baseMs+i*wk).getFullYear();if(yr!==lastY){ticks.push({i:i,y:yr});lastY=yr;}}
+    const step=Math.ceil(ticks.length/9);ticks=ticks.filter((_,k)=>k%step===0);
+    let xl="";ticks.forEach(t=>{xl+='<text class="ax" x="'+xOf(t.i).toFixed(1)+'" y="'+(H-8)+'" text-anchor="middle">'+t.y+'</text>';});
+    let line="";for(let i=0;i<n;i++){line+=(i?"L":"M")+xOf(i).toFixed(1)+" "+yOf(p[i]).toFixed(2)+" ";}
+    const entries=(a.bt&&a.bt.entries)||[];
+    let mks="";
+    entries.forEach((e,idx0)=>{
+      let idx=Math.round((Date.parse(e.entry_date+"T00:00:00")-baseMs)/wk);
+      idx=Math.max(0,Math.min(n-1,idx));
+      const col=e.complete_1y?(e.return_1y>0?"var(--rm-green)":"var(--rm-red)"):"var(--rm-yellow)";
+      mks+='<circle class="mk" data-i="'+idx0+'" cx="'+xOf(idx).toFixed(1)+'" cy="'+yOf(p[idx]).toFixed(2)+'" r="4.6" fill="'+col+'"/>';
+    });
+    host.innerHTML='<svg class="btr-chart" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none">'+grid+xl+'<path class="pl" d="'+line+'"/>'+mks+'</svg>';
+    const svg=host.querySelector("svg");
+    svg.addEventListener("pointerover",ev=>{
+      const c=ev.target.closest&&ev.target.closest(".mk");if(!c)return;
+      const e=entries[Number(c.getAttribute("data-i"))];if(!e)return;
+      const one=e.complete_1y?("1y close <b>"+pct(e.return_1y)+"</b> · 1y peak "+pct(e.max_return_1y)):("so far "+pct(e.return_1y)+" ("+e.weeks_observed+"w)");
+      tip.innerHTML='<b>'+esc(e.entry)+'</b> · buy '+esc(money(e.buy,a.moeda))+'<br>'+one+'<br>MAE '+pct(e.entry_drawdown)+'<br><span style="color:var(--rm-dim)">click to highlight the entry row</span>';
+      tip.style.opacity=1;
+    });
+    svg.addEventListener("pointermove",ev=>{tip.style.left=(ev.clientX+14)+"px";tip.style.top=(ev.clientY-12)+"px";});
+    svg.addEventListener("pointerout",ev=>{const c=ev.target.closest&&ev.target.closest(".mk");if(c)tip.style.opacity=0;});
+    svg.addEventListener("click",ev=>{
+      const c=ev.target.closest&&ev.target.closest(".mk");if(!c)return;
+      ev.stopPropagation();
+      selectEntry(Number(c.getAttribute("data-i")),true);
+    });
+  }
+
+  let modal,card,tip;
+  function ensureUI(){
+    if(modal)return;
+    modal=document.createElement("dialog");modal.className="btr-modal";
+    card=document.createElement("div");card.className="btr-card";modal.appendChild(card);
+    document.body.appendChild(modal);
+    tip=document.createElement("div");tip.className="btr-tip";document.body.appendChild(tip);
+    modal.addEventListener("click",e=>{if(e.target===modal)modal.close();});
+    modal.addEventListener("close",()=>{tip.style.opacity=0;});
+  }
+
+  function markerBaseR(m){return m.classList.contains("sel")?"8":"4.6";}
+  function selectEntry(i,scroll){
+    const tb=card.querySelector("tbody");if(!tb)return;
+    const tr=tb.querySelector('tr[data-i="'+i+'"]');
+    const wasSel=tr&&tr.classList.contains("sel");
+    tb.querySelectorAll("tr.sel").forEach(r=>r.classList.remove("sel"));
+    card.querySelectorAll(".mk").forEach(m=>{m.classList.remove("sel");m.classList.remove("on");m.setAttribute("r","4.6");});
+    if(wasSel)return;
+    const mk=card.querySelector('.mk[data-i="'+i+'"]');
+    if(tr)tr.classList.add("sel");
+    if(mk){mk.classList.add("sel");mk.setAttribute("r","8");}
+    if(tr&&scroll)tr.scrollIntoView({behavior:"smooth",block:"center"});
+  }
+
+  function methodText(a){
+    const bt=a.bt;
+    return '<b>Rule:</b> an entry occurs in the first week when rounded weekly RSI(14) falls to or below this asset&#39;s buy threshold ('+bt.threshold+'); consecutive weeks inside the zone are a single entry. <b>Buy price</b> is that week&#39;s adjusted close (same base as the dashboard price). <b>Close</b> is the adjusted weekly close at the end of each 1/2/3/5-year horizon, shown with the month it was measured; a horizon still running shows its value &quot;so far&quot; once (later horizons show &quot;·&quot;) and is excluded from every aggregate. <b>Peak</b> is the maximum reached inside the horizon using '+(bt.peak_basis==="Weekly high"?"the highest adjusted weekly high":"the highest adjusted weekly close available")+', with its month. <b>Give-back</b> = (1+close)/(1+peak)&minus;1: how far below its own peak the horizon ended. <b>MAE</b> is the worst dip from entry before the best 5-year peak, using '+(bt.drawdown_basis==="Weekly low"?"the lowest adjusted weekly low":"the lowest adjusted weekly close available")+'. <b>Win rate</b> = share of completed 1y entries whose close was positive. <b>Base rate</b> = 12-month forward return of every week of this same history; <b>Edge</b> = average 1y close of the entries minus that base average. Click a dot on the chart to highlight its entry row (click again to clear). All aggregates are precomputed by the dashboard generator from the same weekly series used across this page and use completed horizons only.';
   }
 
   function openReport(key){
-    const a=DATA[key]; if(!a||!a.bt) return;
-    const popup=window.open(
-      "",
-      "rsiBacktest_"+String(key).replace(/[^a-z0-9]/gi,"_"),
-      "popup=yes,width=1180,height=760,left=80,top=60,resizable=yes,scrollbars=yes"
-    );
-    if(!popup){ window.alert("The browser blocked the backtest window."); return; }
-    popup.opener=null;
-    popup.document.open(); popup.document.write(reportHtml(a)); popup.document.close();
+    const a=DATA[key];if(!a||!a.bt)return;
+    ensureUI();
+    const bt=a.bt;
+    const rows=entryRows(a);
+    card.innerHTML='<div class="btr-accent"></div>'+
+      '<div class="btr-head"><div class="btr-title"><span class="nm">'+esc(a.name)+'</span><span class="tk">'+esc(a.tk)+'</span>'+
+      '<span class="src">'+esc(a.years)+'y</span></div>'+
+      '<button class="btr-x" aria-label="Close">&times;</button></div>'+
+      '<div class="btr-chips">'+kpis(a)+'</div>'+
+      '<div class="btr-subchips">'+subChips(a)+'</div>'+
+      '<div class="btr-plot"><h4>Where the entries happened &mdash; weekly close, log scale</h4><div class="btr-chartbox"></div>'+
+      '<div class="btr-legend"><span><i style="background:var(--rm-green)"></i>1y closed positive</span><span><i style="background:var(--rm-red)"></i>1y closed negative</span><span><i style="background:var(--rm-yellow)"></i>1y not completed yet</span><span>&mdash; hover a dot or a row · click a dot to highlight its entry</span></div></div>'+
+      '<div class="btr-twrap"><table><thead><tr><th>Entry <em>(newest first)</em></th><th>Buy price</th><th title="Maximum adverse excursion: worst dip after entry, before the best 5y peak">MAE</th><th>1y close &amp; peak</th><th>2y close &amp; peak</th><th>3y close &amp; peak</th><th>5y close &amp; peak</th></tr></thead><tbody>'+
+      (rows||('<tr><td colspan="7" class="btr-emptyrow">No RSI entries found in this history.</td></tr>'))+'</tbody></table></div>'+
+      '<div class="btr-method">'+methodText(a)+'</div>';
+    card.querySelector(".btr-x").onclick=()=>modal.close();
+    drawChart(card.querySelector(".btr-chartbox"),a);
+    const tb=card.querySelector("tbody");
+    const clearHover=()=>{card.querySelectorAll(".mk.on").forEach(m=>{m.classList.remove("on");m.setAttribute("r",markerBaseR(m));});};
+    tb.addEventListener("pointerover",ev=>{
+      const tr=ev.target.closest&&ev.target.closest("tr[data-i]");if(!tr)return;
+      clearHover();
+      const mk=card.querySelector('.mk[data-i="'+tr.getAttribute("data-i")+'"]');
+      if(mk&&!mk.classList.contains("sel")){mk.classList.add("on");mk.setAttribute("r","7");}
+    });
+    tb.addEventListener("pointerleave",clearHover);
+    tb.addEventListener("click",ev=>{
+      const tr=ev.target.closest&&ev.target.closest("tr[data-i]");if(!tr)return;
+      selectEntry(Number(tr.getAttribute("data-i")),false);
+    });
+    if(!modal.open)modal.showModal();
+    card.scrollTop=0;
   }
+
+  /* ---- delegated icon click (capture: beat the row-expand handler) ---- */
   document.addEventListener("click",function(e){
-    const button=e.target.closest&&e.target.closest(".bt-ico");
-    if(!button)return;
-    e.preventDefault();e.stopPropagation();openReport(button.getAttribute("data-bt"));
+    const b=e.target.closest&&e.target.closest(".bt-ico");
+    if(!b)return;
+    e.preventDefault();e.stopPropagation();
+    openReport(b.getAttribute("data-bt"));
+  },true);
+  document.addEventListener("keydown",function(e){
+    if((e.key==="Enter"||e.key===" ")&&document.activeElement&&document.activeElement.classList.contains("bt-ico")){
+      e.preventDefault();e.stopPropagation();
+      openReport(document.activeElement.getAttribute("data-bt"));
+    }
   },true);
 })();
 """
@@ -3100,6 +3363,11 @@ def _build_rsi_backtest(close: pd.Series, buy_threshold: int,
     uses the lowest weekly low (or close when low is unavailable) before the
     best 5-year peak. In-progress horizons use the latest close but do not
     affect completed averages.
+
+    Each horizon also records the exact month of its terminal close, and the
+    payload carries decision aggregates for the backtest modal: 1y win rate,
+    median returns and peaks, median give-back, median months-to-peak and the
+    unconditional 12-month base rate of the same series.
     """
     rsi = RSIIndicator(close=close.astype(float), window=14).rsi()
     # The live signal rounds RSI to the nearest integer before comparing it with
@@ -3158,14 +3426,16 @@ def _build_rsi_backtest(close: pd.Series, buy_threshold: int,
                 (peak_price / entry_price - 1.0) * 100.0, 1
             )
             observation[f"peak_month_{years}y"] = peak_date.strftime("%Y-%m")
-            terminal_price = (
-                float(path_close.iloc[-1])
-                if complete and not path_close.empty
-                else float(close.iloc[-1])
-            )
+            if complete and not path_close.empty:
+                terminal_price = float(path_close.iloc[-1])
+                terminal_date = pd.Timestamp(path_close.index[-1])
+            else:
+                terminal_price = float(close.iloc[-1])
+                terminal_date = last_date
             observation[f"return_{years}y"] = round(
                 (terminal_price / entry_price - 1.0) * 100.0, 1
             )
+            observation[f"close_month_{years}y"] = terminal_date.strftime("%Y-%m")
             observation[f"complete_{years}y"] = complete
 
         drawdown_end = peak_date_5y or min(entry_date + pd.DateOffset(years=5), last_date)
@@ -3180,18 +3450,55 @@ def _build_rsi_backtest(close: pd.Series, buy_threshold: int,
 
     completed_counts = {}
     average_returns = {}
+    median_returns = {}
     for years in (1, 2, 3, 5):
         completed = [item for item in observations if item[f"complete_{years}y"]]
         completed_counts[years] = len(completed)
-        average_returns[years] = (
-            round(sum(item[f"return_{years}y"] for item in completed) / len(completed), 1)
-            if completed else None
-        )
+        returns = [item[f"return_{years}y"] for item in completed]
+        average_returns[years] = round(sum(returns) / len(returns), 1) if returns else None
+        median_returns[years] = round(float(statistics.median(returns)), 1) if returns else None
     completed_5y = [item for item in observations if item["complete_5y"]]
     avg_entry_drawdown = (
         round(sum(item["entry_drawdown"] for item in completed_5y) / len(completed_5y), 1)
         if completed_5y else None
     )
+
+    # 1-year decision stats (win rate, peak, give-back, time-to-peak) feed the
+    # backtest modal KPIs; all of them use completed 1y horizons only.
+    completed_1y = [item for item in observations if item["complete_1y"]]
+    closes_1y = [item["return_1y"] for item in completed_1y]
+    peaks_1y = [item["max_return_1y"] for item in completed_1y]
+    win_rate_1y = (
+        round(100.0 * sum(1 for value in closes_1y if value > 0) / len(closes_1y), 1)
+        if closes_1y else None
+    )
+    give_backs_1y = [
+        ((1.0 + close_pct / 100.0) / (1.0 + peak_pct / 100.0) - 1.0) * 100.0
+        for close_pct, peak_pct in zip(closes_1y, peaks_1y)
+    ]
+    months_to_peak_1y = []
+    for item in completed_1y:
+        if item["max_return_1y"] <= 0:
+            continue
+        entry_year, entry_month = (int(part) for part in item["entry"].split("-"))
+        peak_year, peak_month = (int(part) for part in item["peak_month_1y"].split("-"))
+        months_to_peak_1y.append((peak_year - entry_year) * 12 + (peak_month - entry_month))
+
+    # Unconditional 12-month forward return of every week in the same series:
+    # the base rate the RSI entries must beat to show an edge.
+    base_12m = None
+    if len(close) >= 105:
+        values = [float(v) for v in close.values]
+        forward = [
+            (values[i + 52] / values[i] - 1.0) * 100.0
+            for i in range(len(values) - 52)
+        ]
+        base_12m = {
+            "avg": round(sum(forward) / len(forward), 1),
+            "med": round(float(statistics.median(forward)), 1),
+            "n": len(forward),
+        }
+
     return {
         "threshold": int(buy_threshold),
         "count": len(observations),
@@ -3204,6 +3511,19 @@ def _build_rsi_backtest(close: pd.Series, buy_threshold: int,
         "avg_return_3y": average_returns[3],
         "avg_return_5y": average_returns[5],
         "avg_entry_drawdown": avg_entry_drawdown,
+        "win_rate_1y": win_rate_1y,
+        "med_return_1y": median_returns[1],
+        "med_return_2y": median_returns[2],
+        "med_return_3y": median_returns[3],
+        "med_return_5y": median_returns[5],
+        "med_peak_1y": round(float(statistics.median(peaks_1y)), 1) if peaks_1y else None,
+        "avg_peak_1y": round(sum(peaks_1y) / len(peaks_1y), 1) if peaks_1y else None,
+        "med_give_back_1y": round(float(statistics.median(give_backs_1y)), 1) if give_backs_1y else None,
+        "med_months_to_peak_1y": (
+            round(float(statistics.median(months_to_peak_1y)), 1)
+            if months_to_peak_1y else None
+        ),
+        "base_12m": base_12m,
         "peak_basis": peak_basis,
         "drawdown_basis": drawdown_basis,
         "entries": observations,
@@ -4911,6 +5231,7 @@ body{{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:
 {RESEARCH_V2_CSS}
 {RESEARCH_V3_CSS}
 {DRAWDOWN_CSS}
+{BACKTEST_CSS}
 {SIGNAL_CHANGES_CSS}
 {DATA_CONTRACT_CSS}
 </style>
