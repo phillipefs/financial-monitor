@@ -2959,7 +2959,7 @@ DATA_CONTRACT_SCRIPT = r"""
 BACKTEST_RESULTS_CSS = r"""
 /* ===== BACKTEST RESULTS (consolidated ranking board) ===== */
 .research-v2.profile-field-v3 .backtest-board{
-  max-width:1320px;margin:20px auto 0;padding:0 clamp(16px,3vw,34px);
+  max-width:1380px;margin:20px auto 0;padding:0 clamp(16px,3vw,34px);
 }
 body.research-v2.profile-field-v3:not(.backtest-open) .backtest-board{display:none}
 body.research-v2.profile-field-v3.backtest-open .executive-board,
@@ -2986,7 +2986,9 @@ body.research-v2.profile-field-v3.backtest-open .backtest-board{
 .research-v2.profile-field-v3 .btb-fbtn:hover{border-color:rgba(67,215,232,.4)}
 .research-v2.profile-field-v3 .btb-fbtn.active{border-color:rgba(67,215,232,.5);background:rgba(67,215,232,.10);color:var(--rm-cyan)}
 .research-v2.profile-field-v3 .btb-fbtn.active .fc{color:var(--rm-cyan)}
-.research-v2.profile-field-v3 .btb-table{min-width:1220px}
+.research-v2.profile-field-v3 .btb-table{min-width:1160px}
+.research-v2.profile-field-v3 .btb-table th,.research-v2.profile-field-v3 .btb-table td{padding-left:9px;padding-right:9px}
+.research-v2.profile-field-v3 .btb-table th:last-child,.research-v2.profile-field-v3 .btb-table td:last-child{width:52px;text-align:center;padding-right:14px}
 .research-v2.profile-field-v3 .btb-table th[data-sort]{cursor:pointer;user-select:none;white-space:nowrap}
 .research-v2.profile-field-v3 .btb-table th[data-sort]:hover{color:var(--rm-text)}
 .research-v2.profile-field-v3 .btb-table th[data-sort]::after{content:"\2195";margin-left:5px;opacity:.35}
@@ -3125,11 +3127,10 @@ BACKTEST_RESULTS_SCRIPT = r"""
     return '<td><span class="btb-num '+tone(v)+'" title="'+esc('Average '+label+' return · '+sample(total,completed))+'">'+fmtPct(v)+'</span></td>';
   }
   function rowHtml(r){
-    var hitCls,hitSub,subCls='';
+    var hitCls,hitSub;
     if(r.hitD>0){
       hitCls=r.hit>=60?'pos':(r.hit>=45?'warn':'neg');
       hitSub=r.hitN+' of '+r.hitD+' closed';
-      if(r.hitD<5){subCls=' warn';hitSub+=' · small sample';}
     }else{
       hitCls='na';
       hitSub=r.count>0?'no closed 1Y yet':'no entries';
@@ -3141,7 +3142,7 @@ BACKTEST_RESULTS_SCRIPT = r"""
       '<td class="btb-asset"><b>'+esc(r.name)+'</b><span class="btb-sub">'+esc(r.tk)+(r.grupo?' &middot; '+esc(r.grupo):'')+'</span></td>'+
       '<td><span class="btb-num">'+(r.years==null?'&mdash;':r.years.toFixed(1)+'y')+'</span></td>'+
       '<td><span class="btb-num">'+r.count+'</span><span class="btb-sub">RSI &le; '+(r.threshold==null?'&mdash;':r.threshold)+'</span></td>'+
-      '<td><span class="btb-num '+hitCls+'">'+(r.hit==null?'&mdash;':r.hit.toFixed(0)+'%')+'</span><span class="btb-sub'+subCls+'">'+hitSub+'</span></td>'+
+      '<td><span class="btb-num '+hitCls+'">'+(r.hit==null?'&mdash;':r.hit.toFixed(0)+'%')+'</span><span class="btb-sub">'+hitSub+'</span></td>'+
       avgCell(r.avg1,r.rc1,r.cd1,'1-year')+
       avgCell(r.avg2,r.rc2,r.cd2,'2-year')+
       avgCell(r.avg3,r.rc3,r.cd3,'3-year')+
@@ -3201,7 +3202,7 @@ BACKTEST_RESULTS_SCRIPT = r"""
       'Trade-weighted, not the median of each asset&#39;s own average.';
     return '<div class="dq-stat is-info"><strong>'+subset.length+'</strong><span>Assets analyzed</span></div>'+
       '<div class="dq-stat"><strong>'+totalEntries+'</strong><span>RSI entries</span></div>'+
-      '<div class="dq-stat" title="'+perYearTitle+'"><strong>'+(perYear==null?'&mdash;':(perYear>=100?perYear.toFixed(0):perYear.toFixed(1)))+'</strong><span>Entries / year</span></div>'+
+      '<div class="dq-stat" title="'+perYearTitle+'"><strong>'+(perYear==null?'&mdash;':(perYear>=100?perYear.toFixed(0):perYear.toFixed(1)))+'</strong><span>Avg entries / year</span></div>'+
       '<div class="dq-stat '+(winRate!=null&&winRate>=60?'is-ok':'is-warn')+'" title="'+winRateTitle+'"><strong>'+(winRate==null?'&mdash;':winRate.toFixed(0)+'%')+'</strong><span>Win rate 1Y</span></div>'+
       '<div class="dq-stat is-ok"><strong>'+perfect+'</strong><span>100% hit assets</span></div>'+
       '<div class="dq-stat '+(avgRet1!=null&&avgRet1>0?'is-ok':'is-warn')+'" title="'+avgRet1Title+'"><strong>'+(avgRet1==null?'&mdash;':fmtPct(avgRet1))+'</strong><span>Average 1Y return</span></div>'+
@@ -3272,8 +3273,12 @@ BACKTEST_RESULTS_SCRIPT = r"""
     board.addEventListener('click',function(ev){
       var fbtn=ev.target.closest&&ev.target.closest('.btb-fbtn');
       if(fbtn){
-        activeGroup=fbtn.getAttribute('data-group')||'';
-        Array.prototype.forEach.call(board.querySelectorAll('.btb-fbtn'),function(b){b.classList.toggle('active',b===fbtn);});
+        var g=fbtn.getAttribute('data-group')||'';
+        /* Clicking the already-active market clears the filter (back to All). */
+        activeGroup=(g&&g===activeGroup)?'':g;
+        Array.prototype.forEach.call(board.querySelectorAll('.btb-fbtn'),function(b){
+          b.classList.toggle('active',(b.getAttribute('data-group')||'')===activeGroup);
+        });
         renderRows();
         updateStats();
         return;
