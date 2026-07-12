@@ -2970,14 +2970,13 @@ body.research-v2.profile-field-v3.backtest-open .footer{display:none!important}
 body.research-v2.profile-field-v3.backtest-open .backtest-board{
   display:block;min-height:calc(100vh - var(--chrome-h,118px));padding-top:28px;padding-bottom:42px;
 }
-.research-v2.profile-field-v3 .btb-stats{grid-template-columns:repeat(7,minmax(0,1fr))}
+.research-v2.profile-field-v3 .btb-stats{grid-template-columns:repeat(4,minmax(0,1fr))}
+.research-v2.profile-field-v3 .btb-stats .dq-stat strong{font-size:1.35rem}
 @media(max-width:960px){
-  .research-v2.profile-field-v3 .btb-stats{grid-template-columns:repeat(3,minmax(0,1fr))}
-}
-@media(max-width:560px){
   .research-v2.profile-field-v3 .btb-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
-.research-v2.profile-field-v3 .btb-filters{display:flex;flex-wrap:wrap;gap:6px;padding:16px 22px 0}
+.research-v2.profile-field-v3 .btb-kpi-sub{display:block;margin-top:5px;color:var(--rm-dim);font-size:.66rem;font-weight:700;font-style:normal}
+.research-v2.profile-field-v3 .btb-filters{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:16px 22px 0}
 .research-v2.profile-field-v3 .btb-fbtn{
   border:1px solid var(--rm-line);border-radius:999px;background:transparent;color:var(--rm-muted);
   cursor:pointer;font-size:.68rem;font-weight:800;padding:6px 12px;text-transform:uppercase;
@@ -2986,9 +2985,17 @@ body.research-v2.profile-field-v3.backtest-open .backtest-board{
 .research-v2.profile-field-v3 .btb-fbtn:hover{border-color:rgba(67,215,232,.4)}
 .research-v2.profile-field-v3 .btb-fbtn.active{border-color:rgba(67,215,232,.5);background:rgba(67,215,232,.10);color:var(--rm-cyan)}
 .research-v2.profile-field-v3 .btb-fbtn.active .fc{color:var(--rm-cyan)}
+.research-v2.profile-field-v3 .btb-evidence-wrap{display:flex;align-items:center;gap:8px;margin-left:auto;white-space:nowrap}
+.research-v2.profile-field-v3 .btb-evidence-wrap label{color:var(--rm-dim);font-family:var(--mono);font-size:.62rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.research-v2.profile-field-v3 .btb-evidence{border:1px solid var(--rm-line);border-radius:8px;background:#0c151c;color:var(--rm-text);font-size:.7rem;font-weight:700;padding:7px 9px;cursor:pointer}
+.research-v2.profile-field-v3 .btb-evidence:hover{border-color:rgba(67,215,232,.4)}
+.research-v2.profile-field-v3 .btb-evidence option{background:#0c151c;color:#edf4f6;font-weight:700}
+.research-v2.profile-field-v3 .btb-evidence option:checked{background:rgba(67,215,232,.16);color:#fff}
 .research-v2.profile-field-v3 .btb-table{min-width:1160px}
 .research-v2.profile-field-v3 .btb-table th,.research-v2.profile-field-v3 .btb-table td{padding-left:9px;padding-right:9px}
 .research-v2.profile-field-v3 .btb-table th:last-child,.research-v2.profile-field-v3 .btb-table td:last-child{width:52px;text-align:center;padding-right:14px}
+.research-v2.profile-field-v3 .btb-table th:nth-child(5),.research-v2.profile-field-v3 .btb-table td:nth-child(5),
+.research-v2.profile-field-v3 .btb-table th:nth-child(10),.research-v2.profile-field-v3 .btb-table td:nth-child(10){border-left:1px solid var(--rm-line-soft)}
 .research-v2.profile-field-v3 .btb-table th[data-sort]{cursor:pointer;user-select:none;white-space:nowrap}
 .research-v2.profile-field-v3 .btb-table th[data-sort]:hover{color:var(--rm-text)}
 .research-v2.profile-field-v3 .btb-table th[data-sort]::after{content:"\2195";margin-left:5px;opacity:.35}
@@ -3009,7 +3016,7 @@ body.research-v2.profile-field-v3.backtest-open .backtest-board{
 .research-v2.profile-field-v3 .btb-num.warn{color:var(--rm-yellow)}
 .research-v2.profile-field-v3 .btb-num.na{color:var(--rm-dim);font-weight:600}
 .research-v2.profile-field-v3 .btb-sub{display:block;margin-top:3px;color:var(--rm-dim);font-size:.64rem;font-weight:700;white-space:nowrap}
-.research-v2.profile-field-v3 .btb-sub.warn{color:var(--rm-yellow)}
+.research-v2.profile-field-v3 .btb-fresh{display:inline-block;margin-left:7px;padding:2px 7px;border-radius:999px;background:rgba(67,215,232,.14);border:1px solid rgba(67,215,232,.3);color:var(--rm-cyan);font-family:var(--mono);font-size:.62rem;font-weight:800;text-transform:uppercase;vertical-align:middle}
 .research-v2.profile-field-v3 .btb-open{
   display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;padding:0;
   border:1px solid var(--rm-line);border-radius:8px;background:rgba(67,215,232,.06);color:var(--rm-cyan);cursor:pointer;
@@ -3019,6 +3026,7 @@ body.research-v2.profile-field-v3.backtest-open .backtest-board{
 .research-v2.profile-field-v3 .btb-empty{padding:30px;text-align:center;color:var(--rm-muted)}
 @media(max-width:560px){
   .research-v2.profile-field-v3 .btb-filters{padding-left:14px;padding-right:14px}
+  .research-v2.profile-field-v3 .btb-evidence-wrap{margin-left:0}
 }
 """
 
@@ -3046,37 +3054,60 @@ BACKTEST_RESULTS_SCRIPT = r"""
     var mid=Math.floor(s.length/2);
     return s.length%2?s[mid]:(s[mid-1]+s[mid])/2;
   };
+  /* 95% Wilson lower bound of the win rate: a 100% hit on 2 trades has a
+     floor of ~34%, on 10 trades ~72% — sample size becomes visible. */
+  var wilson=function(wins,n){
+    if(!n)return null;
+    var z=1.96,p=wins/n,den=1+z*z/n;
+    return 100*(p+z*z/(2*n)-z*Math.sqrt(p*(1-p)/n+z*z/(4*n*n)))/den;
+  };
+
+  var NOW=Date.now();
+  var MS_DAY=86400000;
 
   var records=Object.keys(DATA).map(function(key){
     var a=DATA[key],bt=a.bt||{};
     var base=bt.base_12m||null;
     var avg1=num(bt.avg_return_1y);
-    var edge=(avg1!=null&&base&&base.avg!=null)?Math.round((avg1-base.avg)*10)/10:null;
     var entries=bt.entries||[];
     var yearsV=num(a.years);
-    /* Entry-level 1Y returns so the board can pool a true average across every
-       entry (trade-weighted), instead of averaging per-asset averages. Matches
-       avg_return_1y semantics: in-progress entries use the latest close. */
-    var ret1sum=0,ret1n=0;
+    var ret1list=[],maeClosedList=[],closed1=[],recent12=0,lastMs=null;
     entries.forEach(function(e){
       var r=num(e.return_1y);
-      if(r!=null){ret1sum+=r;ret1n++;}
+      if(r!=null)ret1list.push(r);
+      if(e.complete_1y){
+        if(r!=null)closed1.push(r);
+        var m=num(e.mae_1y);if(m!=null)maeClosedList.push(m);
+      }
+      var ms=Date.parse((e.entry_date||(e.entry+'-01'))+'T00:00:00');
+      if(!isNaN(ms)){
+        if(NOW-ms<=365*MS_DAY)recent12++;
+        if(lastMs==null||ms>lastMs)lastMs=ms;
+      }
     });
+    var medClosed1=median(closed1);
+    /* Median-based edge: robust to the hypergrowth outliers that made the
+       average edge absurd for young crypto (SOL avg edge -830pp vs med +366pp). */
+    var edge=(medClosed1!=null&&base&&base.med!=null)?Math.round((medClosed1-base.med)*10)/10:null;
+    var hitN=bt.positive_count_1y||0,hitD=bt.completed_1y||0;
     return {
       key:key,name:String(a.name||key),tk:String(a.tk||key),grupo:String(a.grupo||''),
       years:yearsV,rate:(yearsV&&yearsV>0)?(bt.count||0)/yearsV:null,
       threshold:(bt.threshold==null?null:bt.threshold),
-      count:bt.count||0,ret1sum:ret1sum,ret1n:ret1n,
-      hit:num(bt.positive_rate_1y),hitN:bt.positive_count_1y||0,hitD:bt.completed_1y||0,
-      avg1:avg1,avg2:num(bt.avg_return_2y),avg3:num(bt.avg_return_3y),avg5:num(bt.avg_return_5y),
-      rc1:bt.return_count_1y||0,rc2:bt.return_count_2y||0,rc3:bt.return_count_3y||0,rc5:bt.return_count_5y||0,
-      cd1:bt.completed_1y||0,cd2:bt.completed_2y||0,cd3:bt.completed_3y||0,cd5:bt.completed_5y||0,
+      count:bt.count||0,ret1list:ret1list,maeClosedList:maeClosedList,recent12:recent12,
+      fresh:(lastMs!=null&&(NOW-lastMs)<=183*MS_DAY),
+      hit:num(bt.positive_rate_1y),hitN:hitN,hitD:hitD,
+      conf:wilson(hitN,hitD),
+      avg1:avg1,med1:num(bt.med_return_1y),
+      avg2:num(bt.avg_return_2y),avg3:num(bt.avg_return_3y),
+      rc1:bt.return_count_1y||0,rc2:bt.return_count_2y||0,rc3:bt.return_count_3y||0,
+      cd1:bt.completed_1y||0,cd2:bt.completed_2y||0,cd3:bt.completed_3y||0,
       mae:num(bt.avg_mae_1y),edge:edge,
       last:entries.length?String(entries[entries.length-1].entry):null
     };
   });
 
-  /* Best asset first: hit rate, then average return 1y -> 5y (user rule). Nulls last. */
+  /* Best asset first: win rate, then average return 1y -> 3y (user rule). Nulls last. */
   function cmpDesc(x,y){
     if(x==null&&y==null)return 0;
     if(x==null)return 1;
@@ -3085,26 +3116,40 @@ BACKTEST_RESULTS_SCRIPT = r"""
   }
   function defaultCmp(a,b){
     return cmpDesc(a.hit,b.hit)||cmpDesc(a.avg1,b.avg1)||cmpDesc(a.avg2,b.avg2)||
-      cmpDesc(a.avg3,b.avg3)||cmpDesc(a.avg5,b.avg5)||cmpDesc(a.count,b.count)||
+      cmpDesc(a.avg3,b.avg3)||cmpDesc(a.count,b.count)||
       a.name.localeCompare(b.name);
   }
   records.sort(defaultCmp);
-  records.forEach(function(r,i){r.rank=i+1;});
-  /* Rank restarts at 1 inside each market so filtered views read 1..n. */
-  var byGroup={};
-  records.forEach(function(r){
-    if(!r.grupo)return;
-    (byGroup[r.grupo]=byGroup[r.grupo]||[]).push(r);
-  });
-  Object.keys(byGroup).forEach(function(g){
-    byGroup[g].forEach(function(r,i){r.grank=i+1;});
-  });
-  function rankOf(r){return activeGroup?(r.grank||r.rank):r.rank;}
+
+  var tbody=null,tableEl=null,statsEl=null,activeGroup='',minClosed=0;
+
+  function universe(){
+    return records.filter(function(r){
+      if(activeGroup&&r.grupo!==activeGroup)return false;
+      if(minClosed&&r.hitD<minClosed)return false;
+      return true;
+    });
+  }
+  /* Rank always restarts at 1 inside whatever market + evidence filters are
+     active, so a filtered view reads 1..n. */
+  var rankMap={};
+  function refreshRanks(){
+    rankMap={};
+    universe().forEach(function(r,i){rankMap[r.key]=i+1;});
+  }
+  function rankOf(r){return rankMap[r.key]||null;}
+  refreshRanks();
 
   var sortKey='rank',sortDir='asc';
   var ASC_DEFAULT={rank:true,name:true};
   function keyCmp(a,b){
-    if(sortKey==='rank')return sortDir==='asc'?rankOf(a)-rankOf(b):rankOf(b)-rankOf(a);
+    if(sortKey==='rank'){
+      var ra=rankOf(a),rb=rankOf(b);
+      if(ra==null&&rb==null)return defaultCmp(a,b);
+      if(ra==null)return 1;
+      if(rb==null)return -1;
+      return sortDir==='asc'?ra-rb:rb-ra;
+    }
     if(sortKey==='name')return sortDir==='asc'?a.name.localeCompare(b.name):b.name.localeCompare(a.name);
     var x=a[sortKey],y=b[sortKey];
     if(sortKey==='last'){
@@ -3123,8 +3168,8 @@ BACKTEST_RESULTS_SCRIPT = r"""
     var live=Math.max(0,(total||0)-(completed||0));
     return live?(total+' entries incl. '+live+' ongoing'):(total+' entries');
   }
-  function avgCell(v,total,completed,label){
-    return '<td><span class="btb-num '+tone(v)+'" title="'+esc('Average '+label+' return · '+sample(total,completed))+'">'+fmtPct(v)+'</span></td>';
+  function avgCell(v,total,completed,label,subHtml){
+    return '<td><span class="btb-num '+tone(v)+'" title="'+esc('Average '+label+' return · '+sample(total,completed))+'">'+fmtPct(v)+'</span>'+(subHtml||'')+'</td>';
   }
   function rowHtml(r){
     var hitCls,hitSub;
@@ -3135,80 +3180,89 @@ BACKTEST_RESULTS_SCRIPT = r"""
       hitCls='na';
       hitSub=r.count>0?'no closed 1Y yet':'no entries';
     }
+    var confTitle='95% Wilson lower bound of the 1Y win rate given '+r.hitD+' completed entries. A 100% win rate on 2 trades has a floor of ~34%; a large sample keeps the floor close to the observed rate.';
+    var medSub=r.med1==null?'':'<span class="btb-sub" title="Median 1-year return of this asset&#39;s entries — robust to one lucky or unlucky entry">med '+fmtPct(r.med1)+'</span>';
     var searchText=(r.tk+' '+r.name+' '+r.grupo).toLowerCase();
     var rk=rankOf(r);
-    return '<tr class="btb-row'+(rk<=3?' is-top':'')+'" data-key="'+esc(r.key)+'" data-grupo="'+esc(r.grupo)+'" data-search="'+esc(searchText)+'">'+
-      '<td class="btb-rank">'+rk+'</td>'+
+    return '<tr class="btb-row'+(rk!=null&&rk<=3?' is-top':'')+'" data-key="'+esc(r.key)+'" data-grupo="'+esc(r.grupo)+'" data-closed="'+r.hitD+'" data-search="'+esc(searchText)+'">'+
+      '<td class="btb-rank">'+(rk==null?'&mdash;':rk)+'</td>'+
       '<td class="btb-asset"><b>'+esc(r.name)+'</b><span class="btb-sub">'+esc(r.tk)+(r.grupo?' &middot; '+esc(r.grupo):'')+'</span></td>'+
       '<td><span class="btb-num">'+(r.years==null?'&mdash;':r.years.toFixed(1)+'y')+'</span></td>'+
       '<td><span class="btb-num">'+r.count+'</span><span class="btb-sub">RSI &le; '+(r.threshold==null?'&mdash;':r.threshold)+'</span></td>'+
       '<td><span class="btb-num '+hitCls+'">'+(r.hit==null?'&mdash;':r.hit.toFixed(0)+'%')+'</span><span class="btb-sub">'+hitSub+'</span></td>'+
-      avgCell(r.avg1,r.rc1,r.cd1,'1-year')+
+      '<td title="'+esc(confTitle)+'"><span class="btb-num '+(r.conf==null?'na':(r.conf>=50?'pos':'warn'))+'">'+(r.conf==null?'&mdash;':r.conf.toFixed(0)+'%')+'</span><span class="btb-sub">95% floor</span></td>'+
+      avgCell(r.avg1,r.rc1,r.cd1,'1-year',medSub)+
       avgCell(r.avg2,r.rc2,r.cd2,'2-year')+
       avgCell(r.avg3,r.rc3,r.cd3,'3-year')+
-      avgCell(r.avg5,r.rc5,r.cd5,'5-year')+
       '<td><span class="btb-num '+(r.mae==null?'na':(r.mae<0?'neg':''))+'" title="Average worst loss vs entry within the first year (completed entries)">'+fmtPct(r.mae)+'</span></td>'+
-      '<td><span class="btb-num '+tone(r.edge)+'" title="Average 1Y return after RSI entries minus the 12-month base rate of any week in the same history">'+(r.edge==null?'&mdash;':(r.edge>0?'+':'')+r.edge.toFixed(1)+' pp')+'</span></td>'+
-      '<td><span class="btb-num">'+(r.last?esc(r.last):'&mdash;')+'</span></td>'+
-      '<td><button class="bt-ico btb-open" type="button" data-bt="'+esc(r.key)+'" title="Open the full RSI backtest report" aria-label="Open RSI backtest report for '+esc(r.name)+'">'+ICON+'</button></td>'+
+      '<td><span class="btb-num '+tone(r.edge)+'" title="Median completed 1Y return minus the median 12-month return of any week in the same history — robust to outliers">'+(r.edge==null?'&mdash;':(r.edge>0?'+':'')+r.edge.toFixed(1)+' pp')+'</span></td>'+
+      '<td><span class="btb-num">'+(r.last?esc(r.last):'&mdash;')+'</span>'+(r.fresh?'<span class="btb-fresh" title="Most recent RSI entry happened within the last 6 months">new</span>':'')+'</td>'+
+      '<td><button class="bt-ico btb-open" type="button" data-bt="'+esc(r.key)+'" title="Open the full RSI backtest report (keeps the full 5-year view)" aria-label="Open RSI backtest report for '+esc(r.name)+'">'+ICON+'</button></td>'+
       '</tr>';
   }
 
   var HEADERS=[
-    ['rank','#','Frozen rank: 1Y hit rate, then average 1Y/2Y/3Y/5Y returns'],
+    ['rank','#','Rank inside the active filters: 1Y win rate, then average 1Y/2Y/3Y returns'],
     ['name','Asset',''],
     ['years','History','Weekly history used by the backtest'],
     ['count','Entries','Number of RSI buy-zone entries'],
-    ['hit','Hit 1Y','Share of completed entries positive one year later'],
-    ['avg1','Avg 1Y','Average 1-year return (in-progress entries at latest close)'],
+    ['hit','Win rate 1Y','Share of completed entries that closed positive one year later'],
+    ['conf','Confidence','95% Wilson lower bound of the 1Y win rate — punishes small samples'],
+    ['avg1','Avg 1Y','Average 1-year return (in-progress entries at latest close); median below'],
     ['avg2','Avg 2Y',''],
     ['avg3','Avg 3Y',''],
-    ['avg5','Avg 5Y',''],
     ['mae','Avg MAE 1Y','Average worst loss vs entry within the first year (across completed entries)'],
-    ['edge','Edge 1Y','Average 1Y return minus the 12-month base rate of the same history'],
-    ['last','Last entry','Most recent RSI entry'],
+    ['edge','Med edge 1Y','Median completed 1Y return minus the median 12-month base rate of the same history'],
+    ['last','Last entry','Most recent RSI entry; "new" = within the last 6 months'],
     ['','','']
   ];
 
-  var tbody=null,tableEl=null,statsEl=null,activeGroup='';
-  /* KPIs follow the active market filter: they describe the visible universe. */
+  function chip(value,label,sub,cls,title){
+    return '<div class="dq-stat '+(cls||'')+'"'+(title?' title="'+esc(title)+'"':'')+'><strong>'+value+'</strong><span>'+label+'</span>'+
+      (sub?'<em class="btb-kpi-sub">'+sub+'</em>':'')+'</div>';
+  }
+  /* KPIs describe the visible universe: market filter AND evidence filter. */
   function statsChips(){
-    var subset=activeGroup?records.filter(function(r){return r.grupo===activeGroup;}):records;
+    var subset=universe();
+    var scope=(activeGroup||'all markets')+(minClosed?(' &middot; '+minClosed+'+ closed'):'');
     var totalEntries=subset.reduce(function(acc,r){return acc+r.count;},0);
+    var recent=subset.reduce(function(acc,r){return acc+r.recent12;},0);
     var rates=subset.map(function(r){return r.rate;}).filter(function(v){return v!=null;});
     var perYear=rates.length?rates.reduce(function(acc,v){return acc+v;},0):null;
     var perAsset=(perYear!=null&&rates.length)?perYear/rates.length:null;
-    var perYearTitle='Expected RSI entries per year across the current filter: sum of each asset&#39;s entries divided by its own history length'+
-      (perAsset!=null?(' (~'+perAsset.toFixed(1)+' per asset per year)'):'');
-    /* System win rate: pooled across every completed 1Y entry (trade-weighted),
-       not the median of each asset's own hit rate (which weights a 1-entry
-       asset the same as a 20-entry asset). */
     var hitNsum=subset.reduce(function(acc,r){return acc+(r.hitN||0);},0);
     var hitDsum=subset.reduce(function(acc,r){return acc+(r.hitD||0);},0);
     var winRate=hitDsum>0?(100*hitNsum/hitDsum):null;
-    var winRateTitle='System win rate: '+hitNsum+' of '+hitDsum+' completed 1Y entries closed positive, pooled across '+
-      (activeGroup||'all markets')+'. Trade-weighted, not asset-weighted &mdash; differs from averaging each asset&#39;s own Hit 1Y equally.';
-    var perfect=subset.filter(function(r){return r.hitD>0&&r.hit===100;}).length;
+    var allRet=[];subset.forEach(function(r){allRet=allRet.concat(r.ret1list);});
+    var avgRet1=allRet.length?allRet.reduce(function(a,b){return a+b;},0)/allRet.length:null;
+    var medRet1=median(allRet);
+    var allMae=[];subset.forEach(function(r){allMae=allMae.concat(r.maeClosedList);});
+    var avgMae=allMae.length?allMae.reduce(function(a,b){return a+b;},0)/allMae.length:null;
+    var reliableBase=subset.filter(function(r){return r.hitD>=5;});
+    var reliable=reliableBase.filter(function(r){return r.hit>=80;}).length;
     var edges=subset.map(function(r){return r.edge;}).filter(function(v){return v!=null;});
     var edgePos=edges.filter(function(v){return v>0;}).length;
-    /* Average 1Y return pooled across every entry (trade-weighted), i.e. how
-       much a typical entry returned holding one year. Not the median of each
-       asset's own average. */
-    var retSum=subset.reduce(function(acc,r){return acc+(r.ret1sum||0);},0);
-    var retN=subset.reduce(function(acc,r){return acc+(r.ret1n||0);},0);
-    var avgRet1=retN>0?(retSum/retN):null;
-    var avgRet1Title='Average 1-year return across all '+retN+' RSI entries in '+
-      (activeGroup||'all markets')+', pooled by entry (in-progress entries use the latest close). '+
-      'Trade-weighted, not the median of each asset&#39;s own average.';
-    return '<div class="dq-stat is-info"><strong>'+subset.length+'</strong><span>Assets analyzed</span></div>'+
-      '<div class="dq-stat"><strong>'+totalEntries+'</strong><span>RSI entries</span></div>'+
-      '<div class="dq-stat" title="'+perYearTitle+'"><strong>'+(perYear==null?'&mdash;':(perYear>=100?perYear.toFixed(0):perYear.toFixed(1)))+'</strong><span>Avg entries / year</span></div>'+
-      '<div class="dq-stat '+(winRate!=null&&winRate>=60?'is-ok':'is-warn')+'" title="'+winRateTitle+'"><strong>'+(winRate==null?'&mdash;':winRate.toFixed(0)+'%')+'</strong><span>Win rate 1Y</span></div>'+
-      '<div class="dq-stat is-ok"><strong>'+perfect+'</strong><span>100% hit assets</span></div>'+
-      '<div class="dq-stat '+(avgRet1!=null&&avgRet1>0?'is-ok':'is-warn')+'" title="'+avgRet1Title+'"><strong>'+(avgRet1==null?'&mdash;':fmtPct(avgRet1))+'</strong><span>Average 1Y return</span></div>'+
-      '<div class="dq-stat is-info"><strong>'+edgePos+'/'+edges.length+'</strong><span>Positive edge 1Y</span></div>';
+    return chip(subset.length,'Assets analyzed',scope,'is-info')+
+      chip(totalEntries,'RSI entries',recent+' in the last 12 months','',
+        'Total RSI buy-zone entries in the current filter; the sub-line counts entries that happened in the last 12 months.')+
+      chip(perYear==null?'&mdash;':(perYear>=100?perYear.toFixed(0):perYear.toFixed(1)),'Avg entries / year',
+        perAsset==null?'':('~'+perAsset.toFixed(1)+' per asset'),'',
+        'Expected RSI entries per year across the current filter: sum of each asset&#39;s entries divided by its own history length.')+
+      chip(winRate==null?'&mdash;':winRate.toFixed(0)+'%','Win rate 1Y',hitNsum+' of '+hitDsum+' closed entries',
+        (winRate!=null&&winRate>=60?'is-ok':'is-warn'),
+        'System win rate pooled across every completed 1Y entry (trade-weighted).')+
+      chip(fmtPct(avgRet1),'Average 1Y return','median '+fmtPct(medRet1),
+        (avgRet1!=null&&avgRet1>0?'is-ok':'is-warn'),
+        'Trade-weighted mean 1Y return across all entries (in-progress at latest close). A few crypto outliers can inflate the mean; the median below is robust to them.')+
+      chip(fmtPct(avgMae),'Avg MAE 1Y','avg worst dip inside year 1','',
+        'Average maximum adverse excursion pooled across '+allMae.length+' completed 1Y entries: the typical worst paper loss during the first year of holding.')+
+      chip(reliable+'/'+reliableBase.length,'Win rate &ge;80%','5+ closed &middot; robust sample','is-ok',
+        'Assets with at least 5 completed 1Y entries AND a win rate of 80% or more.')+
+      chip(edgePos+'/'+edges.length,'Positive edge 1Y','median edge &gt; 0','is-info',
+        'Assets whose median completed 1Y return beats the median 12-month return of any week in their own history (robust to outliers).');
   }
   function updateStats(){if(statsEl)statsEl.innerHTML=statsChips();}
+
   function renderRows(){
     if(!tbody)return;
     var sorted=records.slice().sort(keyCmp);
@@ -3229,9 +3283,15 @@ BACKTEST_RESULTS_SCRIPT = r"""
     var query=search&&document.body.classList.contains('backtest-open')?search.value.trim().toLowerCase():'';
     Array.prototype.forEach.call(tbody.querySelectorAll('tr.btb-row'),function(row){
       var okGroup=!activeGroup||row.getAttribute('data-grupo')===activeGroup;
+      var okClosed=!minClosed||parseInt(row.getAttribute('data-closed'),10)>=minClosed;
       var okQuery=!query||(row.getAttribute('data-search')||'').indexOf(query)!==-1;
-      row.hidden=!(okGroup&&okQuery);
+      row.hidden=!(okGroup&&okClosed&&okQuery);
     });
+  }
+  function refreshView(){
+    refreshRanks();
+    renderRows();
+    updateStats();
   }
 
   function renderBoard(){
@@ -3241,7 +3301,11 @@ BACKTEST_RESULTS_SCRIPT = r"""
     var filterHtml='<button class="btb-fbtn active" type="button" data-group="">All <span class="fc">'+records.length+'</span></button>'+
       groupNames.map(function(g){
         return '<button class="btb-fbtn" type="button" data-group="'+esc(g)+'">'+esc(g)+' <span class="fc">'+groups[g]+'</span></button>';
-      }).join('');
+      }).join('')+
+      '<div class="btb-evidence-wrap"><label for="btb-evidence">Evidence</label>'+
+      '<select id="btb-evidence" class="btb-evidence" title="Keep only assets with at least this many completed 1Y entries. KPIs and rank recalculate.">'+
+      '<option value="0">All samples</option><option value="3">3+ closed</option><option value="5">5+ closed</option><option value="10">10+ closed</option>'+
+      '</select></div>';
 
     var headHtml=HEADERS.map(function(h){
       return h[0]
@@ -3255,11 +3319,11 @@ BACKTEST_RESULTS_SCRIPT = r"""
           '<div>'+
             '<div class="eyebrow">RSI backtest &middot; consolidated</div>'+
             '<h2>Which assets historically rewarded buying their RSI zone.</h2>'+
-            '<p>Every asset&#39;s weekly RSI(14) buy-zone entries measured over 1&ndash;5 year holding windows, from the same data behind each asset&#39;s backtest report. Default ranking: 1Y hit rate, then average 1Y&rarr;5Y returns; with a market filter both the KPIs and the rank restart inside that market. Click a column header to re-sort; click a row to open the per-entry report.</p>'+
+            '<p>Every asset&#39;s weekly RSI(14) buy-zone entries measured over 1&ndash;3 year holding windows, from the same data behind each asset&#39;s backtest report (the per-asset report keeps the full 5-year view). Default ranking: 1Y win rate, then average 1Y&rarr;3Y returns; the rank and every KPI restart inside the active market and evidence filters. Click a column header to re-sort; click a row to open the per-entry report.</p>'+
           '</div>'+
         '</div>'+
         '<div class="dq-stats btb-stats" aria-label="Backtest summary">'+statsChips()+'</div>'+
-        '<div class="btb-filters" role="group" aria-label="Filter by market">'+filterHtml+'</div>'+
+        '<div class="btb-filters" role="group" aria-label="Filter by market and evidence">'+filterHtml+'</div>'+
         '<div class="dq-table-wrap"><table class="dq-table btb-table">'+
           '<thead><tr>'+headHtml+'</tr></thead><tbody></tbody>'+
         '</table></div>'+
@@ -3270,6 +3334,12 @@ BACKTEST_RESULTS_SCRIPT = r"""
     statsEl=board.querySelector('.btb-stats');
     renderRows();
 
+    board.addEventListener('change',function(ev){
+      if(ev.target&&ev.target.id==='btb-evidence'){
+        minClosed=parseInt(ev.target.value,10)||0;
+        refreshView();
+      }
+    });
     board.addEventListener('click',function(ev){
       var fbtn=ev.target.closest&&ev.target.closest('.btb-fbtn');
       if(fbtn){
@@ -3279,8 +3349,7 @@ BACKTEST_RESULTS_SCRIPT = r"""
         Array.prototype.forEach.call(board.querySelectorAll('.btb-fbtn'),function(b){
           b.classList.toggle('active',(b.getAttribute('data-group')||'')===activeGroup);
         });
-        renderRows();
-        updateStats();
+        refreshView();
         return;
       }
       var th=ev.target.closest&&ev.target.closest('th[data-sort]');

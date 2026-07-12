@@ -475,7 +475,7 @@ assets = [
     {"ticker": "CSMG3.SA", "name": "Copasa", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Utilities"},
     {"ticker": "SAPR11.SA", "name": "Sanepar", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Utilities"},
     {"ticker": "SBSP3.SA", "name": "Sabesp", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Utilities"},
-    {"ticker": "VIVT3.SA", "name": "Vivo", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Telecom & Media"},
+    {"ticker": "VIVT3.SA", "name": "Vivo", "buy": 35, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Telecom & Media"},
     {"ticker": "RADL3.SA", "name": "Droga Raia", "buy": 32, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Consumer"},
     {"ticker": "WEGE3.SA", "name": "WEG", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Industrials"},
     {"ticker": "TOTS3.SA", "name": "Totvs", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Technology"},
