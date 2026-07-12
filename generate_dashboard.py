@@ -2963,17 +2963,23 @@ BACKTEST_CSS = """
 .btr-title .src{flex-basis:100%;font-size:.78rem;color:var(--rm-dim)}
 .btr-x{flex:none;cursor:pointer;width:32px;height:32px;border-radius:8px;border:1px solid var(--rm-line);background:transparent;color:var(--rm-muted);font-size:1.2rem;line-height:1;display:grid;place-items:center}
 .btr-x:hover{color:var(--rm-text);border-color:var(--rm-red)}
-.btr-chips{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:8px;padding:6px 20px 2px}
-.btr-chip{border:1px solid var(--rm-line);background:rgba(255,255,255,.02);border-radius:10px;padding:9px 12px}
-.btr-chip .k{display:block;font-size:.64rem;text-transform:uppercase;letter-spacing:.06em;color:var(--rm-dim);margin-bottom:3px;white-space:nowrap}
+.btr-chips{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;padding:6px 20px 2px}
+.btr-chip{min-width:0;border:1px solid var(--rm-line);background:rgba(255,255,255,.02);border-radius:10px;padding:10px 12px}
+.btr-chip .k{display:block;min-height:2.45em;font-size:.64rem;line-height:1.25;text-transform:uppercase;letter-spacing:.06em;color:var(--rm-dim);margin-bottom:4px}
 .btr-chip .v{display:block;font:800 1.16rem ui-monospace,Consolas,monospace;font-variant-numeric:tabular-nums}
-.btr-chip .s{display:block;font-size:.68rem;color:var(--rm-dim);margin-top:3px}
+.btr-chip .s{display:block;font-size:.68rem;line-height:1.35;color:var(--rm-dim);margin-top:4px}
 .btr-chip .v.pos{color:var(--rm-green)}.btr-chip .v.neg{color:var(--rm-red)}.btr-chip .v.warn{color:var(--rm-yellow)}
-.btr-subchips{display:flex;flex-wrap:wrap;gap:6px 10px;padding:8px 20px 2px}
-.btr-schip{font-size:.86rem;color:var(--rm-muted);border:1px solid var(--rm-line);border-radius:999px;padding:5px 12px;background:rgba(255,255,255,.015)}
-.btr-schip b{color:var(--rm-dim);font-weight:600}
-.btr-schip .pos{color:var(--rm-green)}.btr-schip .neg{color:var(--rm-red)}
-.btr-schip em{font-style:normal;color:var(--rm-dim);font-size:.9em}
+.btr-horizon{display:grid;grid-template-columns:minmax(180px,.32fr) minmax(0,1fr);gap:18px;align-items:center;margin:12px 20px 4px;padding:12px 14px;border:1px solid var(--rm-line);border-radius:10px;background:rgba(255,255,255,.015)}
+.btr-horizon .eyebrow{display:block;font-size:.6rem;letter-spacing:.09em;text-transform:uppercase;color:var(--rm-cyan);font-weight:800;margin-bottom:3px}
+.btr-horizon h3{margin:0;color:var(--rm-text);font-size:.92rem;letter-spacing:-.01em}
+.btr-horizon p{margin:4px 0 0;color:var(--rm-dim);font-size:.68rem}
+.btr-horizon-wrap{overflow-x:auto}
+.btr-horizon table{width:100%;border-collapse:collapse;min-width:380px;font-variant-numeric:tabular-nums}
+.btr-horizon th{padding:4px 10px 7px;color:var(--rm-dim);font-size:.61rem;text-transform:uppercase;letter-spacing:.055em;text-align:right;border-bottom:1px solid var(--rm-line)}
+.btr-horizon th:first-child,.btr-horizon td:first-child{text-align:left}
+.btr-horizon td{padding:8px 10px 4px;color:var(--rm-muted);font:700 .76rem ui-monospace,Consolas,monospace;text-align:right}
+.btr-horizon td:first-child{color:var(--rm-text);font-weight:800}
+.btr-horizon td.pos{color:var(--rm-green)}.btr-horizon td.neg{color:var(--rm-red)}
 .btr-plot{padding:10px 20px 0}
 .btr-plot h4{margin:6px 0;font-size:.66rem;letter-spacing:.07em;text-transform:uppercase;color:var(--rm-dim);font-weight:700}
 .btr-chart{width:100%;height:auto;display:block}
@@ -3002,6 +3008,7 @@ BACKTEST_CSS = """
 .btr-h{min-width:132px}
 .btr-mae .cl{display:block;font:800 .95rem ui-monospace,Consolas,monospace;font-variant-numeric:tabular-nums}
 .btr-mae .cl.neg{color:var(--rm-red)}
+.btr-mae .cl.live{color:var(--rm-yellow)}
 .btr-h .ln{display:flex;align-items:baseline;gap:6px;white-space:nowrap}
 .btr-h .ln em{font:700 .62rem/1 "Segoe UI",Inter,system-ui,sans-serif;font-style:normal;text-transform:uppercase;letter-spacing:.05em;color:var(--rm-dim);min-width:40px}
 .btr-h .ln i{font-style:normal;color:var(--rm-dim)}
@@ -3024,18 +3031,31 @@ BACKTEST_CSS = """
 .btr-bb .bz{width:1px;background:rgba(255,255,255,.5)}
 .btr-bb.mae{max-width:64px;margin-top:4px;min-width:0}
 .btr-emptyrow{text-align:center;color:var(--rm-muted);padding:30px}
-.btr-method{margin:4px 20px 18px;border-left:2px solid var(--rm-cyan);background:rgba(38,208,232,.05);padding:12px 15px;color:var(--rm-muted);font-size:.78rem;line-height:1.65;border-radius:0 8px 8px 0}
-.btr-method b{color:var(--rm-text)}
+.btr-method{margin:6px 20px 18px;border:1px solid var(--rm-line);background:rgba(38,208,232,.025);border-radius:9px;color:var(--rm-muted);font-size:.76rem;line-height:1.55}
+.btr-method summary{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 13px;color:var(--rm-muted);font-size:.7rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;list-style:none}
+.btr-method summary::-webkit-details-marker{display:none}
+.btr-method summary::after{content:"+";font:800 1rem ui-monospace,Consolas,monospace;color:var(--rm-cyan);transition:transform .18s}
+.btr-method[open] summary{border-bottom:1px solid var(--rm-line);color:var(--rm-text)}
+.btr-method[open] summary::after{transform:rotate(45deg)}
+.btr-method-body{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 18px;padding:12px 14px}
+.btr-method-body p{margin:0}
+.btr-method-body b{display:block;color:var(--rm-text);font-size:.67rem;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
+.btr-method-note{grid-column:1/-1;padding-top:8px;border-top:1px solid color-mix(in srgb,var(--rm-line) 70%,transparent);color:var(--rm-dim)}
 .btr-tip{position:fixed;z-index:4000;pointer-events:none;opacity:0;transition:opacity .12s;background:#0d141c;border:1px solid var(--rm-line);border-radius:8px;padding:9px 11px;font:600 .76rem/1.5 ui-monospace,Consolas,monospace;color:var(--rm-text);box-shadow:0 8px 24px rgba(0,0,0,.5);max-width:300px}
+@media(max-width:1100px){
+.btr-chips{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
 @media(max-width:760px){
 .btr-chips{grid-template-columns:repeat(2,minmax(0,1fr))}
 .btr-head{flex-wrap:wrap;padding:14px 12px 6px}
 .btr-modal{max-width:100vw}
 .btr-card{max-height:94vh;max-height:94dvh}
-.btr-chips,.btr-subchips{padding-left:12px;padding-right:12px}
+.btr-chips{padding-left:12px;padding-right:12px}
+.btr-horizon{grid-template-columns:1fr;margin:10px 12px 4px;gap:10px}
 .btr-plot{padding:8px 12px 0}
 .btr-twrap{margin:10px 12px}
 .btr-method{margin:4px 12px 16px}
+.btr-method-body{grid-template-columns:1fr}
 .btr-chip .v{font-size:1.06rem}
 .btr-twrap td{padding:10px}
 .btr-title .nm{font-size:1.12rem}
@@ -3097,47 +3117,62 @@ BACKTEST_SCRIPT = r"""
   function entryRows(a){
     const bt=a.bt,list=(bt.entries||[]).map((e,i)=>Object.assign({_i:i},e));
     let maeMin=-1;
-    list.forEach(e=>{if(typeof e.entry_drawdown==="number"&&e.entry_drawdown<maeMin)maeMin=e.entry_drawdown;});
+    list.forEach(e=>{if(typeof e.mae_1y==="number"&&e.mae_1y<maeMin)maeMin=e.mae_1y;});
     return list.slice().reverse().map(e=>{
       const state={soFarShown:false};
       const cells=HOR.map(y=>horizonCell(e,y,state)).join("");
       const ongoing=!e.complete_5y;
-      const maeW=Math.max(0,Math.min(100,(e.entry_drawdown||0)/maeMin*100));
+      const mae=e.mae_1y;
+      const maeW=Math.max(0,Math.min(100,(mae||0)/maeMin*100));
+      const maeCls=e.complete_1y?(mae<0?"neg":""):"live";
+      const maeTitle="1-year maximum adverse excursion: worst weekly "+(bt.drawdown_basis==="Weekly low"?"low":"close")+" versus entry within the first year"+(e.complete_1y?"":" (so far; horizon still running)");
       return '<tr data-i="'+e._i+'">'+
         '<td class="btr-e"><b>'+esc(e.entry)+'</b><small class="'+(ongoing?"live":"done")+'">'+(ongoing?("ongoing · "+e.weeks_observed+"w"):"5y complete")+'</small></td>'+
         '<td class="btr-buy">'+esc(money(e.buy,a.moeda))+'</td>'+
-        '<td class="btr-mae" title="Maximum adverse excursion: worst dip from entry before the best 5y peak ('+esc(bt.drawdown_basis||"")+')"><span class="cl neg">'+pct(e.entry_drawdown)+'</span><span class="btr-bb mae"><i class="bcl neg" style="left:'+(100-maeW).toFixed(2)+'%;width:'+maeW.toFixed(2)+'%"></i></span></td>'+
+        '<td class="btr-mae" title="'+esc(maeTitle)+'"><span class="cl '+maeCls+'">'+pct(mae)+'</span><span class="btr-bb mae"><i class="bcl '+(e.complete_1y?"neg":"live")+'" style="left:'+(100-maeW).toFixed(2)+'%;width:'+maeW.toFixed(2)+'%"></i></span></td>'+
         cells+'</tr>';
     }).join("");
   }
 
-  function chip(k,v,cls,sub){return '<div class="btr-chip"><span class="k">'+k+'</span><span class="v '+(cls||"")+'">'+v+'</span>'+(sub?'<span class="s">'+sub+'</span>':'')+'</div>';}
-  function schip(k,v,cls){return '<span class="btr-schip"><b>'+k+':</b> <span class="'+(cls||"")+'">'+v+'</span></span>';}
+  function chip(k,v,cls,sub,title){
+    return '<div class="btr-chip"'+(title?' title="'+esc(title)+'"':'')+'><span class="k">'+k+'</span><span class="v '+(cls||"")+'">'+v+'</span>'+(sub?'<span class="s">'+sub+'</span>':'')+'</div>';
+  }
 
   function kpis(a){
     const bt=a.bt,base=bt.base_12m||null;
-    const edge=(bt.avg_return_1y!=null&&base)?(bt.avg_return_1y-base.avg):null;
-    const wr=bt.win_rate_1y;
-    const wrCls=wr==null?"":(wr>=60?"pos":(wr>=45?"warn":"neg"));
+    const edge=(bt.avg_return_1y!=null&&base&&base.avg!=null)?(bt.avg_return_1y-base.avg):null;
+    const positive=bt.positive_rate_1y;
+    const positiveCls=positive==null?"":(positive>=60?"pos":(positive>=45?"warn":"neg"));
+    const peakSub=bt.med_months_to_peak_1y!=null
+      ?("median time to peak ~"+Math.round(bt.med_months_to_peak_1y)+"m")
+      :"completed 1Y entries";
+    const edgeValue=edge==null?"&mdash;":((edge>0?"+":"")+edge.toFixed(1)+" pp");
+    const edgeSub=base
+      ?("signal avg "+pct(bt.avg_return_1y)+" vs baseline avg "+pct(base.avg))
+      :"history too short";
     let h="";
     h+=chip("Entries","<b>"+bt.count+"</b>","","weekly RSI(14) &le; "+bt.threshold);
-    h+=chip("Win rate · 1y",pct(wr,0).replace("+",""),wrCls,bt.completed_1y?("n = "+bt.completed_1y+" completed"):"no completed 1y yet");
-    h+=chip("Close · 1y median",pct(bt.med_return_1y),tone(bt.med_return_1y),"avg "+pct(bt.avg_return_1y));
-    h+=chip("Peak · 1y median",pct(bt.med_peak_1y),"pos",(bt.med_months_to_peak_1y!=null?("avg "+pct(bt.avg_peak_1y)+" · ~"+Math.round(bt.med_months_to_peak_1y)+"m to peak"):("avg "+pct(bt.avg_peak_1y))));
-    h+=chip("Give-back · 1y median",pct(bt.med_give_back_1y),"neg","peak &rarr; close, inside year 1");
-    h+=chip("Edge vs any week",edge==null?"&mdash;":((edge>0?"+":"")+edge.toFixed(1)+" pp"),tone(edge),base?("12m base rate: avg "+pct(base.avg)+" · med "+pct(base.med)):"history too short");
+    h+=chip("Positive at 1Y",pct(positive,0).replace("+",""),positiveCls,bt.completed_1y?(bt.positive_count_1y+" of "+bt.completed_1y+" completed entries"):"no completed 1Y entries");
+    h+=chip("1Y Average Return",pct(bt.avg_return_1y),tone(bt.avg_return_1y),sampleLabel(bt,1),"Average 1-year return across RSI entries, using the latest available close for in-progress entries. Median is kept internally for distortion checks.");
+    h+=chip("1Y Peak Return",pct(bt.avg_peak_1y),tone(bt.avg_peak_1y),peakSub,"Average best return reached inside the first year after each completed entry.");
+    h+=chip("1Y MAE",pct(bt.avg_mae_1y),tone(bt.avg_mae_1y),"average worst loss vs entry within 1 year","Average maximum adverse excursion inside the first year after each completed entry.");
+    h+=chip("1Y Avg Edge vs Any Week",edgeValue,tone(edge),edgeSub);
     return h;
   }
-  function subChips(a){
-    const bt=a.bt;
-    let h="";
-    h+=schip("Avg MAE entry&rarr;5y peak",pct(bt.avg_entry_drawdown),"neg");
-    h+=schip("Avg close 2y",pct(bt.avg_return_2y)+" <em>n="+bt.completed_2y+"</em>",tone(bt.avg_return_2y));
-    h+=schip("Avg close 3y",pct(bt.avg_return_3y)+" <em>n="+bt.completed_3y+"</em>",tone(bt.avg_return_3y));
-    h+=schip("Avg close 5y",pct(bt.avg_return_5y)+" <em>n="+bt.completed_5y+"</em>",tone(bt.avg_return_5y));
-    h+=schip("Peak basis",esc(bt.peak_basis||"—"),"");
-    h+=schip("Drawdown basis",esc(bt.drawdown_basis||"—"),"");
-    return h;
+  function sampleLabel(bt,y){
+    const total=bt["return_count_"+y+"y"]??bt.count??0;
+    const completed=bt["completed_"+y+"y"]??0;
+    const live=Math.max(0,total-completed);
+    return live?(total+" entries incl. "+live+" ongoing"):(total+" entries");
+  }
+  function horizonComparison(bt){
+    const rows=HOR.map(y=>{
+      const avg=bt["avg_return_"+y+"y"];
+      return '<tr><td>'+y+'Y</td><td title="'+esc(sampleLabel(bt,y))+'">'+(bt["return_count_"+y+"y"]??bt.count)+'</td><td class="'+tone(avg)+'">'+pct(avg)+'</td></tr>';
+    }).join("");
+    return '<section class="btr-horizon" aria-labelledby="btr-horizon-title">'+
+      '<div><h3 id="btr-horizon-title">Average Return by Holding Period</h3><p>Includes in-progress entries at latest close</p></div>'+
+      '<div class="btr-horizon-wrap"><table><thead><tr><th>Hold</th><th>Entries</th><th>Average Return</th></tr></thead><tbody>'+rows+'</tbody></table></div></section>';
   }
 
   function drawChart(host,a){
@@ -3175,7 +3210,7 @@ BACKTEST_SCRIPT = r"""
       const c=ev.target.closest&&ev.target.closest(".mk");if(!c)return;
       const e=entries[Number(c.getAttribute("data-i"))];if(!e)return;
       const one=e.complete_1y?("1y close <b>"+pct(e.return_1y)+"</b> · 1y peak "+pct(e.max_return_1y)):("so far "+pct(e.return_1y)+" ("+e.weeks_observed+"w)");
-      tip.innerHTML='<b>'+esc(e.entry)+'</b> · buy '+esc(money(e.buy,a.moeda))+'<br>'+one+'<br>MAE '+pct(e.entry_drawdown)+'<br><span style="color:var(--rm-dim)">click to highlight the entry row</span>';
+      tip.innerHTML='<b>'+esc(e.entry)+'</b> · buy '+esc(money(e.buy,a.moeda))+'<br>'+one+'<br>1Y MAE '+pct(e.mae_1y)+'<br><span style="color:var(--rm-dim)">click to highlight the entry row</span>';
       tip.style.opacity=1;
     });
     svg.addEventListener("pointermove",ev=>{tip.style.left=(ev.clientX+14)+"px";tip.style.top=(ev.clientY-12)+"px";});
@@ -3199,22 +3234,37 @@ BACKTEST_SCRIPT = r"""
   }
 
   function markerBaseR(m){return m.classList.contains("sel")?"8":"4.6";}
+  function entryBody(){return card&&card.querySelector(".btr-entrybody");}
+  function restoreEntryOrder(tb){
+    Array.from(tb.querySelectorAll("tr[data-i]"))
+      .sort((a,b)=>Number(b.getAttribute("data-i"))-Number(a.getAttribute("data-i")))
+      .forEach(r=>tb.appendChild(r));
+  }
   function selectEntry(i,scroll){
-    const tb=card.querySelector("tbody");if(!tb)return;
+    const tb=entryBody();if(!tb)return;
     const tr=tb.querySelector('tr[data-i="'+i+'"]');
     const wasSel=tr&&tr.classList.contains("sel");
     tb.querySelectorAll("tr.sel").forEach(r=>r.classList.remove("sel"));
     card.querySelectorAll(".mk").forEach(m=>{m.classList.remove("sel");m.classList.remove("on");m.setAttribute("r","4.6");});
+    restoreEntryOrder(tb);
     if(wasSel)return;
+    const row=tb.querySelector('tr[data-i="'+i+'"]');
     const mk=card.querySelector('.mk[data-i="'+i+'"]');
-    if(tr)tr.classList.add("sel");
+    if(row){tb.prepend(row);row.classList.add("sel");}
     if(mk){mk.classList.add("sel");mk.setAttribute("r","8");}
-    if(tr&&scroll)tr.scrollIntoView({behavior:"smooth",block:"center"});
+    if(row&&scroll)row.scrollIntoView({behavior:"smooth",block:"nearest"});
   }
 
   function methodText(a){
     const bt=a.bt;
-    return '<b>Rule:</b> an entry occurs in the first week when rounded weekly RSI(14) falls to or below this asset&#39;s buy threshold ('+bt.threshold+'); consecutive weeks inside the zone are a single entry. <b>Buy price</b> is that week&#39;s adjusted close (same base as the dashboard price). <b>Close</b> is the adjusted weekly close at the end of each 1/2/3/5-year horizon, shown with the month it was measured; a horizon still running shows its value &quot;so far&quot; once (later horizons show &quot;·&quot;) and is excluded from every aggregate. <b>Peak</b> is the maximum reached inside the horizon using '+(bt.peak_basis==="Weekly high"?"the highest adjusted weekly high":"the highest adjusted weekly close available")+', with its month. <b>Give-back</b> = (1+close)/(1+peak)&minus;1: how far below its own peak the horizon ended. <b>MAE</b> is the worst dip from entry before the best 5-year peak, using '+(bt.drawdown_basis==="Weekly low"?"the lowest adjusted weekly low":"the lowest adjusted weekly close available")+'. <b>Win rate</b> = share of completed 1y entries whose close was positive. <b>Base rate</b> = 12-month forward return of every week of this same history; <b>Edge</b> = average 1y close of the entries minus that base average. Click a dot on the chart to highlight its entry row (click again to clear). All aggregates are precomputed by the dashboard generator from the same weekly series used across this page and use completed horizons only.';
+    return '<div class="btr-method-body">'+
+      '<p><b>Entry rule</b>First week when rounded weekly RSI(14) is at or below '+bt.threshold+'; consecutive weeks inside the zone count as one entry.</p>'+
+      '<p><b>Entry price</b>Adjusted weekly close in the signal week.</p>'+
+      '<p><b>Average return</b>Mean return from adjusted weekly close at the horizon end when completed; in-progress entries use the latest available close.</p>'+
+      '<p><b>Peak return</b>'+(bt.peak_basis==="Weekly high"?"Highest adjusted weekly high":"Highest adjusted weekly close")+' inside the same horizon.</p>'+
+      '<p><b>MAE</b>'+(bt.drawdown_basis==="Weekly low"?"Lowest adjusted weekly low":"Lowest adjusted weekly close")+' versus entry inside the same horizon.</p>'+
+      '<p><b>Average edge</b>Average 1Y return after RSI entries minus the average 12-month return from any week in the same history.</p>'+
+      '<p class="btr-method-note">Average Return includes in-progress entries marked &quot;so far&quot;; Peak Return, MAE, Positive at 1Y and time-to-peak use completed 1Y entries only. Median return is still calculated internally as a distortion check, but the main screen prioritizes the average outcome. Peak-to-close decline remains available in each horizon cell tooltip. Click a chart dot to move its entry row to the top; click again to restore it.</p></div>';
   }
 
   function openReport(key){
@@ -3227,15 +3277,16 @@ BACKTEST_SCRIPT = r"""
       '<span class="src">'+esc(a.years)+'y</span></div>'+
       '<button class="btr-x" aria-label="Close">&times;</button></div>'+
       '<div class="btr-chips">'+kpis(a)+'</div>'+
-      '<div class="btr-subchips">'+subChips(a)+'</div>'+
+      horizonComparison(bt)+
       '<div class="btr-plot"><h4>Where the entries happened &mdash; weekly close, log scale</h4><div class="btr-chartbox"></div>'+
       '<div class="btr-legend"><span><i style="background:var(--rm-green)"></i>1y closed positive</span><span><i style="background:var(--rm-red)"></i>1y closed negative</span><span><i style="background:var(--rm-yellow)"></i>1y not completed yet</span><span>&mdash; hover a dot or a row · click a dot to highlight its entry</span></div></div>'+
-      '<div class="btr-twrap"><table><thead><tr><th>Entry <em>(newest first)</em></th><th>Buy price</th><th title="Maximum adverse excursion: worst dip after entry, before the best 5y peak">MAE</th><th>1y close &amp; peak</th><th>2y close &amp; peak</th><th>3y close &amp; peak</th><th>5y close &amp; peak</th></tr></thead><tbody>'+
+      '<div class="btr-twrap"><table><thead><tr><th>Entry <em>(newest first)</em></th><th>Buy price</th><th title="Worst weekly low versus entry within the first year">1Y MAE</th><th>1y close &amp; peak</th><th>2y close &amp; peak</th><th>3y close &amp; peak</th><th>5y close &amp; peak</th></tr></thead><tbody class="btr-entrybody">'+
       (rows||('<tr><td colspan="7" class="btr-emptyrow">No RSI entries found in this history.</td></tr>'))+'</tbody></table></div>'+
-      '<div class="btr-method">'+methodText(a)+'</div>';
+      '<details class="btr-method"><summary><span>Methodology <span aria-hidden="true">&#9432;</span></span></summary>'+methodText(a)+'</details>';
     card.querySelector(".btr-x").onclick=()=>modal.close();
     drawChart(card.querySelector(".btr-chartbox"),a);
-    const tb=card.querySelector("tbody");
+    const tb=entryBody();
+    if(!tb)return;
     const clearHover=()=>{card.querySelectorAll(".mk.on").forEach(m=>{m.classList.remove("on");m.setAttribute("r",markerBaseR(m));});};
     tb.addEventListener("pointerover",ev=>{
       const tr=ev.target.closest&&ev.target.closest("tr[data-i]");if(!tr)return;
@@ -3357,17 +3408,17 @@ def _build_rsi_backtest(close: pd.Series, buy_threshold: int,
     """Backtest entries when weekly RSI first falls into the asset buy zone.
 
     Consecutive weeks inside the zone are one entry. The entry price is that
-    signal week's adjusted close. Return is measured at each horizon's final
-    weekly close, while maximum favorable excursion remains secondary context
-    over independent 1, 2, 3 and 5-year horizons. Maximum adverse excursion
-    uses the lowest weekly low (or close when low is unavailable) before the
-    best 5-year peak. In-progress horizons use the latest close but do not
-    affect completed averages.
+    signal week's adjusted close. Return, maximum favorable excursion and
+    maximum adverse excursion are measured independently over 1, 2, 3 and
+    5-year horizons. MAE uses the lowest weekly low (or close when low is
+    unavailable) inside the selected horizon. In-progress horizons use the
+    latest available observations; Average Return includes those "so far"
+    values, while completion-dependent stats remain limited to closed horizons.
 
     Each horizon also records the exact month of its terminal close, and the
-    payload carries decision aggregates for the backtest modal: 1y win rate,
-    median returns and peaks, median give-back, median months-to-peak and the
-    unconditional 12-month base rate of the same series.
+    payload carries decision aggregates for the backtest modal: positive-close
+    rate, median/average returns, horizon-consistent MAE, median 1y peak and
+    time-to-peak, plus the unconditional 12-month base rate of the same series.
     """
     rsi = RSIIndicator(close=close.astype(float), window=14).rsi()
     # The live signal rounds RSI to the nearest integer before comparing it with
@@ -3380,6 +3431,7 @@ def _build_rsi_backtest(close: pd.Series, buy_threshold: int,
     peak_basis = "Weekly close"
     if high is not None:
         aligned_high = high.reindex(close.index).astype(float)
+        aligned_high = aligned_high.where(aligned_high > 0)
         if aligned_high.notna().any():
             peak_series = aligned_high.fillna(close)
             peak_basis = "Weekly high"
@@ -3388,6 +3440,7 @@ def _build_rsi_backtest(close: pd.Series, buy_threshold: int,
     drawdown_basis = "Weekly close"
     if low is not None:
         aligned_low = low.reindex(close.index).astype(float)
+        aligned_low = aligned_low.where(aligned_low > 0)
         if aligned_low.notna().any():
             drawdown_series = aligned_low.fillna(close)
             drawdown_basis = "Weekly low"
@@ -3403,7 +3456,6 @@ def _build_rsi_backtest(close: pd.Series, buy_threshold: int,
             "buy": _round_px(entry_price),
             "weeks_observed": min(int((last_date - entry_date).days // 7), 260),
         }
-        peak_date_5y = None
         for years in (1, 2, 3, 5):
             horizon_end = entry_date + pd.DateOffset(years=years)
             complete = bool(last_date >= horizon_end)
@@ -3413,6 +3465,10 @@ def _build_rsi_backtest(close: pd.Series, buy_threshold: int,
             path_peak = peak_series[
                 (peak_series.index > entry_date) & (peak_series.index <= horizon_end)
             ]
+            path_drawdown = drawdown_series[
+                (drawdown_series.index > entry_date)
+                & (drawdown_series.index <= horizon_end)
+            ]
             observed_peak = float(path_peak.max()) if not path_peak.empty else entry_price
             peak_price = max(entry_price, observed_peak)
             peak_date = (
@@ -3420,12 +3476,17 @@ def _build_rsi_backtest(close: pd.Series, buy_threshold: int,
                 if not path_peak.empty and observed_peak > entry_price
                 else entry_date
             )
-            if years == 5 and observed_peak > entry_price:
-                peak_date_5y = peak_date
             observation[f"max_return_{years}y"] = round(
                 (peak_price / entry_price - 1.0) * 100.0, 1
             )
             observation[f"peak_month_{years}y"] = peak_date.strftime("%Y-%m")
+            trough_price = (
+                min(entry_price, float(path_drawdown.min()))
+                if not path_drawdown.empty else entry_price
+            )
+            observation[f"mae_{years}y"] = round(
+                (trough_price / entry_price - 1.0) * 100.0, 1
+            )
             if complete and not path_close.empty:
                 terminal_price = float(path_close.iloc[-1])
                 terminal_date = pd.Timestamp(path_close.index[-1])
@@ -3438,44 +3499,44 @@ def _build_rsi_backtest(close: pd.Series, buy_threshold: int,
             observation[f"close_month_{years}y"] = terminal_date.strftime("%Y-%m")
             observation[f"complete_{years}y"] = complete
 
-        drawdown_end = peak_date_5y or min(entry_date + pd.DateOffset(years=5), last_date)
-        path_drawdown = drawdown_series[
-            (drawdown_series.index > entry_date) & (drawdown_series.index <= drawdown_end)
-        ]
-        trough_price = min(entry_price, float(path_drawdown.min())) if not path_drawdown.empty else entry_price
-        observation["entry_drawdown"] = round(
-            (trough_price / entry_price - 1.0) * 100.0, 1
-        )
         observations.append(observation)
 
     completed_counts = {}
+    return_counts = {}
     average_returns = {}
     median_returns = {}
+    average_maes = {}
+    median_maes = {}
     for years in (1, 2, 3, 5):
         completed = [item for item in observations if item[f"complete_{years}y"]]
         completed_counts[years] = len(completed)
-        returns = [item[f"return_{years}y"] for item in completed]
-        average_returns[years] = round(sum(returns) / len(returns), 1) if returns else None
-        median_returns[years] = round(float(statistics.median(returns)), 1) if returns else None
-    completed_5y = [item for item in observations if item["complete_5y"]]
-    avg_entry_drawdown = (
-        round(sum(item["entry_drawdown"] for item in completed_5y) / len(completed_5y), 1)
-        if completed_5y else None
-    )
+        return_sample = [
+            item[f"return_{years}y"]
+            for item in observations
+            if item.get(f"return_{years}y") is not None
+        ]
+        return_counts[years] = len(return_sample)
+        maes = [item[f"mae_{years}y"] for item in completed]
+        average_returns[years] = (
+            round(sum(return_sample) / len(return_sample), 1)
+            if return_sample else None
+        )
+        median_returns[years] = (
+            round(float(statistics.median(return_sample)), 1)
+            if return_sample else None
+        )
+        average_maes[years] = round(sum(maes) / len(maes), 1) if maes else None
+        median_maes[years] = round(float(statistics.median(maes)), 1) if maes else None
 
-    # 1-year decision stats (win rate, peak, give-back, time-to-peak) feed the
-    # backtest modal KPIs; all of them use completed 1y horizons only.
+    # The headline decision stats all use completed 1y horizons only.
     completed_1y = [item for item in observations if item["complete_1y"]]
     closes_1y = [item["return_1y"] for item in completed_1y]
     peaks_1y = [item["max_return_1y"] for item in completed_1y]
-    win_rate_1y = (
-        round(100.0 * sum(1 for value in closes_1y if value > 0) / len(closes_1y), 1)
+    positive_count_1y = sum(1 for value in closes_1y if value > 0)
+    positive_rate_1y = (
+        round(100.0 * positive_count_1y / len(closes_1y), 1)
         if closes_1y else None
     )
-    give_backs_1y = [
-        ((1.0 + close_pct / 100.0) / (1.0 + peak_pct / 100.0) - 1.0) * 100.0
-        for close_pct, peak_pct in zip(closes_1y, peaks_1y)
-    ]
     months_to_peak_1y = []
     for item in completed_1y:
         if item["max_return_1y"] <= 0:
@@ -3506,19 +3567,30 @@ def _build_rsi_backtest(close: pd.Series, buy_threshold: int,
         "completed_2y": completed_counts[2],
         "completed_3y": completed_counts[3],
         "completed_5y": completed_counts[5],
+        "return_count_1y": return_counts[1],
+        "return_count_2y": return_counts[2],
+        "return_count_3y": return_counts[3],
+        "return_count_5y": return_counts[5],
         "avg_return_1y": average_returns[1],
         "avg_return_2y": average_returns[2],
         "avg_return_3y": average_returns[3],
         "avg_return_5y": average_returns[5],
-        "avg_entry_drawdown": avg_entry_drawdown,
-        "win_rate_1y": win_rate_1y,
+        "positive_count_1y": positive_count_1y,
+        "positive_rate_1y": positive_rate_1y,
         "med_return_1y": median_returns[1],
         "med_return_2y": median_returns[2],
         "med_return_3y": median_returns[3],
         "med_return_5y": median_returns[5],
+        "avg_mae_1y": average_maes[1],
+        "avg_mae_2y": average_maes[2],
+        "avg_mae_3y": average_maes[3],
+        "avg_mae_5y": average_maes[5],
+        "med_mae_1y": median_maes[1],
+        "med_mae_2y": median_maes[2],
+        "med_mae_3y": median_maes[3],
+        "med_mae_5y": median_maes[5],
         "med_peak_1y": round(float(statistics.median(peaks_1y)), 1) if peaks_1y else None,
         "avg_peak_1y": round(sum(peaks_1y) / len(peaks_1y), 1) if peaks_1y else None,
-        "med_give_back_1y": round(float(statistics.median(give_backs_1y)), 1) if give_backs_1y else None,
         "med_months_to_peak_1y": (
             round(float(statistics.median(months_to_peak_1y)), 1)
             if months_to_peak_1y else None
