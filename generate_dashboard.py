@@ -568,7 +568,7 @@ body.research-v2{
 .research-v2 .t-assets th:nth-child(4),
 .research-v2 .t-assets th:nth-child(5),
 .research-v2 .t-assets th:nth-child(6),
-.research-v2 .t-assets th:nth-child(7),
+.research-v2 .t-assets th:nth-child(8),
 .research-v2 .t-assets th:nth-child(9),
 .research-v2 .t-assets th:nth-child(10),
 .research-v2 .col-price,
@@ -1803,7 +1803,7 @@ body.research-v2.profile-field-v3::after{
 }
 .research-v2.profile-field-v3 .t-assets{
   width:100%;
-  min-width:1280px;
+  min-width:1248px;
   table-layout:fixed;
 }
 .research-v2.profile-field-v3 .t-assets th,
@@ -1813,41 +1813,41 @@ body.research-v2.profile-field-v3::after{
 .research-v2.profile-field-v3 .t-assets th:nth-child(1),
 .research-v2.profile-field-v3 .t-assets td:nth-child(1){width:88px}
 .research-v2.profile-field-v3 .t-assets th:nth-child(2),
-.research-v2.profile-field-v3 .t-assets td:nth-child(2){width:164px}
+.research-v2.profile-field-v3 .t-assets td:nth-child(2){width:144px}
 .research-v2.profile-field-v3 .t-assets th:nth-child(3),
-.research-v2.profile-field-v3 .t-assets td:nth-child(3){width:88px}
+.research-v2.profile-field-v3 .t-assets td:nth-child(3){width:140px}
 .research-v2.profile-field-v3 .t-assets th:nth-child(4),
-.research-v2.profile-field-v3 .t-assets td:nth-child(4){width:156px}
+.research-v2.profile-field-v3 .t-assets td:nth-child(4){width:108px}
 .research-v2.profile-field-v3 .t-assets th:nth-child(5),
-.research-v2.profile-field-v3 .t-assets td:nth-child(5){width:108px}
+.research-v2.profile-field-v3 .t-assets td:nth-child(5),
 .research-v2.profile-field-v3 .t-assets th:nth-child(6),
-.research-v2.profile-field-v3 .t-assets td:nth-child(6),
+.research-v2.profile-field-v3 .t-assets td:nth-child(6){width:105px}
 .research-v2.profile-field-v3 .t-assets th:nth-child(7),
-.research-v2.profile-field-v3 .t-assets td:nth-child(7){width:105px}
+.research-v2.profile-field-v3 .t-assets td:nth-child(7){width:92px}
 .research-v2.profile-field-v3 .t-assets th:nth-child(8),
-.research-v2.profile-field-v3 .t-assets td:nth-child(8){width:92px}
+.research-v2.profile-field-v3 .t-assets td:nth-child(8){width:76px}
 .research-v2.profile-field-v3 .t-assets th:nth-child(9),
-.research-v2.profile-field-v3 .t-assets td:nth-child(9){width:76px}
+.research-v2.profile-field-v3 .t-assets td:nth-child(9){width:88px}
 .research-v2.profile-field-v3 .t-assets th:nth-child(10),
 .research-v2.profile-field-v3 .t-assets td:nth-child(10){width:92px}
 .research-v2.profile-field-v3 .t-assets th:nth-child(11),
 .research-v2.profile-field-v3 .t-assets td:nth-child(11){width:105px}
 .research-v2.profile-field-v3 .t-assets th:nth-child(12),
 .research-v2.profile-field-v3 .t-assets td:nth-child(12){width:105px}
-.research-v2.profile-field-v3 .t-assets th:nth-child(5),
+.research-v2.profile-field-v3 .t-assets th:nth-child(4),
 .research-v2.profile-field-v3 .col-price{
   text-align:right;
 }
+.research-v2.profile-field-v3 .t-assets th:nth-child(5),
 .research-v2.profile-field-v3 .t-assets th:nth-child(6),
 .research-v2.profile-field-v3 .t-assets th:nth-child(7),
-.research-v2.profile-field-v3 .t-assets th:nth-child(8),
 .research-v2.profile-field-v3 .t-assets th:nth-child(10),
 .research-v2.profile-field-v3 .col-rsi,
 .research-v2.profile-field-v3 .col-dd,
 .research-v2.profile-field-v3 .col-cagr{
   text-align:right;
 }
-.research-v2.profile-field-v3 .t-assets th:nth-child(3),
+.research-v2.profile-field-v3 .t-assets th:nth-child(8),
 .research-v2.profile-field-v3 .t-assets th:nth-child(9),
 .research-v2.profile-field-v3 .t-assets th:nth-child(11),
 .research-v2.profile-field-v3 .t-assets th:nth-child(12),
@@ -1880,12 +1880,12 @@ body.research-v2.profile-field-v3::after{
 .research-v2.profile-field-v3 .col-sector{
   color:var(--rm-muted);
 }
-.research-v2.profile-field-v3 .t-assets th:nth-child(3),
+.research-v2.profile-field-v3 .t-assets th:nth-child(9),
 .research-v2.profile-field-v3 .col-backtest{
-  padding-left:2px;
-  padding-right:22px;
+  padding-left:8px;
+  padding-right:8px;
 }
-.research-v2.profile-field-v3 .t-assets th:nth-child(4),
+.research-v2.profile-field-v3 .t-assets th:nth-child(3),
 .research-v2.profile-field-v3 .col-sector{
   padding-left:12px;
   padding-right:8px;
@@ -4369,20 +4369,24 @@ def _build_sector_rows(df_sector: pd.DataFrame, market_key: str, dd_data: dict |
                 backtest_cell = '<span class="dd-na">—</span>'
             industria = str(r.get("Industria", "")) if show_sector else ""
             sector_attr = f' data-sector="{escape(industria, quote=True)}"' if show_sector else ""
-            name_inner = f'<span class="cn-txt">{escape(str(r["Name"]))}</span>'
+            asset_name = str(r["Name"])
+            name_inner = (
+                f'<span class="cn-txt" title="{escape(asset_name, quote=True)}">'
+                f'{escape(asset_name)}</span>'
+            )
             sector_html = _sector_badge(industria) if industria else '<span class="sec-na">-</span>'
             sector_sort = industria.lower() if industria else ""
             rows_html += f'''
             <tr class="asset-row" data-signal="{r['Signal']}" data-market="{escape(market_key)}"{sector_attr} data-ticker="{escape(str(r['Ticker']).lower())}" data-name="{escape(str(r['Name']).lower())}" data-peak-close="{escape(peak_close, quote=True)}" data-peak-date="{escape(peak_date, quote=True)}" data-dd="{escape(_format_percent(drawdown), quote=True)}" data-yahoo="{escape(yahoo_url, quote=True)}" data-tv="{escape(tv_url or '', quote=True)}">
               <td class="col-tk"><span class="tk-badge">{escape(str(r['Ticker']))}</span></td>
               <td class="col-name"><div class="name-cell">{name_inner}</div></td>
-              <td class="col-backtest">{backtest_cell}</td>
               <td class="col-sector" data-sort="{escape(sector_sort, quote=True)}">{sector_html}</td>
               <td class="col-price">{_format_price(r['Weekly_Close'])}</td>
               <td class="col-rsi">{_rsi_meter(rsi_w)}</td>
               <td class="col-rsi">{_rsi_meter(rsi_m)}</td>
               <td class="col-dd"><span class="dd-pill {dd_cls}" title="{escape(peak_meta, quote=True)}">{_format_percent(drawdown)}</span></td>
               <td class="col-chart">{chart_cell}</td>
+              <td class="col-backtest">{backtest_cell}</td>
               <td class="col-cagr" data-sort="{cagr_sort}">{cagr_cell}</td>
               <td class="col-sig"><span class="signal-badge {sig_cls}">{sig_lbl}</span></td>
               <td class="col-vol" data-sort="{vol_sort}">{_volume_badge(r.get("Vol_High"), vol_ratio)}</td>
@@ -5027,13 +5031,13 @@ def generate_html(df: pd.DataFrame, onchain: Dict, deltas: dict | None = None,
               <tr>
                 <th class="th-sort" data-col="0">Ticker</th>
                 <th class="th-sort" data-col="1">Name</th>
-                <th class="th-c">Backtest</th>
-                <th class="th-sort" data-col="3">Sector</th>
-                <th class="th-sort th-r" data-col="4">Price</th>
-                <th class="th-sort th-r" data-col="5">RSI W</th>
-                <th class="th-sort th-r" data-col="6">RSI M</th>
-                <th class="th-sort th-r" data-col="7">DD 5A</th>
+                <th class="th-sort" data-col="2">Sector</th>
+                <th class="th-sort th-r" data-col="3">Price</th>
+                <th class="th-sort th-r" data-col="4">RSI W</th>
+                <th class="th-sort th-r" data-col="5">RSI M</th>
+                <th class="th-sort th-r" data-col="6">DD 5A</th>
                 <th class="th-c">DD Chart</th>
+                <th class="th-c">Backtest</th>
                 <th class="th-sort th-r" data-col="9" title="Compound annual growth rate over the DD Chart history">CAGR</th>
                 <th>Signal</th>
                 <th class="th-sort th-c" data-col="11">Volume</th>
