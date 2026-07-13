@@ -3403,7 +3403,7 @@ BACKTEST_CSS = """
 /* ===== BACKTEST (RSI backtest modal) ===== */
 .btr-modal{border:none;padding:0;background:transparent;max-width:min(1300px,96vw);width:100%;color:var(--rm-text)}
 .btr-modal::backdrop{background:rgba(4,7,11,.7);backdrop-filter:blur(4px)}
-.btr-card{position:relative;border-radius:16px;background:var(--rm-surface);border:1px solid var(--rm-line);box-shadow:var(--rm-shadow);font-family:"Segoe UI",Inter,system-ui,-apple-system,sans-serif;max-height:92vh;overflow:auto}
+.btr-card{--btr-scale:#4da3ff;position:relative;border-radius:16px;background:var(--rm-surface);border:1px solid var(--rm-line);box-shadow:var(--rm-shadow);font-family:"Segoe UI",Inter,system-ui,-apple-system,sans-serif;max-height:92vh;overflow:auto}
 .btr-accent{position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--rm-cyan),var(--rm-green) 55%,transparent)}
 .btr-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:18px 20px 8px}
 .btr-title{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;min-width:0}
@@ -3436,6 +3436,7 @@ BACKTEST_CSS = """
 .btr-chart .ax{fill:var(--rm-dim);font:600 11px ui-monospace,Consolas,monospace}
 .btr-chart .pl{fill:none;stroke:var(--rm-cyan);stroke-width:1.6;opacity:.9}
 .btr-chart .mk{stroke:#0b1016;stroke-width:1.4;cursor:pointer}
+.btr-chart .mk-scale{fill:var(--btr-scale)}
 .btr-chart .mk.on{stroke:#fff;stroke-width:2}
 .btr-chart .mk.sel{stroke:#fff;stroke-width:2.4}
 .btr-legend{display:flex;flex-wrap:wrap;gap:8px 16px;margin:2px 0 4px;font-size:.7rem;color:var(--rm-muted)}
@@ -3451,9 +3452,14 @@ BACKTEST_CSS = """
 .btr-twrap tbody tr.sel{background:rgba(38,208,232,.10)}
 .btr-twrap tbody tr.sel td:first-child{box-shadow:inset 3px 0 0 var(--rm-cyan)}
 .btr-e b{font:700 .9rem ui-monospace,Consolas,monospace;color:var(--rm-text)}
+.btr-scale-badge{display:inline-block;margin-left:7px;padding:2px 6px;border:1px solid color-mix(in srgb,var(--btr-scale) 65%,transparent);border-radius:999px;background:color-mix(in srgb,var(--btr-scale) 13%,transparent);color:var(--btr-scale);font:800 .6rem ui-monospace,Consolas,monospace;vertical-align:2px}
 .btr-e small{display:block;margin-top:3px;font:700 .62rem ui-monospace,Consolas,monospace;text-transform:uppercase}
 .btr-e small.done{color:var(--rm-green)}.btr-e small.live{color:var(--rm-yellow)}
 .btr-buy{font:600 .8rem ui-monospace,Consolas,monospace;color:var(--rm-muted);white-space:nowrap}
+.btr-buy .avg{display:block;color:var(--rm-text);font-weight:800}
+.btr-buy small{display:block;margin-top:3px;color:var(--rm-dim);font-size:.62rem;font-weight:600}
+.btr-scale-list{display:grid;gap:2px;margin-top:5px;color:var(--btr-scale);font-size:.64rem}
+.btr-scale-list span{display:block}
 .btr-h{min-width:132px}
 .btr-mae .cl{display:block;font:800 .95rem ui-monospace,Consolas,monospace;font-variant-numeric:tabular-nums}
 .btr-mae .cl.neg{color:var(--rm-red)}
@@ -3574,10 +3580,17 @@ BACKTEST_SCRIPT = r"""
       const mae=e.mae_1y;
       const maeW=Math.max(0,Math.min(100,(mae||0)/maeMin*100));
       const maeCls=e.complete_1y?(mae<0?"neg":""):"live";
-      const maeTitle="1-year maximum adverse excursion: worst weekly "+(bt.drawdown_basis==="Weekly low"?"low":"close")+" versus entry within the first year"+(e.complete_1y?"":" (so far; horizon still running)");
+      const scales=e.scale_entries||[];
+      const avgBuy=e.average_buy==null?e.buy:e.average_buy;
+      const badge=scales.length?'<span class="btr-scale-badge" title="'+scales.length+' scaled entr'+(scales.length===1?'y':'ies')+' inside this operation">+'+scales.length+'x</span>':"";
+      const scaleList=scales.length?'<span class="btr-scale-list">'+scales.map(s=>'<span>+'+s.sequence+' · '+esc(s.entry_date)+' · '+esc(money(s.buy,a.moeda))+'</span>').join("")+'</span>':"";
+      const buyCell=scales.length
+        ?'<span class="avg">avg '+esc(money(avgBuy,a.moeda))+'</span><small>initial '+esc(money(e.buy,a.moeda))+'</small>'+scaleList
+        :'<span class="avg">'+esc(money(e.buy,a.moeda))+'</span>';
+      const maeTitle="1-year maximum adverse excursion: worst weekly "+(bt.drawdown_basis==="Weekly low"?"low":"close")+" versus average fill price, measured from the last fill"+(e.complete_1y?"":" (so far; horizon still running)");
       return '<tr data-i="'+e._i+'">'+
-        '<td class="btr-e"><b>'+esc(e.entry)+'</b><small class="'+(ongoing?"live":"done")+'">'+(ongoing?("ongoing · "+e.weeks_observed+"w"):"5y complete")+'</small></td>'+
-        '<td class="btr-buy">'+esc(money(e.buy,a.moeda))+'</td>'+
+        '<td class="btr-e"><b>'+esc(e.entry)+'</b>'+badge+'<small class="'+(ongoing?"live":"done")+'">'+(ongoing?("ongoing · "+e.weeks_observed+"w"):"5y complete")+'</small></td>'+
+        '<td class="btr-buy">'+buyCell+'</td>'+
         '<td class="btr-mae" title="'+esc(maeTitle)+'"><span class="cl '+maeCls+'">'+pct(mae)+'</span><span class="btr-bb mae"><i class="bcl '+(e.complete_1y?"neg":"live")+'" style="left:'+(100-maeW).toFixed(2)+'%;width:'+maeW.toFixed(2)+'%"></i></span></td>'+
         cells+'</tr>';
     }).join("");
@@ -3600,7 +3613,8 @@ BACKTEST_SCRIPT = r"""
       ?("signal avg "+pct(bt.avg_return_1y)+" vs baseline avg "+pct(base.avg))
       :"history too short";
     let h="";
-    h+=chip("Entries","<b>"+bt.count+"</b>","","weekly RSI(14) &le; "+bt.threshold);
+    const scaleSub=(bt.scaled_entry_count||0)+" scaled fills across "+(bt.scaled_operation_count||0)+" operations";
+    h+=chip("Entries","<b>"+bt.count+"</b>","","weekly RSI(14) &le; "+bt.threshold+" · "+scaleSub);
     h+=chip("Positive at 1Y",pct(positive,0).replace("+",""),positiveCls,bt.completed_1y?(bt.positive_count_1y+" of "+bt.completed_1y+" completed entries"):"no completed 1Y entries");
     h+=chip("1Y Average Return",pct(bt.avg_return_1y),tone(bt.avg_return_1y),sampleLabel(bt,1),"Average 1-year return across RSI entries, using the latest available close for in-progress entries. Median is kept internally for distortion checks.");
     h+=chip("1Y Peak Return",pct(bt.avg_peak_1y),tone(bt.avg_peak_1y),peakSub,"Average best return reached inside the first year after each completed entry.");
@@ -3630,8 +3644,10 @@ BACKTEST_SCRIPT = r"""
     const W=1000,H=232,PADL=58,PADR=16,PADT=12,PADB=26;
     const wk=7*86400000,baseMs=Date.parse(a.start+"T00:00:00");
     const xOf=i=>PADL+i/(n-1)*(W-PADL-PADR);
+    const entries=(a.bt&&a.bt.entries)||[];
     let lo=Infinity,hi=-Infinity;
     for(let i=0;i<n;i++){const l=Math.log(p[i]);if(l<lo)lo=l;if(l>hi)hi=l;}
+    entries.forEach(e=>(e.scale_entries||[]).forEach(s=>{const l=Math.log(s.buy);if(l<lo)lo=l;if(l>hi)hi=l;}));
     const pad=(hi-lo)*0.08||0.1;
     const yOf=v=>PADT+((hi+pad)-Math.log(v))/((hi+pad)-(lo-pad))*(H-PADT-PADB);
     let grid="";
@@ -3645,21 +3661,33 @@ BACKTEST_SCRIPT = r"""
     const step=Math.ceil(ticks.length/9);ticks=ticks.filter((_,k)=>k%step===0);
     let xl="";ticks.forEach(t=>{xl+='<text class="ax" x="'+xOf(t.i).toFixed(1)+'" y="'+(H-8)+'" text-anchor="middle">'+t.y+'</text>';});
     let line="";for(let i=0;i<n;i++){line+=(i?"L":"M")+xOf(i).toFixed(1)+" "+yOf(p[i]).toFixed(2)+" ";}
-    const entries=(a.bt&&a.bt.entries)||[];
     let mks="";
     entries.forEach((e,idx0)=>{
       let idx=Math.round((Date.parse(e.entry_date+"T00:00:00")-baseMs)/wk);
       idx=Math.max(0,Math.min(n-1,idx));
       const col=e.complete_1y?(e.return_1y>0?"var(--rm-green)":"var(--rm-red)"):"var(--rm-yellow)";
       mks+='<circle class="mk" data-i="'+idx0+'" cx="'+xOf(idx).toFixed(1)+'" cy="'+yOf(p[idx]).toFixed(2)+'" r="4.6" fill="'+col+'"/>';
+      (e.scale_entries||[]).forEach((s,scaleIdx)=>{
+        let si=Math.round((Date.parse(s.entry_date+"T00:00:00")-baseMs)/wk);
+        si=Math.max(0,Math.min(n-1,si));
+        mks+='<circle class="mk mk-scale" data-i="'+idx0+'" data-scale="'+scaleIdx+'" cx="'+xOf(si).toFixed(1)+'" cy="'+yOf(s.buy).toFixed(2)+'" r="3.8"/>';
+      });
     });
     host.innerHTML='<svg class="btr-chart" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none">'+grid+xl+'<path class="pl" d="'+line+'"/>'+mks+'</svg>';
     const svg=host.querySelector("svg");
     svg.addEventListener("pointerover",ev=>{
       const c=ev.target.closest&&ev.target.closest(".mk");if(!c)return;
       const e=entries[Number(c.getAttribute("data-i"))];if(!e)return;
+      const scaleAttr=c.getAttribute("data-scale");
+      if(scaleAttr!==null){
+        const s=(e.scale_entries||[])[Number(scaleAttr)];if(!s)return;
+        tip.innerHTML='<b>Scaled entry +'+s.sequence+'</b> · '+esc(s.entry_date)+'<br>fill '+esc(money(s.buy,a.moeda))+' · '+pct(s.drop_from_previous)+' from previous fill<br><span style="color:var(--rm-dim)">part of the '+esc(e.entry)+' RSI operation · click to highlight it</span>';
+        tip.style.opacity=1;
+        return;
+      }
       const one=e.complete_1y?("1y close <b>"+pct(e.return_1y)+"</b> · 1y peak "+pct(e.max_return_1y)):("so far "+pct(e.return_1y)+" ("+e.weeks_observed+"w)");
-      tip.innerHTML='<b>'+esc(e.entry)+'</b> · buy '+esc(money(e.buy,a.moeda))+'<br>'+one+'<br>1Y MAE '+pct(e.mae_1y)+'<br><span style="color:var(--rm-dim)">click to highlight the entry row</span>';
+      const buyInfo=(e.scale_entries||[]).length?('initial '+esc(money(e.buy,a.moeda))+' · average '+esc(money(e.average_buy,a.moeda))):('buy '+esc(money(e.buy,a.moeda)));
+      tip.innerHTML='<b>'+esc(e.entry)+'</b> · '+buyInfo+'<br>'+one+'<br>1Y MAE '+pct(e.mae_1y)+'<br><span style="color:var(--rm-dim)">click to highlight the entry row</span>';
       tip.style.opacity=1;
     });
     svg.addEventListener("pointermove",ev=>{tip.style.left=(ev.clientX+14)+"px";tip.style.top=(ev.clientY-12)+"px";});
@@ -3682,7 +3710,8 @@ BACKTEST_SCRIPT = r"""
     modal.addEventListener("close",()=>{tip.style.opacity=0;});
   }
 
-  function markerBaseR(m){return m.classList.contains("sel")?"8":"4.6";}
+  function markerBaseR(m){return m.classList.contains("mk-scale")?"3.8":"4.6";}
+  function markerActiveR(m,selected){return m.classList.contains("mk-scale")?(selected?"6":"5.4"):(selected?"8":"7");}
   function entryBody(){return card&&card.querySelector(".btr-entrybody");}
   function restoreEntryOrder(tb){
     Array.from(tb.querySelectorAll("tr[data-i]"))
@@ -3694,26 +3723,29 @@ BACKTEST_SCRIPT = r"""
     const tr=tb.querySelector('tr[data-i="'+i+'"]');
     const wasSel=tr&&tr.classList.contains("sel");
     tb.querySelectorAll("tr.sel").forEach(r=>r.classList.remove("sel"));
-    card.querySelectorAll(".mk").forEach(m=>{m.classList.remove("sel");m.classList.remove("on");m.setAttribute("r","4.6");});
+    card.querySelectorAll(".mk").forEach(m=>{m.classList.remove("sel");m.classList.remove("on");m.setAttribute("r",markerBaseR(m));});
     restoreEntryOrder(tb);
     if(wasSel)return;
     const row=tb.querySelector('tr[data-i="'+i+'"]');
-    const mk=card.querySelector('.mk[data-i="'+i+'"]');
+    const markers=card.querySelectorAll('.mk[data-i="'+i+'"]');
     if(row){tb.prepend(row);row.classList.add("sel");}
-    if(mk){mk.classList.add("sel");mk.setAttribute("r","8");}
+    markers.forEach(m=>{m.classList.add("sel");m.setAttribute("r",markerActiveR(m,true));});
     if(row&&scroll)row.scrollIntoView({behavior:"smooth",block:"nearest"});
   }
 
   function methodText(a){
     const bt=a.bt;
+    const scaleSource=bt.scale_ohlc_source?(" Scale OHLC source: "+bt.scale_ohlc_source+"."):"";
     return '<div class="btr-method-body">'+
       '<p><b>Entry rule</b>First week when rounded weekly RSI(14) is at or below '+bt.threshold+'; consecutive weeks inside the zone count as one entry.</p>'+
-      '<p><b>Entry price</b>Adjusted weekly close in the signal week.</p>'+
-      '<p><b>Average return</b>Mean return from adjusted weekly close at the horizon end when completed; in-progress entries use the latest available close.</p>'+
+      '<p><b>Scaled entries</b>Up to two blue fills: the weekly low only needs to touch each price 10% below the previous fill. '+(bt.peak_basis==="Weekly high"?'A weekly high above the principal signal candle high':'A weekly close above the principal signal candle close')+' cancels the remaining plan.</p>'+
+      '<p><b>Entry price</b>The principal uses adjusted weekly close; each scale executes at its exact -10% trigger. Returns use the arithmetic average of equally sized lots.</p>'+
+      '<p><b>Holding clock</b>All horizons restart at the last fill in the operation; scaled fills remain inside the principal entry and do not increase Entries.</p>'+
+      '<p><b>Average return</b>Mean return from average fill price to adjusted weekly close at the horizon end when completed; in-progress entries use the latest available close.</p>'+
       '<p><b>Peak return</b>'+(bt.peak_basis==="Weekly high"?"Highest adjusted weekly high":"Highest adjusted weekly close")+' inside the same horizon.</p>'+
-      '<p><b>MAE</b>'+(bt.drawdown_basis==="Weekly low"?"Lowest adjusted weekly low":"Lowest adjusted weekly close")+' versus entry inside the same horizon.</p>'+
+      '<p><b>MAE</b>'+(bt.drawdown_basis==="Weekly low"?"Lowest adjusted weekly low":"Lowest adjusted weekly close")+' versus average fill price, starting after the last fill.</p>'+
       '<p><b>Average edge</b>Average 1Y return after RSI entries minus the average 12-month return from any week in the same history.</p>'+
-      '<p class="btr-method-note">Average Return includes in-progress entries marked &quot;so far&quot;; Peak Return, MAE, Positive at 1Y and time-to-peak use completed 1Y entries only. Median return is still calculated internally as a distortion check, but the main screen prioritizes the average outcome. Peak-to-close decline remains available in each horizon cell tooltip. Click a chart dot to move its entry row to the top; click again to restore it.</p></div>';
+      '<p class="btr-method-note">Average Return includes in-progress entries marked &quot;so far&quot;; Peak Return, MAE, Positive at 1Y and time-to-peak use completed 1Y entries only. Both scales can fill in the same weekly candle if its low crosses both levels. If that candle also breaks the principal high, invalidation wins because weekly OHLC cannot establish the intrabar order.'+scaleSource+' Median return is still calculated internally as a distortion check. Click any chart dot to move its principal operation row to the top; click again to restore it.</p></div>';
   }
 
   function openReport(key){
@@ -3728,8 +3760,8 @@ BACKTEST_SCRIPT = r"""
       '<div class="btr-chips">'+kpis(a)+'</div>'+
       horizonComparison(bt)+
       '<div class="btr-plot"><h4>Where the entries happened &mdash; weekly close, log scale</h4><div class="btr-chartbox"></div>'+
-      '<div class="btr-legend"><span><i style="background:var(--rm-green)"></i>1y closed positive</span><span><i style="background:var(--rm-red)"></i>1y closed negative</span><span><i style="background:var(--rm-yellow)"></i>1y not completed yet</span><span>&mdash; hover a dot or a row · click a dot to highlight its entry</span></div></div>'+
-      '<div class="btr-twrap"><table><thead><tr><th>Entry <em>(newest first)</em></th><th>Buy price</th><th title="Worst weekly low versus entry within the first year">1Y MAE</th><th>1y close &amp; peak</th><th>2y close &amp; peak</th><th>3y close &amp; peak</th><th>5y close &amp; peak</th></tr></thead><tbody class="btr-entrybody">'+
+      '<div class="btr-legend"><span><i style="background:var(--rm-green)"></i>1y closed positive</span><span><i style="background:var(--rm-red)"></i>1y closed negative</span><span><i style="background:var(--rm-yellow)"></i>1y not completed yet</span><span><i style="background:var(--btr-scale)"></i>scaled entry</span><span>&mdash; hover a dot or a row · click a dot to highlight its operation</span></div></div>'+
+      '<div class="btr-twrap"><table><thead><tr><th>Entry <em>(newest first)</em></th><th>Buy price</th><th title="Worst weekly low versus the average fill price during the first year after the last fill">1Y MAE</th><th>1y close &amp; peak</th><th>2y close &amp; peak</th><th>3y close &amp; peak</th><th>5y close &amp; peak</th></tr></thead><tbody class="btr-entrybody">'+
       (rows||('<tr><td colspan="7" class="btr-emptyrow">No RSI entries found in this history.</td></tr>'))+'</tbody></table></div>'+
       '<details class="btr-method"><summary><span>Methodology <span aria-hidden="true">&#9432;</span></span></summary>'+methodText(a)+'</details>';
     card.querySelector(".btr-x").onclick=()=>modal.close();
@@ -3740,8 +3772,8 @@ BACKTEST_SCRIPT = r"""
     tb.addEventListener("pointerover",ev=>{
       const tr=ev.target.closest&&ev.target.closest("tr[data-i]");if(!tr)return;
       clearHover();
-      const mk=card.querySelector('.mk[data-i="'+tr.getAttribute("data-i")+'"]');
-      if(mk&&!mk.classList.contains("sel")){mk.classList.add("on");mk.setAttribute("r","7");}
+      const markers=card.querySelectorAll('.mk[data-i="'+tr.getAttribute("data-i")+'"]');
+      markers.forEach(m=>{if(!m.classList.contains("sel")){m.classList.add("on");m.setAttribute("r",markerActiveR(m,false));}});
     });
     tb.addEventListener("pointerleave",clearHover);
     tb.addEventListener("click",ev=>{
@@ -3851,24 +3883,106 @@ def _trim_brazilian_adjustment_breaks(close: pd.Series, key: str) -> pd.Series:
     return close
 
 
+_SCALED_ENTRY_DROP = 0.10
+_MAX_SCALED_ENTRIES = 2
+
+
+def _normalize_weekly_price_index(series: pd.Series) -> pd.Series:
+    """Return a copy with a timezone-naive DatetimeIndex.
+
+    Yahoo single-ticker history can carry a UTC-aware weekly index, while the
+    compact backtest payload stores ISO calendar dates without timezone data.
+    Normalizing before any signal or scale calculation keeps both paths
+    comparable and prevents tz-aware/tz-naive lookups from dropping an asset.
+    """
+    normalized = series.copy()
+    index = pd.DatetimeIndex(normalized.index)
+    if index.tz is not None:
+        index = index.tz_localize(None)
+    normalized.index = index
+    return normalized
+
+
+def _find_scaled_entries(close: pd.Series, weekly_high: pd.Series,
+                         weekly_low: pd.Series,
+                         entry_date: pd.Timestamp, entry_price: float,
+                         entry_candle_high: float,
+                         next_entry_date: Optional[pd.Timestamp] = None) -> list:
+    """Return the scaled entries that belong to one principal RSI operation.
+
+    A scale is triggered as soon as the weekly low touches the price 10% below
+    the previous fill, and executes at that trigger price.  Both permitted
+    fills can occur in the same weekly candle when its low crosses both levels.
+    The plan is permanently invalidated as soon as a later weekly high exceeds
+    the high of the principal entry candle (or the later close exceeds the
+    principal close when OHLC data is unavailable).  It also stops before the
+    next principal RSI entry so separate operations cannot claim the same price
+    movement.
+    """
+    scales = []
+    previous_fill = float(entry_price)
+    dates = close.index[close.index > entry_date]
+    if next_entry_date is not None:
+        dates = dates[dates < next_entry_date]
+
+    for scale_date in dates:
+        scale_date = pd.Timestamp(scale_date)
+        candle_high = float(weekly_high.loc[scale_date])
+        if candle_high > entry_candle_high:
+            break
+
+        candle_low = float(weekly_low.loc[scale_date])
+        while len(scales) < _MAX_SCALED_ENTRIES:
+            trigger_price = previous_fill * (1.0 - _SCALED_ENTRY_DROP)
+            if candle_low > trigger_price:
+                break
+
+            sequence = len(scales) + 1
+            scales.append({
+                "sequence": sequence,
+                "entry": scale_date.strftime("%Y-%m"),
+                "entry_date": scale_date.strftime("%Y-%m-%d"),
+                "buy": _round_px(trigger_price),
+                "trigger_price": _round_px(trigger_price),
+                "observed_low": _round_px(candle_low),
+                "drop_from_previous": -10.0,
+            })
+            previous_fill = trigger_price
+
+        if len(scales) >= _MAX_SCALED_ENTRIES:
+            break
+
+    return scales
+
+
 def _build_rsi_backtest(close: pd.Series, buy_threshold: int,
                         high: Optional[pd.Series] = None,
                         low: Optional[pd.Series] = None) -> dict:
     """Backtest entries when weekly RSI first falls into the asset buy zone.
 
-    Consecutive weeks inside the zone are one entry. The entry price is that
-    signal week's adjusted close. Return, maximum favorable excursion and
-    maximum adverse excursion are measured independently over 1, 2, 3 and
-    5-year horizons. MAE uses the lowest weekly low (or close when low is
-    unavailable) inside the selected horizon. In-progress horizons use the
-    latest available observations; Average Return includes those "so far"
-    values, while completion-dependent stats remain limited to closed horizons.
+    Consecutive weeks inside the zone are one principal entry. Up to two scaled
+    entries can be attached to it when the weekly low touches successive 10%
+    trigger levels, provided no later weekly high has exceeded the principal
+    candle's high.
+    Scales do not increase the operation count. Metrics use the arithmetic
+    average fill price (equal-sized lots), and every holding horizon starts at
+    the last fill in the operation. MAE uses the lowest weekly low (or close
+    when low is unavailable) inside the selected horizon. In-progress horizons
+    use the latest available observations; Average Return includes those "so
+    far" values, while completion-dependent stats remain limited to closed
+    horizons.
 
     Each horizon also records the exact month of its terminal close, and the
     payload carries decision aggregates for the backtest modal: positive-close
     rate, median/average returns, horizon-consistent MAE, median 1y peak and
     time-to-peak, plus the unconditional 12-month base rate of the same series.
     """
+    close = _normalize_weekly_price_index(close)
+    if high is not None:
+        high = _normalize_weekly_price_index(high)
+    if low is not None:
+        low = _normalize_weekly_price_index(low)
+
     rsi = RSIIndicator(close=close.astype(float), window=14).rsi()
     # The live signal rounds RSI to the nearest integer before comparing it with
     # the per-asset threshold. RSI is positive, so floor(x + .5) is equivalent.
@@ -3896,45 +4010,74 @@ def _build_rsi_backtest(close: pd.Series, buy_threshold: int,
 
     observations = []
     last_date = pd.Timestamp(close.index[-1])
-    for entry_date in rounded.index[entries_mask]:
+    entry_dates = [pd.Timestamp(value) for value in rounded.index[entries_mask]]
+    for entry_index, entry_date in enumerate(entry_dates):
         entry_date = pd.Timestamp(entry_date)
         entry_price = float(close.loc[entry_date])
+        next_entry_date = (
+            entry_dates[entry_index + 1]
+            if entry_index + 1 < len(entry_dates) else None
+        )
+        entry_candle_high = float(peak_series.loc[entry_date])
+        scale_entries = _find_scaled_entries(
+            close=close,
+            weekly_high=peak_series,
+            weekly_low=drawdown_series,
+            entry_date=entry_date,
+            entry_price=entry_price,
+            entry_candle_high=entry_candle_high,
+            next_entry_date=next_entry_date,
+        )
+        fills = [entry_price] + [float(item["buy"]) for item in scale_entries]
+        average_buy = sum(fills) / len(fills)
+        horizon_entry_date = (
+            pd.Timestamp(scale_entries[-1]["entry_date"])
+            if scale_entries else entry_date
+        )
         observation = {
             "entry": entry_date.strftime("%Y-%m"),
             "entry_date": entry_date.strftime("%Y-%m-%d"),
             "buy": _round_px(entry_price),
-            "weeks_observed": min(int((last_date - entry_date).days // 7), 260),
+            "average_buy": _round_px(average_buy),
+            "scale_count": len(scale_entries),
+            "scale_entries": scale_entries,
+            "horizon_entry": horizon_entry_date.strftime("%Y-%m"),
+            "horizon_entry_date": horizon_entry_date.strftime("%Y-%m-%d"),
+            "weeks_observed": min(
+                int((last_date - horizon_entry_date).days // 7), 260
+            ),
         }
         for years in (1, 2, 3, 5):
-            horizon_end = entry_date + pd.DateOffset(years=years)
+            horizon_end = horizon_entry_date + pd.DateOffset(years=years)
             complete = bool(last_date >= horizon_end)
             path_close = close[
-                (close.index > entry_date) & (close.index <= horizon_end)
+                (close.index > horizon_entry_date) & (close.index <= horizon_end)
             ]
             path_peak = peak_series[
-                (peak_series.index > entry_date) & (peak_series.index <= horizon_end)
+                (peak_series.index > horizon_entry_date)
+                & (peak_series.index <= horizon_end)
             ]
             path_drawdown = drawdown_series[
-                (drawdown_series.index > entry_date)
+                (drawdown_series.index > horizon_entry_date)
                 & (drawdown_series.index <= horizon_end)
             ]
-            observed_peak = float(path_peak.max()) if not path_peak.empty else entry_price
-            peak_price = max(entry_price, observed_peak)
+            observed_peak = float(path_peak.max()) if not path_peak.empty else average_buy
+            peak_price = max(average_buy, observed_peak)
             peak_date = (
                 pd.Timestamp(path_peak.idxmax())
-                if not path_peak.empty and observed_peak > entry_price
-                else entry_date
+                if not path_peak.empty and observed_peak > average_buy
+                else horizon_entry_date
             )
             observation[f"max_return_{years}y"] = round(
-                (peak_price / entry_price - 1.0) * 100.0, 1
+                (peak_price / average_buy - 1.0) * 100.0, 1
             )
             observation[f"peak_month_{years}y"] = peak_date.strftime("%Y-%m")
             trough_price = (
-                min(entry_price, float(path_drawdown.min()))
-                if not path_drawdown.empty else entry_price
+                min(average_buy, float(path_drawdown.min()))
+                if not path_drawdown.empty else average_buy
             )
             observation[f"mae_{years}y"] = round(
-                (trough_price / entry_price - 1.0) * 100.0, 1
+                (trough_price / average_buy - 1.0) * 100.0, 1
             )
             if complete and not path_close.empty:
                 terminal_price = float(path_close.iloc[-1])
@@ -3943,7 +4086,7 @@ def _build_rsi_backtest(close: pd.Series, buy_threshold: int,
                 terminal_price = float(close.iloc[-1])
                 terminal_date = last_date
             observation[f"return_{years}y"] = round(
-                (terminal_price / entry_price - 1.0) * 100.0, 1
+                (terminal_price / average_buy - 1.0) * 100.0, 1
             )
             observation[f"close_month_{years}y"] = terminal_date.strftime("%Y-%m")
             observation[f"complete_{years}y"] = complete
@@ -3990,7 +4133,9 @@ def _build_rsi_backtest(close: pd.Series, buy_threshold: int,
     for item in completed_1y:
         if item["max_return_1y"] <= 0:
             continue
-        entry_year, entry_month = (int(part) for part in item["entry"].split("-"))
+        entry_year, entry_month = (
+            int(part) for part in item["horizon_entry"].split("-")
+        )
         peak_year, peak_month = (int(part) for part in item["peak_month_1y"].split("-"))
         months_to_peak_1y.append((peak_year - entry_year) * 12 + (peak_month - entry_month))
 
@@ -4012,6 +4157,12 @@ def _build_rsi_backtest(close: pd.Series, buy_threshold: int,
     return {
         "threshold": int(buy_threshold),
         "count": len(observations),
+        "scaled_entry_count": sum(
+            item["scale_count"] for item in observations
+        ),
+        "scaled_operation_count": sum(
+            1 for item in observations if item["scale_count"] > 0
+        ),
         "completed_1y": completed_counts[1],
         "completed_2y": completed_counts[2],
         "completed_3y": completed_counts[3],
@@ -4141,8 +4292,10 @@ def build_drawdown_data(df: pd.DataFrame, anos: int = 30, min_points: int = 40) 
             int(r.get("Buy_Threshold", 30)),
         ))
 
-    yahoo_specs = [s for s in specs if s[1] != "Cripto"]
-    batch = _download_batch([s[2] for s in yahoo_specs], interval="1wk", period="max")
+    # CoinMetrics remains the primary crypto close source. Yahoo is included in
+    # the same batch so its weekly High/Low can supply the intraperiod scale
+    # triggers that CoinMetrics PriceUSD does not expose.
+    batch = _download_batch([s[2] for s in specs], interval="1wk", period="max")
 
     data: Dict[str, dict] = {}
     total = len(specs)
@@ -4154,6 +4307,7 @@ def build_drawdown_data(df: pd.DataFrame, anos: int = 30, min_points: int = 40) 
             low = None
             if setor == "Cripto":
                 cm_asset = key.lower()
+                yahoo_sub = batch.get(sym)
                 try:
                     close = coinmetrics_weekly_price_series(cm_asset)
                     if len(close.dropna()) < min_points:
@@ -4161,13 +4315,21 @@ def build_drawdown_data(df: pd.DataFrame, anos: int = 30, min_points: int = 40) 
                             f"CoinMetrics returned only {len(close.dropna())} weekly points "
                             f"(need {min_points})"
                         )
+                    if yahoo_sub is not None:
+                        high = yahoo_sub.get("High")
+                        low = yahoo_sub.get("Low")
                     fonte = "CoinMetrics"
                 except Exception as cm_exc:
                     print(f"  [WARN] drawdown CoinMetrics {cm_asset}: {cm_exc}")
-                    history = yf.Ticker(sym).history(period="max", interval="1wk")
-                    close = history["Close"]
-                    high = history.get("High")
-                    low = history.get("Low")
+                    if yahoo_sub is not None and "Close" in yahoo_sub.columns:
+                        close = yahoo_sub["Close"]
+                        high = yahoo_sub.get("High")
+                        low = yahoo_sub.get("Low")
+                    else:
+                        history = yf.Ticker(sym).history(period="max", interval="1wk")
+                        close = history["Close"]
+                        high = history.get("High")
+                        low = history.get("Low")
                     fonte = "Yahoo fallback"
                     fallbacks += 1
             else:
@@ -4192,6 +4354,8 @@ def build_drawdown_data(df: pd.DataFrame, anos: int = 30, min_points: int = 40) 
             if entry is None:
                 print(f"  [skip] {sym}: histórico curto")
                 continue
+            if setor == "Cripto" and fonte == "CoinMetrics" and high is not None:
+                entry["bt"]["scale_ohlc_source"] = "Yahoo"
             # The table's Drawdown_Pct is intentionally a rolling five-year
             # measure. Preserve it in the modal payload alongside the long
             # history drawdown so both perspectives remain visible.
