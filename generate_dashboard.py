@@ -2970,8 +2970,11 @@ body.research-v2.profile-field-v3.backtest-open .footer{display:none!important}
 body.research-v2.profile-field-v3.backtest-open .backtest-board{
   display:block;min-height:calc(100vh - var(--chrome-h,118px));padding-top:28px;padding-bottom:42px;
 }
-.research-v2.profile-field-v3 .btb-stats{grid-template-columns:repeat(4,minmax(0,1fr))}
+.research-v2.profile-field-v3 .btb-stats{grid-template-columns:repeat(5,minmax(0,1fr))}
 .research-v2.profile-field-v3 .btb-stats .dq-stat strong{font-size:1.35rem}
+@media(max-width:1200px){
+  .research-v2.profile-field-v3 .btb-stats{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
 @media(max-width:960px){
   .research-v2.profile-field-v3 .btb-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
@@ -3071,10 +3074,12 @@ BACKTEST_RESULTS_SCRIPT = r"""
     var avg1=num(bt.avg_return_1y);
     var entries=bt.entries||[];
     var yearsV=num(a.years);
-    var ret1list=[],maeClosedList=[],closed1=[],recent12=0,lastMs=null;
+    var ret1list=[],ret2list=[],maeClosedList=[],closed1=[],recent12=0,lastMs=null;
     entries.forEach(function(e){
       var r=num(e.return_1y);
       if(r!=null)ret1list.push(r);
+      var r2=num(e.return_2y);
+      if(r2!=null)ret2list.push(r2);
       if(e.complete_1y){
         if(r!=null)closed1.push(r);
         var m=num(e.mae_1y);if(m!=null)maeClosedList.push(m);
@@ -3094,12 +3099,13 @@ BACKTEST_RESULTS_SCRIPT = r"""
       key:key,name:String(a.name||key),tk:String(a.tk||key),grupo:String(a.grupo||''),
       years:yearsV,rate:(yearsV&&yearsV>0)?(bt.count||0)/yearsV:null,
       threshold:(bt.threshold==null?null:bt.threshold),
-      count:bt.count||0,ret1list:ret1list,maeClosedList:maeClosedList,recent12:recent12,
+      count:bt.count||0,ret1list:ret1list,ret2list:ret2list,maeClosedList:maeClosedList,recent12:recent12,
       fresh:(lastMs!=null&&(NOW-lastMs)<=183*MS_DAY),
       hit:num(bt.positive_rate_1y),hitN:hitN,hitD:hitD,
+      hit2:num(bt.positive_rate_2y),hit2N:bt.positive_count_2y||0,hit2D:bt.completed_2y||0,
       conf:wilson(hitN,hitD),
       avg1:avg1,med1:num(bt.med_return_1y),
-      avg2:num(bt.avg_return_2y),avg3:num(bt.avg_return_3y),
+      avg2:num(bt.avg_return_2y),med2:num(bt.med_return_2y),avg3:num(bt.avg_return_3y),
       rc1:bt.return_count_1y||0,rc2:bt.return_count_2y||0,rc3:bt.return_count_3y||0,
       cd1:bt.completed_1y||0,cd2:bt.completed_2y||0,cd3:bt.completed_3y||0,
       mae:num(bt.avg_mae_1y),edge:edge,
@@ -3233,9 +3239,15 @@ BACKTEST_RESULTS_SCRIPT = r"""
     var hitNsum=subset.reduce(function(acc,r){return acc+(r.hitN||0);},0);
     var hitDsum=subset.reduce(function(acc,r){return acc+(r.hitD||0);},0);
     var winRate=hitDsum>0?(100*hitNsum/hitDsum):null;
+    var hit2Nsum=subset.reduce(function(acc,r){return acc+(r.hit2N||0);},0);
+    var hit2Dsum=subset.reduce(function(acc,r){return acc+(r.hit2D||0);},0);
+    var winRate2=hit2Dsum>0?(100*hit2Nsum/hit2Dsum):null;
     var allRet=[];subset.forEach(function(r){allRet=allRet.concat(r.ret1list);});
     var avgRet1=allRet.length?allRet.reduce(function(a,b){return a+b;},0)/allRet.length:null;
     var medRet1=median(allRet);
+    var allRet2=[];subset.forEach(function(r){allRet2=allRet2.concat(r.ret2list);});
+    var avgRet2=allRet2.length?allRet2.reduce(function(a,b){return a+b;},0)/allRet2.length:null;
+    var medRet2=median(allRet2);
     var allMae=[];subset.forEach(function(r){allMae=allMae.concat(r.maeClosedList);});
     var avgMae=allMae.length?allMae.reduce(function(a,b){return a+b;},0)/allMae.length:null;
     var reliableBase=subset.filter(function(r){return r.hitD>=5;});
@@ -3251,9 +3263,15 @@ BACKTEST_RESULTS_SCRIPT = r"""
       chip(winRate==null?'&mdash;':winRate.toFixed(0)+'%','Win rate 1Y',hitNsum+' of '+hitDsum+' closed entries',
         (winRate!=null&&winRate>=60?'is-ok':'is-warn'),
         'System win rate pooled across every completed 1Y entry (trade-weighted).')+
+      chip(winRate2==null?'&mdash;':winRate2.toFixed(0)+'%','Win rate 2Y',hit2Nsum+' of '+hit2Dsum+' closed entries',
+        (winRate2!=null&&winRate2>=60?'is-ok':'is-warn'),
+        'System win rate pooled across every completed 2Y entry (trade-weighted).')+
       chip(fmtPct(avgRet1),'Average 1Y return','median '+fmtPct(medRet1),
         (avgRet1!=null&&avgRet1>0?'is-ok':'is-warn'),
         'Trade-weighted mean 1Y return across all entries (in-progress at latest close). A few crypto outliers can inflate the mean; the median below is robust to them.')+
+      chip(fmtPct(avgRet2),'Average 2Y return','median '+fmtPct(medRet2),
+        (avgRet2!=null&&avgRet2>0?'is-ok':'is-warn'),
+        'Trade-weighted mean 2Y return across all entries with 2 years of history (in-progress at latest close). The median below is robust to outliers.')+
       chip(fmtPct(avgMae),'Avg MAE 1Y','avg worst dip inside year 1','',
         'Average maximum adverse excursion pooled across '+allMae.length+' completed 1Y entries: the typical worst paper loss during the first year of holding.')+
       chip(reliable+'/'+reliableBase.length,'Win rate &ge;80%','5+ closed &middot; robust sample','is-ok',
@@ -4129,6 +4147,13 @@ def _build_rsi_backtest(close: pd.Series, buy_threshold: int,
         round(100.0 * positive_count_1y / len(closes_1y), 1)
         if closes_1y else None
     )
+    # 2Y win rate mirrors the 1Y logic, restricted to completed 2y horizons.
+    closes_2y = [item["return_2y"] for item in observations if item["complete_2y"]]
+    positive_count_2y = sum(1 for value in closes_2y if value > 0)
+    positive_rate_2y = (
+        round(100.0 * positive_count_2y / len(closes_2y), 1)
+        if closes_2y else None
+    )
     months_to_peak_1y = []
     for item in completed_1y:
         if item["max_return_1y"] <= 0:
@@ -4177,6 +4202,8 @@ def _build_rsi_backtest(close: pd.Series, buy_threshold: int,
         "avg_return_5y": average_returns[5],
         "positive_count_1y": positive_count_1y,
         "positive_rate_1y": positive_rate_1y,
+        "positive_count_2y": positive_count_2y,
+        "positive_rate_2y": positive_rate_2y,
         "med_return_1y": median_returns[1],
         "med_return_2y": median_returns[2],
         "med_return_3y": median_returns[3],
