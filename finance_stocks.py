@@ -465,8 +465,6 @@ assets = [
     {"ticker": "ITSA4.SA", "name": "Itaúsa", "buy": 35, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Financials"},
     {"ticker": "VALE3.SA", "name": "Vale", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Materials"},
     {"ticker": "PETR4.SA", "name": "Petrobras", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Energy"},
-    {"ticker": "PRIO3.SA", "name": "Prio", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Energy"},
-    {"ticker": "PINE4.SA", "name": "Banco Pine", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Financials"},
     {"ticker": "RANI3.SA", "name": "Irani", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Materials"},
     {"ticker": "SUZB3.SA", "name": "Suzano", "buy": 35, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Materials"},
     {"ticker": "PSSA3.SA", "name": "Porto Seguro", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Financials"},
