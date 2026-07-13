@@ -161,7 +161,19 @@ def get_signal(
     buy_threshold: int,
     sell_threshold: int,
     ultra_threshold: int,
+    buy_mensal: Optional[int] = None,
 ) -> str:
+    # Per-asset monthly gate: when `buy_mensal` is set, a weekly reading inside
+    # the buy zone only counts as a buy if the monthly RSI confirms it
+    # (monthly <= buy_mensal). A NaN monthly compares False -> blocked, since
+    # the rule requires the confirmation. Assets without the parameter keep the
+    # original weekly-only behavior.
+    if (
+        buy_mensal is not None
+        and rsi_weekly <= buy_threshold
+        and not rsi_monthly <= buy_mensal
+    ):
+        return "Neutral"
     if rsi_weekly <= buy_threshold and rsi_monthly <= ultra_threshold:
         return "UltraBuy"
     if rsi_weekly <= buy_threshold:
@@ -372,7 +384,7 @@ assets = [
     {"ticker": "AMZN", "name": "Amazon", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Consumer"},
     {"ticker": "GOOGL", "name": "Google", "buy": 35, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Technology"},
     {"ticker": "AAPL", "name": "Apple", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Technology"},
-    {"ticker": "MSFT", "name": "Microsoft", "buy": 35, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Technology"},
+    {"ticker": "MSFT", "name": "Microsoft", "buy": 35, "sell": 70, "ultra": 40, "buy_mensal": 40, "setor": "EUA", "industria": "Technology"},
     {"ticker": "TSLA", "name": "Tesla", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Consumer"},
     {"ticker": "MSTR", "name": "Strategy", "buy": 25, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Technology"},
     {"ticker": "TM", "name": "Toyota", "buy": 25, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Consumer"},
@@ -479,7 +491,7 @@ assets = [
     {"ticker": "TOTS3.SA", "name": "Totvs", "buy": 35, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Technology"},
     {"ticker": "B3SA3.SA", "name": "B3", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Financials"},
     {"ticker": "RENT3.SA", "name": "Localiza", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Industrials"},
-    {"ticker": "SOJA3.SA", "name": "Boa Safra", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Agribusiness"},
+    {"ticker": "SOJA3.SA", "name": "Boa Safra", "buy": 30, "sell": 70, "ultra": 40, "buy_mensal": 40, "setor": "Brasil", "industria": "Agribusiness"},
     {"ticker": "KLBN4.SA", "name": "Klabin", "buy": 35, "sell": 70, "ultra": 45, "setor": "Brasil", "industria": "Materials"},
     {"ticker": "GGBR4.SA", "name": "Gerdau", "buy": 32, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Materials"},
     {"ticker": "MULT3.SA", "name": "Multiplan", "buy": 35, "sell": 70, "ultra": 45, "setor": "Brasil", "industria": "Real Estate"},
@@ -521,13 +533,16 @@ def _build_asset_row(
         raise ValueError("insufficient history for weekly RSI")
 
     # get_signal handles a NaN monthly gracefully: NaN comparisons are False, so
-    # UltraBuy (which needs the monthly confirmation) simply can't trigger.
+    # UltraBuy (which needs the monthly confirmation) simply can't trigger — and
+    # a buy_mensal-gated asset stays blocked until its monthly RSI exists.
+    buy_mensal = asset.get("buy_mensal")
     signal = get_signal(
         float(weekly_rsi),
         float(monthly_rsi),
         int(asset["buy"]),
         int(asset["sell"]),
         int(asset["ultra"]),
+        buy_mensal=None if buy_mensal is None else int(buy_mensal),
     )
 
     # Confirmação por volume: semana fechada vs média das 4 anteriores.
@@ -560,9 +575,11 @@ def _build_asset_row(
         "Signal": signal,
         # Per-asset thresholds carried through so the dashboard's Watch-zone can
         # measure each asset's distance to its OWN buy/sell trigger (not a generic
-        # 30/70). Buy fires at RSI<=buy; Sell fires at RSI>=sell.
+        # 30/70). Buy fires at RSI<=buy; Sell fires at RSI>=sell. Buy_Mensal is
+        # the optional monthly gate (None = weekly-only entry, current default).
         "Buy_Threshold": int(asset["buy"]),
         "Sell_Threshold": int(asset["sell"]),
+        "Buy_Mensal": None if buy_mensal is None else int(buy_mensal),
         "Vol_Ratio": vol_ratio,
         "Vol_High": vol_high,
         "Setor": asset.get("setor", ""),

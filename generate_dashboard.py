@@ -3099,6 +3099,7 @@ BACKTEST_RESULTS_SCRIPT = r"""
       key:key,name:String(a.name||key),tk:String(a.tk||key),grupo:String(a.grupo||''),
       years:yearsV,rate:(yearsV&&yearsV>0)?(bt.count||0)/yearsV:null,
       threshold:(bt.threshold==null?null:bt.threshold),
+      mcap:(bt.monthly_cap==null?null:bt.monthly_cap),
       count:bt.count||0,ret1list:ret1list,ret2list:ret2list,maeClosedList:maeClosedList,recent12:recent12,
       fresh:(lastMs!=null&&(NOW-lastMs)<=183*MS_DAY),
       hit:num(bt.positive_rate_1y),hitN:hitN,hitD:hitD,
@@ -3194,7 +3195,7 @@ BACKTEST_RESULTS_SCRIPT = r"""
       '<td class="btb-rank">'+(rk==null?'&mdash;':rk)+'</td>'+
       '<td class="btb-asset"><b>'+esc(r.name)+'</b><span class="btb-sub">'+esc(r.tk)+(r.grupo?' &middot; '+esc(r.grupo):'')+'</span></td>'+
       '<td><span class="btb-num">'+(r.years==null?'&mdash;':r.years.toFixed(1)+'y')+'</span></td>'+
-      '<td><span class="btb-num">'+r.count+'</span><span class="btb-sub">RSI &le; '+(r.threshold==null?'&mdash;':r.threshold)+'</span></td>'+
+      '<td><span class="btb-num">'+r.count+'</span><span class="btb-sub"'+(r.mcap!=null?' title="Entry requires weekly RSI &le; '+r.threshold+' AND monthly RSI &le; '+r.mcap+' (buy_mensal filter)"':'')+'>RSI &le; '+(r.threshold==null?'&mdash;':r.threshold)+(r.mcap!=null?' &middot; M&le;'+r.mcap:'')+'</span></td>'+
       '<td><span class="btb-num '+hitCls+'">'+(r.hit==null?'&mdash;':r.hit.toFixed(0)+'%')+'</span><span class="btb-sub">'+hitSub+'</span></td>'+
       '<td title="'+esc(confTitle)+'"><span class="btb-num '+(r.conf==null?'na':(r.conf>=50?'pos':'warn'))+'">'+(r.conf==null?'&mdash;':r.conf.toFixed(0)+'%')+'</span><span class="btb-sub">95% floor</span></td>'+
       avgCell(r.avg1,r.rc1,r.cd1,'1-year',medSub)+
@@ -3632,7 +3633,7 @@ BACKTEST_SCRIPT = r"""
       :"history too short";
     let h="";
     const scaleSub=(bt.scaled_entry_count||0)+" scaled fills across "+(bt.scaled_operation_count||0)+" operations";
-    h+=chip("Entries","<b>"+bt.count+"</b>","","weekly RSI(14) &le; "+bt.threshold+" · "+scaleSub);
+    h+=chip("Entries","<b>"+bt.count+"</b>","","weekly RSI(14) &le; "+bt.threshold+(bt.monthly_cap!=null?" + monthly &le; "+bt.monthly_cap:"")+" · "+scaleSub);
     h+=chip("Positive at 1Y",pct(positive,0).replace("+",""),positiveCls,bt.completed_1y?(bt.positive_count_1y+" of "+bt.completed_1y+" completed entries"):"no completed 1Y entries");
     h+=chip("1Y Average Return",pct(bt.avg_return_1y),tone(bt.avg_return_1y),sampleLabel(bt,1),"Average 1-year return across RSI entries, using the latest available close for in-progress entries. Median is kept internally for distortion checks.");
     h+=chip("1Y Peak Return",pct(bt.avg_peak_1y),tone(bt.avg_peak_1y),peakSub,"Average best return reached inside the first year after each completed entry.");
@@ -3755,7 +3756,7 @@ BACKTEST_SCRIPT = r"""
     const bt=a.bt;
     const scaleSource=bt.scale_ohlc_source?(" Scale OHLC source: "+bt.scale_ohlc_source+"."):"";
     return '<div class="btr-method-body">'+
-      '<p><b>Entry rule</b>First week when rounded weekly RSI(14) is at or below '+bt.threshold+'; consecutive weeks inside the zone count as one entry.</p>'+
+      '<p><b>Entry rule</b>First week when rounded weekly RSI(14) is at or below '+bt.threshold+(bt.monthly_cap!=null?' AND the in-progress monthly RSI(14) is at or below '+bt.monthly_cap+' (per-asset buy_mensal filter)':'')+'; consecutive weeks inside the zone count as one entry.</p>'+
       '<p><b>Scaled entries</b>Up to two blue fills: the weekly low only needs to touch each price 10% below the previous fill. '+(bt.peak_basis==="Weekly high"?'A weekly high above the principal signal candle high':'A weekly close above the principal signal candle close')+' cancels the remaining plan.</p>'+
       '<p><b>Entry price</b>The principal uses adjusted weekly close; each scale executes at its exact -10% trigger. Returns use the arithmetic average of equally sized lots.</p>'+
       '<p><b>Holding clock</b>All horizons restart at the last fill in the operation; scaled fills remain inside the principal entry and do not increase Entries.</p>'+
@@ -3973,9 +3974,61 @@ def _find_scaled_entries(close: pd.Series, weekly_high: pd.Series,
     return scales
 
 
+def _monthly_rsi_at_week(close: pd.Series, window: int = 14) -> pd.Series:
+    """In-progress monthly RSI evaluated at every weekly bar.
+
+    For each weekly bar, the monthly series is [closes of all completed
+    months] + [this week's close as the current month's provisional close],
+    mirroring how the live signal computes monthly RSI on the in-progress
+    monthly bar. Matches ta.RSIIndicator exactly (validated to ~1e-14 in the
+    features/rsi_calibration.py study): ta turns the leading NaN diff into 0.0
+    (seeding the ewm state with 0 at row 0), min_periods counts rows (first
+    valid RSI once the series has `window` monthly bars), and a zero loss
+    average yields RSI 100.
+    """
+    values = [float(v) for v in close.values]
+    out = [math.nan] * len(values)
+    if not values:
+        return pd.Series(out, index=close.index, dtype=float)
+    periods = pd.PeriodIndex(close.index, freq="M")
+    alpha = 1.0 / float(window)
+    avg_gain = None  # ewm state through the last completed monthly row
+    avg_loss = None
+    n_rows = 0  # completed monthly rows folded into the state
+    prev_month_close = None
+    for i, value in enumerate(values):
+        if prev_month_close is not None:
+            # provisional monthly row: series length = n_rows + 1
+            delta = value - prev_month_close
+            gain = delta if delta > 0 else 0.0
+            loss = -delta if delta < 0 else 0.0
+            cur_gain = avg_gain + alpha * (gain - avg_gain)
+            cur_loss = avg_loss + alpha * (loss - avg_loss)
+            if n_rows + 1 >= window:
+                if cur_loss == 0.0:
+                    out[i] = 100.0
+                else:
+                    out[i] = 100.0 - 100.0 / (1.0 + cur_gain / cur_loss)
+        month_end = i == len(values) - 1 or periods[i + 1] != periods[i]
+        if month_end:
+            if prev_month_close is None:
+                avg_gain = 0.0  # row 0: NaN diff replaced by 0.0 seeds the ewm
+                avg_loss = 0.0
+            else:
+                delta = value - prev_month_close
+                gain = delta if delta > 0 else 0.0
+                loss = -delta if delta < 0 else 0.0
+                avg_gain = avg_gain + alpha * (gain - avg_gain)
+                avg_loss = avg_loss + alpha * (loss - avg_loss)
+            n_rows += 1
+            prev_month_close = value
+    return pd.Series(out, index=close.index, dtype=float)
+
+
 def _build_rsi_backtest(close: pd.Series, buy_threshold: int,
                         high: Optional[pd.Series] = None,
-                        low: Optional[pd.Series] = None) -> dict:
+                        low: Optional[pd.Series] = None,
+                        monthly_cap: Optional[int] = None) -> dict:
     """Backtest entries when weekly RSI first falls into the asset buy zone.
 
     Consecutive weeks inside the zone are one principal entry. Up to two scaled
@@ -4006,6 +4059,15 @@ def _build_rsi_backtest(close: pd.Series, buy_threshold: int,
     # the per-asset threshold. RSI is positive, so floor(x + .5) is equivalent.
     rounded = rsi.map(lambda value: math.floor(float(value) + 0.5) if pd.notna(value) else math.nan)
     in_buy_zone = rounded <= int(buy_threshold)
+    if monthly_cap is not None:
+        # Per-asset monthly gate (buy_mensal): the entry zone also requires the
+        # in-progress monthly RSI (rounded like the weekly one) at or below the
+        # cap — the same rule the live signal applies. NaN monthly (fewer than
+        # `window` monthly bars) compares False, so no entry can happen there.
+        monthly_rounded = _monthly_rsi_at_week(close).map(
+            lambda value: math.floor(float(value) + 0.5) if pd.notna(value) else math.nan
+        )
+        in_buy_zone = in_buy_zone & (monthly_rounded <= int(monthly_cap))
     entries_mask = in_buy_zone & ~in_buy_zone.shift(1, fill_value=False) & rounded.shift(1).notna()
 
     peak_series = close
@@ -4181,6 +4243,7 @@ def _build_rsi_backtest(close: pd.Series, buy_threshold: int,
 
     return {
         "threshold": int(buy_threshold),
+        "monthly_cap": None if monthly_cap is None else int(monthly_cap),
         "count": len(observations),
         "scaled_entry_count": sum(
             item["scale_count"] for item in observations
@@ -4233,7 +4296,8 @@ def _build_dd_entry(close: pd.Series, key: str, name: str, setor: str,
                     anos: int, min_points: int, fonte: str = "Yahoo",
                     buy_threshold: int = 30,
                     high: Optional[pd.Series] = None,
-                    low: Optional[pd.Series] = None) -> Optional[dict]:
+                    low: Optional[pd.Series] = None,
+                    monthly_cap: Optional[int] = None) -> Optional[dict]:
     """Build one drawdown payload entry from a raw weekly Close series.
 
     Returns ``None`` when the history is too short. Pure computation — shared by
@@ -4279,7 +4343,8 @@ def _build_dd_entry(close: pd.Series, key: str, name: str, setor: str,
         "requested_years": int(anos),
         "adjustment": adjustment,
         "p": [_round_px(v) for v in close.values],
-        "bt": _build_rsi_backtest(close, buy_threshold, high=high, low=low),
+        "bt": _build_rsi_backtest(close, buy_threshold, high=high, low=low,
+                                  monthly_cap=monthly_cap),
         "st": {
             "pn": round(float(close.iloc[-1]), 2),
             "cd": round(cur_dd, 1),
@@ -4304,7 +4369,7 @@ def build_drawdown_data(df: pd.DataFrame, anos: int = 30, min_points: int = 40) 
     (cummax) and drawdown curve from the prices to keep the payload small.
     """
     # (normalized_key, setor, yahoo_symbol, name, rolling_5y_drawdown,
-    # buy_threshold) for
+    # buy_threshold, monthly_cap) for
     # each asset row. The rolling value is calculated with the RSI snapshot
     # series and remains intentionally distinct from the long-history DD.
     specs = []
@@ -4314,9 +4379,11 @@ def build_drawdown_data(df: pd.DataFrame, anos: int = 30, min_points: int = 40) 
         yahoo_symbol = str(r.get("Yahoo_Ticker") or _yahoo_symbol(key, setor))
         raw_dd_5y = r.get("Drawdown_Pct")
         dd_5y = None if raw_dd_5y is None or pd.isna(raw_dd_5y) else float(raw_dd_5y)
+        raw_mcap = r.get("Buy_Mensal")
+        monthly_cap = None if raw_mcap is None or pd.isna(raw_mcap) else int(raw_mcap)
         specs.append((
             key, setor, yahoo_symbol, str(r["Name"]), dd_5y,
-            int(r.get("Buy_Threshold", 30)),
+            int(r.get("Buy_Threshold", 30)), monthly_cap,
         ))
 
     # CoinMetrics remains the primary crypto close source. Yahoo is included in
@@ -4327,7 +4394,7 @@ def build_drawdown_data(df: pd.DataFrame, anos: int = 30, min_points: int = 40) 
     data: Dict[str, dict] = {}
     total = len(specs)
     fallbacks = 0
-    for pos, (key, setor, sym, name, dd_5y, buy_threshold) in enumerate(specs, start=1):
+    for pos, (key, setor, sym, name, dd_5y, buy_threshold, monthly_cap) in enumerate(specs, start=1):
         try:
             fonte = "Yahoo"
             high = None
@@ -4376,7 +4443,7 @@ def build_drawdown_data(df: pd.DataFrame, anos: int = 30, min_points: int = 40) 
 
             entry = _build_dd_entry(
                 close, key, name, setor, anos, min_points, fonte, buy_threshold,
-                high=high, low=low,
+                high=high, low=low, monthly_cap=monthly_cap,
             )
             if entry is None:
                 print(f"  [skip] {sym}: histórico curto")
@@ -5037,6 +5104,32 @@ def _build_sector_rows(df_sector: pd.DataFrame, market_key: str, dd_data: dict |
             sig_lbl = _signal_label(r["Signal"])
             rsi_w = r["Weekly_RSI"]
             rsi_m = r["Monthly_RSI"]
+            # Per-asset monthly gate (buy_mensal): keep the rule visible on the
+            # signal badge, and call out explicitly when it is the gate (not the
+            # weekly RSI) holding the entry back.
+            gate_raw = r.get("Buy_Mensal")
+            gate = None if gate_raw is None or pd.isna(gate_raw) else int(gate_raw)
+            sig_title = ""
+            gate_badge = ""
+            if gate is not None:
+                buy_thr = int(r.get("Buy_Threshold", 30))
+                rsi_m_txt = "n/a" if pd.isna(rsi_m) else str(int(rsi_m))
+                blocked = (
+                    str(r["Signal"]) == "Neutral"
+                    and not pd.isna(rsi_w) and int(rsi_w) <= buy_thr
+                )
+                if blocked:
+                    title_txt = (
+                        f"Buy blocked by the monthly filter: weekly RSI {int(rsi_w)} is inside "
+                        f"the buy zone (≤ {buy_thr}) but monthly RSI {rsi_m_txt} > {gate} (buy_mensal)"
+                    )
+                else:
+                    title_txt = (
+                        f"Entry rule for this asset: weekly RSI ≤ {buy_thr} AND "
+                        f"monthly RSI ≤ {gate} (buy_mensal filter)"
+                    )
+                sig_title = f' title="{escape(title_txt, quote=True)}"'
+                gate_badge = f'<i class="mgate{" mgate-block" if blocked else ""}">M{gate}</i>'
             drawdown = float(r.get("Drawdown_Pct", 0.0))
             vol_ratio = r.get("Vol_Ratio")
             vol_sort = "-1" if vol_ratio is None or pd.isna(vol_ratio) else f"{float(vol_ratio):.6f}"
@@ -5101,7 +5194,7 @@ def _build_sector_rows(df_sector: pd.DataFrame, market_key: str, dd_data: dict |
               <td class="col-chart">{chart_cell}</td>
               <td class="col-backtest">{backtest_cell}</td>
               <td class="col-cagr" data-sort="{cagr_sort}">{cagr_cell}</td>
-              <td class="col-sig"><span class="signal-badge {sig_cls}">{sig_lbl}</span></td>
+              <td class="col-sig"><span class="signal-badge {sig_cls}"{sig_title}>{sig_lbl}{gate_badge}</span></td>
               <td class="col-vol" data-sort="{vol_sort}">{_volume_badge(r.get("Vol_High"), vol_ratio)}</td>
             </tr>'''
     return rows_html
@@ -5360,6 +5453,25 @@ def _compute_near_triggers(df: pd.DataFrame) -> list:
         if rsi is None or pd.isna(rsi) or pd.isna(buy) or pd.isna(sell):
             continue
         rsi, buy, sell = int(rsi), int(buy), int(sell)
+        # buy_mensal gate: the weekly trigger already fired but the monthly RSI
+        # has not confirmed — the asset is Neutral only because of the gate.
+        # Surface it as "waiting monthly" instead of silently dropping it.
+        gate_raw = r.get("Buy_Mensal")
+        gate = None if gate_raw is None or pd.isna(gate_raw) else int(gate_raw)
+        if gate is not None and rsi <= buy:
+            rsi_m = r.get("Monthly_RSI")
+            out.append({
+                "ticker": str(r["Ticker"]),
+                "name": str(r["Name"]),
+                "market": str(r.get("Setor", "")),
+                "rsi": rsi,
+                "dist": 0,
+                "direction": "Buy",
+                "blocked": True,
+                "monthly": None if rsi_m is None or pd.isna(rsi_m) else int(rsi_m),
+                "cap": gate,
+            })
+            continue
         d_buy = rsi - buy      # points above the buy line
         d_sell = sell - rsi    # points below the sell line
         # A Neutral asset sits strictly between the two lines; the nearer wins.
@@ -5389,6 +5501,27 @@ def _build_near_trigger_row(c: dict, index: int) -> str:
     arrow = "&uarr;" if is_sell else "&darr;"
     to_label = "Overbought" if is_sell else "Buy"
     plural = "" if c["dist"] == 1 else "s"
+    if c.get("blocked"):
+        # Weekly trigger already hit; the buy_mensal gate holds the entry.
+        m_txt = "n/a" if c.get("monthly") is None else c["monthly"]
+        dist_html = f'waiting M &le; {c["cap"]} (M {m_txt})'
+        return f'''
+      <div class="highlight-row wc-row" data-goto="{escape(c["ticker"], quote=True)}" title="Weekly RSI {c["rsi"]} is inside the buy zone, but the entry requires monthly RSI &le; {c["cap"]} (buy_mensal filter). Click to locate in the RSI Matrix">
+        <div class="highlight-rank">{index}</div>
+        <div class="highlight-main">
+          <div class="highlight-title">
+            <span class="tk-badge">{escape(c["ticker"])}</span>
+            <span class="highlight-name">{escape(c["name"])}</span>
+          </div>
+          <div class="highlight-meta">
+            <span class="highlight-chip chip-market">{escape(_market_title(c["market"]))}</span>
+            <span class="highlight-chip">RSI W {c["rsi"]}</span>
+          </div>
+        </div>
+        <div class="highlight-signal">
+          <span class="nt-dist nt-buy">{dist_html}</span>
+        </div>
+      </div>'''
     return f'''
       <div class="highlight-row wc-row" data-goto="{escape(c["ticker"], quote=True)}" title="Click to locate in the RSI Matrix">
         <div class="highlight-rank">{index}</div>
@@ -5912,6 +6045,9 @@ body{{font-family:var(--font);background:var(--bg);color:var(--txt);line-height:
 .sig-buy{{background:rgba(52,211,153,.08);color:var(--green);border:1px solid rgba(52,211,153,.3)}}
 .sig-neutral{{background:rgba(96,165,250,.08);color:var(--blue);border:1px solid rgba(96,165,250,.25)}}
 .sig-sell{{background:rgba(248,113,113,.1);color:var(--red);border:1px solid rgba(248,113,113,.35)}}
+/* buy_mensal gate marker: the asset's entry also requires monthly RSI <= N */
+.mgate{{display:inline-block;margin-left:6px;padding:1px 5px;border-radius:8px;font-style:normal;font-size:.56rem;font-weight:800;letter-spacing:.3px;background:rgba(96,165,250,.14);color:var(--blue);border:1px solid rgba(96,165,250,.3);vertical-align:1px}}
+.mgate-block{{background:rgba(251,191,36,.16);color:var(--yellow);border-color:rgba(251,191,36,.4)}}
 
 /* ===== SIGNAL FILTER BAR ===== */
 .filter-strip{{display:flex;align-items:center;gap:8px;margin-bottom:20px;flex-wrap:wrap}}
