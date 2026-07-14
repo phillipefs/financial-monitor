@@ -468,7 +468,7 @@ assets = [
     {"ticker": "CPLE3.SA", "name": "Copel", "buy": 35, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Utilities"},
     {"ticker": "EQTL3.SA", "name": "Equatorial", "buy": 35, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Utilities"},
     {"ticker": "INBR32.SA", "name": "Banco Inter", "buy": 35, "sell": 70, "ultra": 45, "setor": "Brasil", "industria": "Financials"},
-    {"ticker": "BBAS3.SA", "name": "Banco do Brasil", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Financials"},
+    {"ticker": "BBAS3.SA", "name": "Banco do Brasil", "buy": 35, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Financials"},
     {"ticker": "BPAC11.SA", "name": "BTG Pactual", "buy": 35, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Financials"},
     {"ticker": "BRSR6.SA", "name": "Banrisul", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Financials"},
     {"ticker": "BBDC4.SA", "name": "Bradesco", "buy": 30, "sell": 70, "ultra": 40, "setor": "Brasil", "industria": "Financials"},
