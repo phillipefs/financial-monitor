@@ -2,16 +2,16 @@ name: Update dashboard
 
 on:
   workflow_dispatch:
-  # schedule:
-  #   # GitHub cron uses UTC. Brasilia (BRT) is fixed at UTC-3 (no DST since 2019).
-  #   # Runs Mon-Fri at 08:00, 12:00, 15:00, 18:00 BRT (11:00, 15:00, 18:00, 21:00 UTC).
-  #   # Minutes are offset from :00 to avoid the scheduler's top-of-hour congestion.
-  #   - cron: "7 11 * * 1-5"
+  schedule:
+    # GitHub cron uses UTC. Brasilia (BRT) is fixed at UTC-3 (no DST since 2019).
+    # Runs Mon-Fri at 08:00, 12:00, 15:00, 18:00 BRT (11:00, 15:00, 18:00, 21:00 UTC).
+    # Minutes are offset from :00 to avoid the scheduler's top-of-hour congestion.
+    - cron: "7 11 * * 1-5"
   #   - cron: "7 15 * * 1-5"
   #   - cron: "7 18 * * 1-5"
   #   - cron: "7 21 * * 1-5"
-  #   # Weekend: single run at 08:00 BRT (11:00 UTC) on Saturday and Sunday.
-  #   - cron: "7 11 * * 6,0"
+    # Weekend: single run at 08:00 BRT (11:00 UTC) on Saturday and Sunday.
+    - cron: "7 11 * * 6,0"
   push:
     branches:
       - main

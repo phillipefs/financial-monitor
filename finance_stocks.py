@@ -378,6 +378,8 @@ assets = [
     {"ticker": "ETH-USD", "name": "Ethereum", "buy": 30, "sell": 70, "ultra": 45, "setor": "Cripto"},
     {"ticker": "SOL-USD", "name": "Solana", "buy": 30, "sell": 70, "ultra": 45, "setor": "Cripto"},
     {"ticker": "AAVE-USD", "name": "Aave", "buy": 30, "sell": 70, "ultra": 45, "setor": "Cripto"},
+    {"ticker": "UNI7083-USD", "display_ticker": "UNI", "name": "Uniswap", "buy": 30, "sell": 70, "ultra": 45, "setor": "Cripto"},
+    {"ticker": "LINK-USD", "name": "Chainlink", "buy": 30, "sell": 70, "ultra": 45, "setor": "Cripto"},
     {"ticker": "HYPE32196-USD", "display_ticker": "HYPE", "name": "Hyperliquid", "buy": 30, "sell": 70, "ultra": 45, "setor": "Cripto"},
 
     # EUA
