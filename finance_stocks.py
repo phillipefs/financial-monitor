@@ -411,6 +411,7 @@ assets = [
     {"ticker": "INTC", "name": "Intel", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Semiconductors"},
     {"ticker": "MU", "name": "Micron", "buy": 35, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Semiconductors"},
     {"ticker": "ORCL", "name": "Oracle", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Technology"},
+    {"ticker": "SAP", "name": "SAP", "buy": 35, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Technology"},
     {"ticker": "NOW", "name": "ServiceNow", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Technology"},
     {"ticker": "PANW", "name": "Palo Alto", "buy": 35, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Technology"},
     {"ticker": "AMAT", "name": "Applied Mat", "buy": 30, "sell": 70, "ultra": 40, "setor": "EUA", "industria": "Semiconductors"},
