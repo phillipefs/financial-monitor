@@ -2371,6 +2371,7 @@ DRAWDOWN_CSS = """
 .dd-chip .k{display:block;font-size:.6rem;text-transform:uppercase;letter-spacing:.05em;color:var(--rm-dim);margin-bottom:2px}
 .dd-chip .v{font-size:.95rem;font-weight:800;font-variant-numeric:tabular-nums}
 .dd-chip .v small{font-size:.68rem;font-weight:600;color:var(--rm-muted);margin-left:3px}
+.dd-chip .meta{display:block;font-size:.65rem;color:var(--rm-muted);margin-top:4px;font-weight:500}
 .dd-chip .v.neg{color:var(--rm-red)} .dd-chip .v.pos{color:var(--rm-green)} .dd-chip .v.warn{color:var(--rm-yellow)}
 .dd-plot{padding:4px 12px 6px}
 .dd-plot h4{margin:12px 10px 0;font-size:.66rem;font-weight:700;color:var(--rm-muted);text-transform:uppercase;letter-spacing:.06em}
@@ -2477,13 +2478,17 @@ DRAWDOWN_SCRIPT = r"""
     const p=a.p, n=p.length, ath=cummax(p);
     const dd=p.map((v,i)=>(v/ath[i]-1)*100);
     const s=a.st, moeda=a.moeda||"";
+    const priceDate=a.price_as_of
+      ? new Date(a.price_as_of).toLocaleString("en-US",{month:"short",day:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit",hour12:false,timeZone:"UTC"})+" UTC"
+      : "Week of "+a.as_of;
+    const priceMeta=priceDate+" · "+(a.fonte||"Yahoo");
     card.innerHTML =
       '<div class="dd-head"><div class="dd-title">'+
         '<span class="nm">'+a.name+'</span><span class="tk">'+a.tk+'</span>'+
         '<span class="src">'+a.years+'y · source '+(a.fonte||"Yahoo")+'</span>'+
       '</div><button class="dd-x" aria-label="Close">&times;</button></div>'+
       '<div class="dd-chips">'+
-        chip("Current price", moeda+" "+fmtNum(s.pn), "")+
+        chip("Last historical price", moeda+" "+fmtNum(s.pn), "", priceMeta)+
         chip("Current DD · 5Y", fmtPct(s.cd5), s.cd5<-15?"neg":"warn")+
         chip("Current DD · Historical", fmtPct(s.cd), s.cd<-15?"neg":"warn")+
         chip("Worst drawdown", fmtPct(s.md)+'<small>'+s.mdd+'</small>', "neg")+
@@ -2501,7 +2506,7 @@ DRAWDOWN_SCRIPT = r"""
     drawDD(card.querySelector("#ddMain"), a, dd, baseMs, n);
     if(!modal.open) modal.showModal();
   }
-  function chip(k,v,cls){ return '<div class="dd-chip"><span class="k">'+k+'</span><span class="v '+cls+'">'+v+'</span></div>'; }
+  function chip(k,v,cls,meta){ return '<div class="dd-chip"><span class="k">'+k+'</span><span class="v '+cls+'">'+v+'</span>'+(meta?'<span class="meta">'+meta+'</span>':"")+'</div>'; }
 
   /* ---- main underwater chart ---- */
   function drawDD(host,a,dd,baseMs,n){
@@ -4339,6 +4344,7 @@ def _build_dd_entry(close: pd.Series, key: str, name: str, setor: str,
         "years": round(years, 1),
         "start": close.index[0].strftime("%Y-%m-%d"),
         "as_of": as_of.strftime("%Y-%m-%d"),
+        "price_as_of": close.attrs.get("price_as_of"),
         "bars": int(len(close)),
         "requested_years": int(anos),
         "adjustment": adjustment,

@@ -146,7 +146,12 @@ def coinmetrics_weekly_price_series(
     if out.empty:
         raise RuntimeError(f"CoinMetrics returned no usable price history for {asset}")
 
-    return out.resample("W-MON", label="left", closed="left").last().dropna()
+    weekly = out.resample("W-MON", label="left", closed="left").last().dropna()
+    # Weekly labels mark the start of the bucket. Daily PriceUSD (and the
+    # implied cap/supply price) is the close at the END of its labeled UTC day,
+    # identical to ReferenceRateUSD at midnight of the following day.
+    weekly.attrs["price_as_of"] = (out.index[-1] + pd.Timedelta(days=1)).isoformat() + "Z"
+    return weekly
 
 
 # ==========================================================
