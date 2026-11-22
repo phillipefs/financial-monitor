@@ -2391,10 +2391,20 @@ svg.dd-chart{display:block;width:100%;height:auto;overflow:visible}
 .dd-hov-date{fill:var(--rm-dim);font-family:var(--mono);font-size:10.5px;font-weight:800;
   paint-order:stroke;stroke:var(--rm-surface);stroke-width:4px;stroke-linejoin:round}
 .dd-tip{position:fixed;pointer-events:none;z-index:99999;background:var(--rm-surface-3);color:var(--rm-text);
-  border:1px solid var(--rm-line);border-radius:8px;padding:6px 9px;font-size:.72rem;
+  border:1px solid var(--rm-line);border-radius:8px;padding:6px 10px;font-size:.74rem;
   box-shadow:var(--rm-shadow);opacity:0;transition:opacity .1s;white-space:nowrap;
   font-family:"Segoe UI",Inter,system-ui,sans-serif}
-.dd-tip .td{color:var(--rm-dim);font-size:.62rem} .dd-tip b{font-variant-numeric:tabular-nums}
+.dd-tip .td{display:block;color:var(--rm-dim);font-size:.66rem;margin-bottom:3px}
+.dd-tip .tr{display:flex;justify-content:space-between;gap:14px;line-height:1.45}
+.dd-tip .tr span{color:var(--rm-muted)}
+.dd-tip b{font-variant-numeric:tabular-nums} .dd-tip b.neg{color:var(--rm-red)}
+.dd-leg{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 18px;padding:0 10px 8px;
+  font-size:.72rem;font-variant-numeric:tabular-nums;color:var(--rm-muted)}
+.dd-leg-it{display:inline-flex;align-items:baseline;gap:5px;white-space:nowrap}
+.dd-leg-it .sw{align-self:center;width:12px;border-top:2px dashed var(--lc);opacity:.85}
+.dd-leg-it .lb{font-weight:700;color:var(--lc)}
+.dd-leg-it .px{font-weight:700;color:var(--rm-text)}
+.dd-leg-it .ds{color:var(--rm-dim)}
 @keyframes ddDraw{to{stroke-dashoffset:0}}
 
 /* ===== SECTOR PULSE + SECTOR FILTER ===== */
@@ -2467,7 +2477,8 @@ DRAWDOWN_SCRIPT = r"""
     modal=document.createElement("dialog"); modal.className="dd-modal";
     card=document.createElement("div"); card.className="dd-card"; modal.appendChild(card);
     document.body.appendChild(modal);
-    tip=document.createElement("div"); tip.className="dd-tip"; document.body.appendChild(tip);
+    /* inside the dialog so it renders in the top layer, above the modal */
+    tip=document.createElement("div"); tip.className="dd-tip"; modal.appendChild(tip);
     modal.addEventListener("click",e=>{ if(e.target===modal) modal.close(); });
     modal.addEventListener("close",()=>{ tip.style.opacity=0; });
   }
@@ -2546,7 +2557,7 @@ DRAWDOWN_SCRIPT = r"""
       '<circle class="dd-hov" id="ddH" r="4.5" style="opacity:0"/>'+
       '<text class="dd-hov-date" id="ddD" y="'+(H-21)+'" text-anchor="middle" style="opacity:0"></text>'+
       '<rect id="ddHit" x="'+PADL+'" y="0" width="'+(W-PADL-PADR)+'" height="'+H+'" fill="transparent" style="cursor:crosshair"/>'+
-      '</svg>';
+      '</svg>'+ddLegend(a,s);
     const svg=host.querySelector("svg"), hit=host.querySelector("#ddHit");
     const cross=host.querySelector("#ddC"), hov=host.querySelector("#ddH"), dateLabel=host.querySelector("#ddD");
     hit.addEventListener("pointermove",ev=>{
@@ -2560,12 +2571,35 @@ DRAWDOWN_SCRIPT = r"""
       dateLabel.setAttribute("x",px);
       dateLabel.setAttribute("text-anchor",px<PADL+42?"start":px>W-PADR-42?"end":"middle");
       dateLabel.style.opacity=1;
-      tip.innerHTML='<span class="td">'+d.toLocaleDateString("en-GB")+'</span><br><b>'+fmtPct(dd[i])+'</b> from ATH';
-      tip.style.opacity=1; tip.style.left=(ev.clientX+14)+"px"; tip.style.top=(ev.clientY-10)+"px";
+      tip.innerHTML='<span class="td">'+d.toLocaleDateString("en-GB")+'</span>'+
+        '<div class="tr"><span>Price</span><b>'+(a.moeda||"")+' '+fmtNum(a.p[i])+'</b></div>'+
+        '<div class="tr"><span>DD</span><b class="'+(dd[i]<0?"neg":"")+'">'+fmtPct(dd[i])+'</b></div>';
+      /* anchor the mini card to the hover dot (viewBox -> screen; preserveAspectRatio=none) */
+      const sx=r.left+px/W*r.width, sy=r.top+py/H*r.height;
+      const tw=tip.offsetWidth||120, th=tip.offsetHeight||56;
+      let tx=sx+12, ty=sy-th-10;
+      if(tx+tw>window.innerWidth-8) tx=sx-tw-12;
+      if(ty<8) ty=sy+12;
+      tip.style.opacity=1; tip.style.left=tx+"px"; tip.style.top=ty+"px";
       if(window._ddSync) window._ddSync(i);
     });
     hit.addEventListener("pointerleave",()=>{ cross.style.opacity=0; hov.style.opacity=0; dateLabel.style.opacity=0; tip.style.opacity=0;
       if(window._ddSync) window._ddSync(-1); });
+  }
+
+  /* ---- percentile legend: drawdown level -> implied price from the current ATH ---- */
+  function ddLegend(a,s){
+    const p=a.p, athNow=Math.max.apply(null,p), last=p[p.length-1], moeda=a.moeda||"";
+    if(!(athNow>0)||!(last>0)) return "";
+    const items=[["P75","--rm-blue",s.p75],["P90","--rm-yellow",s.p90],["P95","--rm-red",s.p95]]
+      .filter(x=>x[2]!=null&&isFinite(x[2])).map(x=>{
+        const px=athNow*(1+x[2]/100), dist=(px/last-1)*100;
+        return '<div class="dd-leg-it" style="--lc:var('+x[1]+')">'+
+          '<span class="sw"></span><span class="lb">'+x[0]+' '+fmtPct(x[2])+'</span>'+
+          '<span class="px">'+moeda+' '+fmtNum(px)+'</span>'+
+          '<span class="ds">('+fmtPct(dist)+')</span></div>';
+      }).join("");
+    return items?'<div class="dd-leg">'+items+'</div>':"";
   }
 
   /* ---- price + ATH sparkline (log) ---- */
