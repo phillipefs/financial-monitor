@@ -225,4 +225,4 @@ __marimo__/
 # GitHub Actions has durable history to commit back. Local dashboard runs read
 # them but do not persist changes unless FM_PERSIST_HISTORY=1 is set.
 
-ideas/
+tests/
